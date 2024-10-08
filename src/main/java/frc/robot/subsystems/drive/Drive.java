@@ -302,7 +302,6 @@ public class Drive extends SubsystemBase {
   }
 
   public Command generatePath(Pose2d end) {
-    System.out.println("Generating path to " + end);
     return AutoBuilder.pathfindToPose(
         end,
         new PathConstraints(

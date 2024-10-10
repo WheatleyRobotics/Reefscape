@@ -21,10 +21,9 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import frc.lib.Fault;
 import frc.robot.Constants;
+import java.util.List;
 import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
-
-import java.util.List;
 
 public class Module {
   private static final double WHEEL_RADIUS = Units.inchesToMeters(2.0);

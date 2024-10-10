@@ -33,13 +33,12 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.lib.Elastic;
 import frc.lib.Fault;
 import frc.robot.util.LocalADStarAK;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
@@ -321,13 +320,13 @@ public class Drive extends SubsystemBase {
   }
 
   public void runSelfCheck() {
-    currentFaults.clear();  // Clear previous faults before checking again
+    currentFaults.clear(); // Clear previous faults before checking again
 
     // Run the self-check for each module and collect faults
-      for (Module module : modules) {
-          List<Fault> moduleFaults = module.selfCheck();
-          currentFaults.addAll(moduleFaults);
-      }
+    for (Module module : modules) {
+      List<Fault> moduleFaults = module.selfCheck();
+      currentFaults.addAll(moduleFaults);
+    }
 
     // Log or handle the results
     if (!currentFaults.isEmpty()) {
@@ -335,7 +334,11 @@ public class Drive extends SubsystemBase {
       for (int i = 0; i < currentFaults.size(); i++) {
         faultStrings[i] = currentFaults.get(i).getTimestamp() + currentFaults.get(i).getMessage();
       }
-      SmartDashboard.putStringArray("Drive Faults", faultStrings);
+      Elastic.sendAlert(
+          new Elastic.ElasticNotification(
+              Elastic.ElasticNotification.NotificationLevel.WARNING,
+              "Drive Self-Check Failed",
+              String.join("\n", faultStrings)));
     }
   }
 }

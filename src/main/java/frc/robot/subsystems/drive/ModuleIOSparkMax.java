@@ -28,7 +28,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import frc.lib.Fault;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.OptionalDouble;
@@ -221,8 +220,10 @@ public class ModuleIOSparkMax implements ModuleIO {
   public List<Fault> selfCheck() {
     List<Fault> faults = new ArrayList<>();
     faults.addAll(Fault.checkForFaults("CANcoder " + cancoder.getDeviceID(), cancoder));
-    faults.addAll(Fault.checkForFaults("Drive SparkFlex " + driveSparkFlex.getDeviceId(), driveSparkFlex));
-    faults.addAll(Fault.checkForFaults("Turn SparkMax " + turnSparkMax.getDeviceId(), turnSparkMax));
+    faults.addAll(
+        Fault.checkForFaults("Drive SparkFlex " + driveSparkFlex.getDeviceId(), driveSparkFlex));
+    faults.addAll(
+        Fault.checkForFaults("Turn SparkMax " + turnSparkMax.getDeviceId(), turnSparkMax));
     return faults;
   }
 }

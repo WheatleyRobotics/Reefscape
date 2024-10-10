@@ -6,81 +6,84 @@ import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkMax;
 import edu.wpi.first.wpilibj.Timer;
-import lombok.Data;
-
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Data;
 
 @Data
 public class Fault {
-    private double timestamp;
-    private String message;
+  private double timestamp;
+  private String message;
 
-    public Fault(double timestamp, String message) {
-        this.timestamp = timestamp;
-        this.message = message;
+  public Fault(double timestamp, String message) {
+    this.timestamp = timestamp;
+    this.message = message;
+  }
+
+  public static List<Fault> checkForFaults(String label, CANcoder cancoder) {
+    List<Fault> faults = new ArrayList<>();
+
+    if (cancoder.getFault_Hardware().getValue()) {
+      faults.add(new Fault(Timer.getFPGATimestamp(), String.format("[%s]: Hardware fault", label)));
+    }
+    if (cancoder.getStickyFault_BootDuringEnable().getValue()) {
+      faults.add(
+          new Fault(Timer.getFPGATimestamp(), String.format("[%s]: Boot during enable", label)));
+    }
+    if (cancoder.getFault_BadMagnet().getValue()) {
+      faults.add(new Fault(Timer.getFPGATimestamp(), String.format("[%s]: Bad magnet", label)));
+    }
+    if (cancoder.getFault_Undervoltage().getValue()) {
+      faults.add(new Fault(Timer.getFPGATimestamp(), String.format("[%s]: Undervoltage", label)));
     }
 
-    public static List<Fault> checkForFaults(String label, CANcoder cancoder) {
-        List<Fault> faults = new ArrayList<>();
+    StatusSignal.refreshAll(
+        cancoder.getFault_Hardware(),
+        cancoder.getStickyFault_BootDuringEnable(),
+        cancoder.getFault_BadMagnet(),
+        cancoder.getFault_Undervoltage());
 
-        if (cancoder.getFault_Hardware().getValue()) {
-            faults.add(new Fault(Timer.getFPGATimestamp(), String.format("[%s]: Hardware fault", label)));
-        }
-        if (cancoder.getStickyFault_BootDuringEnable().getValue()) {
-            faults.add(new Fault(Timer.getFPGATimestamp(), String.format("[%s]: Boot during enable", label)));
-        }
-        if (cancoder.getFault_BadMagnet().getValue()) {
-            faults.add(new Fault(Timer.getFPGATimestamp(), String.format("[%s]: Bad magnet", label)));
-        }
-        if (cancoder.getFault_Undervoltage().getValue()) {
-            faults.add(new Fault(Timer.getFPGATimestamp(), String.format("[%s]: Undervoltage", label)));
-        }
+    return faults;
+  }
 
-        StatusSignal.refreshAll(
-                cancoder.getFault_Hardware(), cancoder.getStickyFault_BootDuringEnable(), cancoder.getFault_BadMagnet(), cancoder.getFault_Undervoltage());
+  public static List<Fault> checkForFaults(String label, CANSparkMax sparkMax) {
+    List<Fault> faults = new ArrayList<>();
 
-        return faults;
+    if (sparkMax.getFault(CANSparkBase.FaultID.kDRVFault)) {
+      faults.add(new Fault(Timer.getFPGATimestamp(), String.format("[%s]: Driver Fault", label)));
+    }
+    if (sparkMax.getStickyFault(CANSparkBase.FaultID.kSensorFault)) {
+      faults.add(new Fault(Timer.getFPGATimestamp(), String.format("[%s]: Sensor Fault", label)));
+    }
+    if (sparkMax.getFault(CANSparkBase.FaultID.kMotorFault)) {
+      faults.add(new Fault(Timer.getFPGATimestamp(), String.format("[%s]: Motor Fault", label)));
+    }
+    if (sparkMax.getFault(CANSparkBase.FaultID.kStall)) {
+      faults.add(new Fault(Timer.getFPGATimestamp(), String.format("[%s]: Stall", label)));
     }
 
-    public static List<Fault> checkForFaults(String label, CANSparkMax sparkMax) {
-        List<Fault> faults = new ArrayList<>();
+    return faults;
+  }
 
-        if (sparkMax.getFault(CANSparkBase.FaultID.kDRVFault)) {
-            faults.add(new Fault(Timer.getFPGATimestamp(), String.format("[%s]: Driver Fault", label)));
-        }
-        if (sparkMax.getStickyFault(CANSparkBase.FaultID.kSensorFault)) {
-            faults.add(new Fault(Timer.getFPGATimestamp(), String.format("[%s]: Sensor Fault", label)));
-        }
-        if (sparkMax.getFault(CANSparkBase.FaultID.kMotorFault)) {
-            faults.add(new Fault(Timer.getFPGATimestamp(), String.format("[%s]: Motor Fault", label)));
-        }
-        if (sparkMax.getFault(CANSparkBase.FaultID.kStall)) {
-            faults.add(new Fault(Timer.getFPGATimestamp(), String.format("[%s]: Stall", label)));
-        }
+  public static List<Fault> checkForFaults(String label, CANSparkFlex sparkFlex) {
+    List<Fault> faults = new ArrayList<>();
 
-        return faults;
+    if (sparkFlex.getFault(CANSparkBase.FaultID.kDRVFault)) {
+      faults.add(new Fault(Timer.getFPGATimestamp(), String.format("[%s]: Driver Fault", label)));
+    }
+    if (sparkFlex.getStickyFault(CANSparkBase.FaultID.kSensorFault)) {
+      faults.add(new Fault(Timer.getFPGATimestamp(), String.format("[%s]: Sensor Fault", label)));
+    }
+    if (sparkFlex.getFault(CANSparkBase.FaultID.kMotorFault)) {
+      faults.add(new Fault(Timer.getFPGATimestamp(), String.format("[%s]: Motor Fault", label)));
+    }
+    if (sparkFlex.getFault(CANSparkBase.FaultID.kStall)) {
+      faults.add(new Fault(Timer.getFPGATimestamp(), String.format("[%s]: Stall", label)));
+    }
+    if (sparkFlex.getFault(CANSparkBase.FaultID.kEEPROMCRC)) {
+      faults.add(new Fault(Timer.getFPGATimestamp(), String.format("[%s]: EEPROM CRC", label)));
     }
 
-    public static List<Fault> checkForFaults(String label, CANSparkFlex sparkFlex) {
-        List<Fault> faults = new ArrayList<>();
-
-        if (sparkFlex.getFault(CANSparkBase.FaultID.kDRVFault)) {
-            faults.add(new Fault(Timer.getFPGATimestamp(), String.format("[%s]: Driver Fault", label)));
-        }
-        if (sparkFlex.getStickyFault(CANSparkBase.FaultID.kSensorFault)) {
-            faults.add(new Fault(Timer.getFPGATimestamp(), String.format("[%s]: Sensor Fault", label)));
-        }
-        if (sparkFlex.getFault(CANSparkBase.FaultID.kMotorFault)) {
-            faults.add(new Fault(Timer.getFPGATimestamp(), String.format("[%s]: Motor Fault", label)));
-        }
-        if (sparkFlex.getFault(CANSparkBase.FaultID.kStall)) {
-            faults.add(new Fault(Timer.getFPGATimestamp(), String.format("[%s]: Stall", label)));
-        }
-        if(sparkFlex.getFault(CANSparkBase.FaultID.kEEPROMCRC)) {
-            faults.add(new Fault(Timer.getFPGATimestamp(), String.format("[%s]: EEPROM CRC", label)));
-        }
-
-        return faults;
-    }
+    return faults;
+  }
 }

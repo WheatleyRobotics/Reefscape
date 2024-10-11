@@ -49,7 +49,6 @@ import org.littletonrobotics.junction.Logger;
 public class Drive extends SubsystemBase {
   private double SELF_CHECK_INTERVAL = 1.0;
   private double lastSelfCheck = 0.0;
-  private List<Fault> currentFaults = new ArrayList<>();
 
   private static final double TRACK_WIDTH_X = Units.inchesToMeters(25.0);
   private static final double TRACK_WIDTH_Y = Units.inchesToMeters(25.0);
@@ -57,9 +56,9 @@ public class Drive extends SubsystemBase {
       Math.hypot(TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0);
 
   private static final double MAX_LINEAR_SPEED = Units.feetToMeters(14.5);
-  private static double MAX_LINEAR_ACCEL = 3; // m/s^2
-  private static double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
-  private static double MAX_ANGULAR_ACCEL = MAX_LINEAR_ACCEL / DRIVE_BASE_RADIUS;
+  private static final double MAX_LINEAR_ACCEL = 3; // m/s^2
+  private static final double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
+  private static final double MAX_ANGULAR_ACCEL = MAX_LINEAR_ACCEL / DRIVE_BASE_RADIUS;
 
   static final Lock odometryLock = new ReentrantLock();
   private final GyroIO gyroIO;
@@ -137,9 +136,9 @@ public class Drive extends SubsystemBase {
   }
 
   public void periodic() {
-      if (DriverStation.getMatchTime() - lastSelfCheck > SELF_CHECK_INTERVAL) {
-        runSelfCheck();
-        lastSelfCheck = DriverStation.getMatchTime();
+    if (DriverStation.getMatchTime() - lastSelfCheck > SELF_CHECK_INTERVAL) {
+      runSelfCheck();
+      lastSelfCheck = DriverStation.getMatchTime();
     }
 
     odometryLock.lock(); // Prevents odometry updates while reading data
@@ -324,19 +323,18 @@ public class Drive extends SubsystemBase {
   }
 
   public void runSelfCheck() {
-    currentFaults.clear(); // Clear previous faults before checking again
+    List<Fault> allFaults = new ArrayList<>();
 
     // Run the self-check for each module and collect faults
     for (Module module : modules) {
-      List<Fault> moduleFaults = module.selfCheck();
-      currentFaults.addAll(moduleFaults);
+      allFaults.addAll(module.selfCheck());
     }
 
     // Log or handle the results
-    if (!currentFaults.isEmpty()) {
-        for (Fault currentFault : currentFaults) {
-            Elastic.sendAlert(currentFault.toNotification("Drive Subsystem Fault"));
-        }
+    if (!allFaults.isEmpty()) {
+      for (Fault currentFault : allFaults) {
+        Elastic.sendAlert(currentFault.toNotification("Drive Subsystem Fault"));
+      }
     }
   }
 }

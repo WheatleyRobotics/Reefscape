@@ -17,6 +17,7 @@ import static edu.wpi.first.units.Units.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PathPlannerLogging;
@@ -34,6 +35,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.Elastic;
@@ -137,9 +139,9 @@ public class Drive extends SubsystemBase {
   }
 
   public void periodic() {
-      if (DriverStation.getMatchTime() - lastSelfCheck > SELF_CHECK_INTERVAL) {
-        runSelfCheck();
-        lastSelfCheck = DriverStation.getMatchTime();
+    if (DriverStation.getMatchTime() - lastSelfCheck > SELF_CHECK_INTERVAL) {
+      runSelfCheck();
+      lastSelfCheck = DriverStation.getMatchTime();
     }
 
     odometryLock.lock(); // Prevents odometry updates while reading data
@@ -323,6 +325,19 @@ public class Drive extends SubsystemBase {
         0);
   }
 
+  public Command followPath(String path) {
+    try {
+      // Load the path you want to follow using its name in the GUI
+      PathPlannerPath choreoTrajectory = PathPlannerPath.fromChoreoTrajectory(path);
+
+      // Create a path following command using AutoBuilder. This will also trigger event markers.
+      return AutoBuilder.followPath(choreoTrajectory);
+    } catch (Exception e) {
+      DriverStation.reportError("Big oops: " + e.getMessage(), e.getStackTrace());
+      return Commands.none();
+    }
+  }
+
   public void runSelfCheck() {
     currentFaults.clear(); // Clear previous faults before checking again
 
@@ -334,9 +349,9 @@ public class Drive extends SubsystemBase {
 
     // Log or handle the results
     if (!currentFaults.isEmpty()) {
-        for (Fault currentFault : currentFaults) {
-            Elastic.sendAlert(currentFault.toNotification("Drive Subsystem Fault"));
-        }
+      for (Fault currentFault : currentFaults) {
+        Elastic.sendAlert(currentFault.toNotification("Drive Subsystem Fault"));
+      }
     }
   }
 }

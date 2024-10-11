@@ -137,6 +137,10 @@ public class Drive extends SubsystemBase {
   }
 
   public void periodic() {
+      if (DriverStation.getMatchTime() - lastSelfCheck > SELF_CHECK_INTERVAL) {
+        runSelfCheck();
+        lastSelfCheck = DriverStation.getMatchTime();
+    }
 
     odometryLock.lock(); // Prevents odometry updates while reading data
     gyroIO.updateInputs(gyroInputs);
@@ -330,15 +334,9 @@ public class Drive extends SubsystemBase {
 
     // Log or handle the results
     if (!currentFaults.isEmpty()) {
-      String[] faultStrings = new String[currentFaults.size()];
-      for (int i = 0; i < currentFaults.size(); i++) {
-        faultStrings[i] = currentFaults.get(i).getTimestamp() + currentFaults.get(i).getMessage();
-      }
-      Elastic.sendAlert(
-          new Elastic.ElasticNotification(
-              Elastic.ElasticNotification.NotificationLevel.WARNING,
-              "Drive Self-Check Failed",
-              String.join("\n", faultStrings)));
+        for (Fault currentFault : currentFaults) {
+            Elastic.sendAlert(currentFault.toNotification("Drive Subsystem Fault"));
+        }
     }
   }
 }

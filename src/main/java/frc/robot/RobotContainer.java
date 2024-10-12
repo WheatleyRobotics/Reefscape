@@ -136,12 +136,6 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
-
-    controller
-        .x()
-        .onTrue(
-            Commands.runOnce(() -> System.out.println(drive.getPose().toString()), drive)
-                .ignoringDisable(true));
   }
 
   /**

@@ -1,6 +1,7 @@
 package frc.robot.subsystems.vision;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import frc.lib.structs.VisionPose;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface VisionIO {
@@ -11,7 +12,7 @@ public interface VisionIO {
 
   public default void updateIOInputs(VisionIOInputs inputs) {}
 
-  public default Pose2d getPose() {
-    return new Pose2d();
+  public default VisionPose getVisionPose() {
+    return new VisionPose();
   }
 }

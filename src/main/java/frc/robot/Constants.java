@@ -22,6 +22,10 @@ package frc.robot;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+
+  public static final boolean usePhoton = false;
+  public static final boolean useLimeLight = false;
+
   public static final Mode currentMode = Mode.REAL;
 
   public enum Mode {

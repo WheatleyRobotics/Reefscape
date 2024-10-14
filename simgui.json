@@ -5,6 +5,19 @@
       "/SmartDashboard/Auto Choices": "String Chooser"
     }
   },
+  "NetworkTables": {
+    "transitory": {
+      "PathPlanner": {
+        "open": true
+      },
+      "SmartDashboard": {
+        "Auto Choices": {
+          "open": true
+        },
+        "open": true
+      }
+    }
+  },
   "NetworkTables Info": {
     "visible": true
   }

@@ -94,7 +94,7 @@ public class RobotContainer {
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
     autoChooser.addOption(
-        "Drive Forward",
+    "Drive Forward",
         new FSDCommand(
             drive,
             new Pose2d(5, 5, new Rotation2d()),

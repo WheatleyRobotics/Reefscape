@@ -23,7 +23,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.FSDCommand;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -92,15 +91,6 @@ public class RobotContainer {
     }
 
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
-
-    autoChooser.addOption(
-    "Drive Forward",
-        new FSDCommand(
-            drive,
-            new Pose2d(5, 5, new Rotation2d()),
-            new Pose2d(10, 10, new Rotation2d()),
-            null,
-            null));
 
     // Set up SysId routines
     autoChooser.addOption(

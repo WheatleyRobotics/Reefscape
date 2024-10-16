@@ -16,6 +16,7 @@ package frc.robot;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -26,7 +27,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-  public static final Mode currentMode = Mode.SIM;
+  public static final Mode currentMode = Mode.REAL;
 
   public enum Mode {
     /** Running on a real robot. */
@@ -40,5 +41,5 @@ public final class Constants {
   }
 
   public static RobotConfig robotConfig =
-      new RobotConfig(40, 10, new ModuleConfig(0.5, 0.5, 0.5, DCMotor.getNEO(4), 0.5, 0), 10, 10);
+      new RobotConfig(40, 10, new ModuleConfig(0.0508, Units.feetToMeters(14.5), 0.5, DCMotor.getNEO(4), 0.5, 0), 10, 10);
 }

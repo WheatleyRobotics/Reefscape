@@ -347,7 +347,7 @@ public class Drive extends SubsystemBase {
         0);
   }
 
-  public Command followPath(String path) {
+  public Command followPathChoreo(String path) {
     try {
       // Load the path you want to follow using its name in the GUI
       PathPlannerPath choreoTrajectory = PathPlannerPath.fromChoreoTrajectory(path);
@@ -355,6 +355,20 @@ public class Drive extends SubsystemBase {
 
       // Create a path following command using AutoBuilder. This will also trigger event markers.
       return AutoBuilder.followPath(choreoTrajectory);
+    } catch (Exception e) {
+      DriverStation.reportError("Oh no: " + e.getMessage(), e.getStackTrace());
+      return Commands.none();
+    }
+  }
+
+  public Command followPathPP(String path) {
+    try {
+      // Load the path you want to follow using its name in the GUI
+      PathPlannerPath PPTrajectory = PathPlannerPath.fromPathFile(path);
+      setPose(PPTrajectory.getPathPoses().getFirst());
+
+      // Create a path following command using AutoBuilder. This will also trigger event markers.
+      return AutoBuilder.followPath(PPTrajectory);
     } catch (Exception e) {
       DriverStation.reportError("Oh no: " + e.getMessage(), e.getStackTrace());
       return Commands.none();

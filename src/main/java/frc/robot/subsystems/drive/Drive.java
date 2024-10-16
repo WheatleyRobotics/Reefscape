@@ -110,8 +110,8 @@ public class Drive extends SubsystemBase {
         this::getSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
         this::runVelocity, // Corrected lambda expression
         new PPHolonomicDriveController(
-            new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
-            new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
+            new PIDConstants(0.0, 0.0, 0.0), // Translation PID constants
+            new PIDConstants(0.0, 0.0, 0.0) // Rotation PID constants
             ),
         Constants.robotConfig, // The robot configuration
         () -> {
@@ -121,7 +121,7 @@ public class Drive extends SubsystemBase {
 
           var alliance = DriverStation.getAlliance();
           if (alliance.isPresent()) {
-            return alliance.get() == Alliance.Red;
+            return alliance.get() == Alliance.Blue;
           }
           return false;
         },
@@ -351,11 +351,12 @@ public class Drive extends SubsystemBase {
     try {
       // Load the path you want to follow using its name in the GUI
       PathPlannerPath choreoTrajectory = PathPlannerPath.fromChoreoTrajectory(path);
+      setPose(choreoTrajectory.getStartingDifferentialPose());
 
       // Create a path following command using AutoBuilder. This will also trigger event markers.
       return AutoBuilder.followPath(choreoTrajectory);
     } catch (Exception e) {
-      DriverStation.reportError("Big oops: " + e.getMessage(), e.getStackTrace());
+      DriverStation.reportError("Oh no: " + e.getMessage(), e.getStackTrace());
       return Commands.none();
     }
   }

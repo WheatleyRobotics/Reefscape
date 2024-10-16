@@ -14,12 +14,14 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
@@ -89,7 +91,10 @@ public class RobotContainer {
                 new ModuleIO() {});
         break;
     }
-
+    NamedCommands.registerCommand("IC", new PrintCommand("Intaking"));
+    NamedCommands.registerCommand("INC", new PrintCommand("Indexing"));
+    NamedCommands.registerCommand("WSC", new PrintCommand("Wing Shot"));
+    NamedCommands.registerCommand("SC", new PrintCommand("Shooting"));
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
     // Set up SysId routines
@@ -106,7 +111,6 @@ public class RobotContainer {
     // Set up autos
     autoChooser.addOption("Choreo", drive.followPathChoreo("test"));
     autoChooser.addOption("PathPlanner", drive.followPathPP("Example Path"));
-
     // Configure the button bindings
     configureButtonBindings();
   }

@@ -365,7 +365,7 @@ public class Drive extends SubsystemBase {
     try {
       // Load the path you want to follow using its name in the GUI
       PathPlannerPath PPTrajectory = PathPlannerPath.fromPathFile(path);
-      setPose(PPTrajectory.getPathPoses().getFirst());
+      setPose(PPTrajectory.getPathPoses().get(0));
 
       // Create a path following command using AutoBuilder. This will also trigger event markers.
       return AutoBuilder.followPath(PPTrajectory);

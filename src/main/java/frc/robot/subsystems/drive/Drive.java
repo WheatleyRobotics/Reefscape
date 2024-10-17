@@ -53,7 +53,6 @@ import org.littletonrobotics.junction.Logger;
 public class Drive extends SubsystemBase {
   private double SELF_CHECK_INTERVAL = 1.0;
   private double lastSelfCheck = 0.0;
-  private List<Fault> currentFaults = new ArrayList<>();
 
   private static final double TRACK_WIDTH_X = Units.inchesToMeters(25.0);
   private static final double TRACK_WIDTH_Y = Units.inchesToMeters(25.0);
@@ -374,12 +373,11 @@ public class Drive extends SubsystemBase {
   }
 
   public void runSelfCheck() {
-    currentFaults.clear(); // Clear previous faults before checking again
+    List<Fault> allFaults = new ArrayList<>();
 
     // Run the self-check for each module and collect faults
     for (Module module : modules) {
-      List<Fault> moduleFaults = module.selfCheck();
-      currentFaults.addAll(moduleFaults);
+      allFaults.addAll(module.selfCheck());
     }
 
     // Log or handle the results

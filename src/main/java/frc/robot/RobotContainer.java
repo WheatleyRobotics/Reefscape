@@ -31,13 +31,10 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOSparkMax;
 import frc.robot.subsystems.vision.*;
-import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -68,10 +65,13 @@ public class RobotContainer {
                 new ModuleIOSparkMax(2),
                 new ModuleIOSparkMax(3));
 
-        vision = new Vision(Stream.of(Constants.useLimeLight ? new VisionIOLimeLight() : null,
+        vision =
+            new Vision(
+                Stream.of(
+                        Constants.useLimeLight ? new VisionIOLimeLight() : null,
                         Constants.usePhoton ? new VisionIOPhoton() : null)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList()));
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList()));
         break;
 
       case SIM:
@@ -163,6 +163,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return autoChooser.get();
+    return autoChooser.get().withName("Selected auto");
   }
 }

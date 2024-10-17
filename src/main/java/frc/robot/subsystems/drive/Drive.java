@@ -20,7 +20,6 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.DriveFeedforward;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -44,7 +43,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.Elastic;
 import frc.lib.Fault;
 import frc.robot.Constants;
-import frc.robot.util.LocalADStarAK;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
@@ -127,7 +125,7 @@ public class Drive extends SubsystemBase {
         },
         this // Reference to this subsystem to set requirements
         );
-    Pathfinding.setPathfinder(new LocalADStarAK());
+    // Pathfinding.setPathfinder(new LocalADStarAK());
     PathPlannerLogging.setLogActivePathCallback(
         (activePath) -> {
           Logger.recordOutput(

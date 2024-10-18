@@ -14,16 +14,19 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.util.DriveFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.FSDCommand;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -41,6 +44,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
+  // private final Vision vision;
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
 
@@ -59,15 +63,8 @@ public class RobotContainer {
                 new ModuleIOSparkMax(1),
                 new ModuleIOSparkMax(2),
                 new ModuleIOSparkMax(3));
-        // drive = new Drive(
-        // new GyroIOPigeon2(true),
-        // new ModuleIOTalonFX(0),
-        // new ModuleIOTalonFX(1),
-        // new ModuleIOTalonFX(2),
-        // new ModuleIOTalonFX(3));
-        // flywheel = new Flywheel(new FlywheelIOTalonFX());
+        // vision = new Vision(new VisionIOPhoton());
         break;
-
       case SIM:
         // Sim robot, instantiate physics sim IO implementations
         drive =
@@ -77,6 +74,7 @@ public class RobotContainer {
                 new ModuleIOSim(),
                 new ModuleIOSim(),
                 new ModuleIOSim());
+        // vision = new Vision(new VisionIOSim());
         break;
 
       default:
@@ -88,9 +86,13 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
+        // vision = new Vision();
         break;
     }
-
+    NamedCommands.registerCommand("IC", new PrintCommand("Intaking"));
+    NamedCommands.registerCommand("INC", new PrintCommand("Indexing"));
+    NamedCommands.registerCommand("WSC", new PrintCommand("Wing Shot"));
+    NamedCommands.registerCommand("SC", new PrintCommand("Shooting"));
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
     // Set up SysId routines
@@ -104,8 +106,10 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    // Set up autos
+    autoChooser.addOption("Choreo", drive.followPathChoreo("Test"));
+    autoChooser.addOption("PathPlanner", drive.followPathPP("Example Path"));
     // Configure the button bindings
-
     configureButtonBindings();
   }
 
@@ -140,6 +144,10 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return autoChooser.get();
+    return autoChooser
+        .get()
+        .withName("Selected Auto Command")
+        .andThen(() -> drive.runVelocity(new ChassisSpeeds(), new DriveFeedforward[] {}), drive)
+        .andThen(new PrintCommand("---------- Finished and set to 0----------"));
   }
 }

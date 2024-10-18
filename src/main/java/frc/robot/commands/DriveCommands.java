@@ -13,6 +13,7 @@
 
 package frc.robot.commands;
 
+import com.pathplanner.lib.util.DriveFeedforward;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -70,7 +71,8 @@ public class DriveCommands {
                   omega * drive.getMaxAngularSpeedRadPerSec(),
                   isFlipped
                       ? drive.getRotation().plus(new Rotation2d(Math.PI))
-                      : drive.getRotation()));
+                      : drive.getRotation()),
+              new DriveFeedforward[0]);
         },
         drive);
   }

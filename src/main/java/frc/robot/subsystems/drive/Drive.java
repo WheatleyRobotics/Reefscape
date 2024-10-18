@@ -16,11 +16,13 @@ package frc.robot.subsystems.drive;
 import static edu.wpi.first.units.Units.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
-import com.pathplanner.lib.pathfinding.Pathfinding;
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.util.DriveFeedforward;
 import com.pathplanner.lib.util.PathPlannerLogging;
-import com.pathplanner.lib.util.ReplanningConfig;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -30,15 +32,17 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.Elastic;
 import frc.lib.Fault;
-import frc.robot.util.LocalADStarAK;
+import frc.robot.Constants;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
@@ -49,6 +53,7 @@ import org.littletonrobotics.junction.Logger;
 public class Drive extends SubsystemBase {
   private double SELF_CHECK_INTERVAL = 1.0;
   private double lastSelfCheck = 0.0;
+  private List<Fault> currentFaults = new ArrayList<>();
 
   private static final double TRACK_WIDTH_X = Units.inchesToMeters(25.0);
   private static final double TRACK_WIDTH_Y = Units.inchesToMeters(25.0);
@@ -93,20 +98,34 @@ public class Drive extends SubsystemBase {
     // Start threads (no-op for each if no signals have been created)
     PhoenixOdometryThread.getInstance().start();
     SparkMaxOdometryThread.getInstance().start();
-
     // Configure AutoBuilder for PathPlanner
-    AutoBuilder.configureHolonomic(
-        this::getPose,
-        this::setPose,
-        () -> kinematics.toChassisSpeeds(getModuleStates()),
-        this::runVelocity,
-        new HolonomicPathFollowerConfig(
-            MAX_LINEAR_SPEED, DRIVE_BASE_RADIUS, new ReplanningConfig()),
-        () ->
-            DriverStation.getAlliance().isPresent()
-                && DriverStation.getAlliance().get() == Alliance.Red,
-        this);
-    Pathfinding.setPathfinder(new LocalADStarAK());
+    var thetaController =
+        new ProfiledPIDController(0, 0, 0, new TrapezoidProfile.Constraints(0, 0));
+    thetaController.enableContinuousInput(-Math.PI, Math.PI);
+    AutoBuilder.configure(
+        this::getPose, // Robot pose supplier
+        this::setPose, // Method to reset odometry (will be called if your auto has a starting pose)
+        this::getSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+        this::runVelocity, // Corrected lambda expression
+        new PPHolonomicDriveController(
+            new PIDConstants(0.0, 0.0, 0.0), // Translation PID constants
+            new PIDConstants(0.0, 0.0, 0.0) // Rotation PID constants
+            ),
+        Constants.robotConfig, // The robot configuration
+        () -> {
+          // Boolean supplier that controls when the path will be mirrored for the red alliance
+          // This will flip the path being followed to the red side of the field.
+          // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+          var alliance = DriverStation.getAlliance();
+          if (alliance.isPresent()) {
+            return alliance.get() == Alliance.Blue;
+          }
+          return false;
+        },
+        this // Reference to this subsystem to set requirements
+        );
+    // Pathfinding.setPathfinder(new LocalADStarAK());
     PathPlannerLogging.setLogActivePathCallback(
         (activePath) -> {
           Logger.recordOutput(
@@ -202,7 +221,7 @@ public class Drive extends SubsystemBase {
    *
    * @param speeds Speeds in meters/sec
    */
-  public void runVelocity(ChassisSpeeds speeds) {
+  public void runVelocity(ChassisSpeeds speeds, DriveFeedforward[] feedforwards) {
     // Calculate module setpoints
     ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
@@ -222,7 +241,7 @@ public class Drive extends SubsystemBase {
 
   /** Stops the drive. */
   public void stop() {
-    runVelocity(new ChassisSpeeds());
+    runVelocity(new ChassisSpeeds(), new DriveFeedforward[0]);
   }
 
   /**
@@ -265,6 +284,11 @@ public class Drive extends SubsystemBase {
       states[i] = modules[i].getPosition();
     }
     return states;
+  }
+
+  @AutoLogOutput(key = "Drive/MeasuredSpeeds")
+  private ChassisSpeeds getSpeeds() {
+    return kinematics.toChassisSpeeds(getModuleStates());
   }
 
   /** Returns the current odometry pose. */
@@ -318,21 +342,49 @@ public class Drive extends SubsystemBase {
         end,
         new PathConstraints(
             MAX_LINEAR_SPEED, MAX_LINEAR_ACCEL, MAX_ANGULAR_SPEED, MAX_ANGULAR_ACCEL),
-        0,
         0);
   }
 
+  public Command followPathChoreo(String path) {
+    try {
+      // Load the path you want to follow using its name in the GUI
+      PathPlannerPath choreoTrajectory = PathPlannerPath.fromChoreoTrajectory(path);
+      setPose(choreoTrajectory.getStartingDifferentialPose());
+
+      // Create a path following command using AutoBuilder. This will also trigger event markers.
+      return AutoBuilder.followPath(choreoTrajectory);
+    } catch (Exception e) {
+      DriverStation.reportError("Oh no: " + e.getMessage(), e.getStackTrace());
+      return Commands.none();
+    }
+  }
+
+  public Command followPathPP(String path) {
+    try {
+      // Load the path you want to follow using its name in the GUI
+      PathPlannerPath PPTrajectory = PathPlannerPath.fromPathFile(path);
+      setPose(PPTrajectory.getPathPoses().get(0));
+
+      // Create a path following command using AutoBuilder. This will also trigger event markers.
+      return AutoBuilder.followPath(PPTrajectory);
+    } catch (Exception e) {
+      DriverStation.reportError("Oh no: " + e.getMessage(), e.getStackTrace());
+      return Commands.none();
+    }
+  }
+
   public void runSelfCheck() {
-    List<Fault> allFaults = new ArrayList<>();
+    currentFaults.clear(); // Clear previous faults before checking again
 
     // Run the self-check for each module and collect faults
     for (Module module : modules) {
-      allFaults.addAll(module.selfCheck());
+      List<Fault> moduleFaults = module.selfCheck();
+      currentFaults.addAll(moduleFaults);
     }
 
     // Log or handle the results
-    if (!allFaults.isEmpty()) {
-      for (Fault currentFault : allFaults) {
+    if (!currentFaults.isEmpty()) {
+      for (Fault currentFault : currentFaults) {
         Elastic.sendAlert(currentFault.toNotification("Drive Subsystem Fault"));
       }
     }

@@ -107,7 +107,7 @@ public class RobotContainer {
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     // Set up autos
-    autoChooser.addOption("Choreo", drive.followPathChoreo("Test"));
+    autoChooser.addOption("Choreo", drive.followPathChoreo("Test2"));
     autoChooser.addOption("PathPlanner", drive.followPathPP("Example Path"));
     // Configure the button bindings
     configureButtonBindings();
@@ -147,7 +147,8 @@ public class RobotContainer {
     return autoChooser
         .get()
         .withName("Selected Auto Command")
-        .andThen(() -> drive.runVelocity(new ChassisSpeeds(), new DriveFeedforward[] {}), drive)
+        .andThen(() -> drive.runVelocity(new ChassisSpeeds(), new DriveFeedforward[] {}))
+        .withName("StopMotor")
         .andThen(new PrintCommand("---------- Finished and set to 0----------"));
   }
 }

@@ -38,6 +38,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.Elastic;
@@ -349,10 +350,9 @@ public class Drive extends SubsystemBase {
     try {
       // Load the path you want to follow using its name in the GUI
       PathPlannerPath choreoTrajectory = PathPlannerPath.fromChoreoTrajectory(path);
-      setPose(choreoTrajectory.getStartingDifferentialPose());
 
       // Create a path following command using AutoBuilder. This will also trigger event markers.
-      return AutoBuilder.followPath(choreoTrajectory);
+      return AutoBuilder.followPath(choreoTrajectory).alongWith(Commands.runOnce(() -> setPose(choreoTrajectory.getStartingDifferentialPose())));
     } catch (Exception e) {
       DriverStation.reportError("Oh no: " + e.getMessage(), e.getStackTrace());
       return Commands.none();
@@ -363,10 +363,9 @@ public class Drive extends SubsystemBase {
     try {
       // Load the path you want to follow using its name in the GUI
       PathPlannerPath PPTrajectory = PathPlannerPath.fromPathFile(path);
-      setPose(PPTrajectory.getPathPoses().get(0));
 
       // Create a path following command using AutoBuilder. This will also trigger event markers.
-      return AutoBuilder.followPath(PPTrajectory);
+      return AutoBuilder.followPath(PPTrajectory).alongWith(Commands.runOnce(() -> setPose(PPTrajectory.getStartingDifferentialPose())));
     } catch (Exception e) {
       DriverStation.reportError("Oh no: " + e.getMessage(), e.getStackTrace());
       return Commands.none();

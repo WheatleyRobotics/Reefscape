@@ -44,7 +44,7 @@ public final class Constants {
       new RobotConfig(
           9,
           1.84,
-          new ModuleConfig(0.0508, Units.feetToMeters(14.5), 1.1, DCMotor.getNeoVortex(1), 55, 1),
+          new ModuleConfig(0.0508, Units.feetToMeters(14.5), 1.1, DCMotor.getNeoVortex(1).withReduction(6.75), 55, 1),
           0.64,
           0.64);
 }

@@ -18,6 +18,7 @@ import static edu.wpi.first.units.Units.*;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.DriveFeedforward;
@@ -43,6 +44,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.Elastic;
 import frc.lib.Fault;
 import frc.robot.Constants;
+import frc.robot.RobotObserver;
 import frc.robot.util.LocalADStarAK;
 import java.util.ArrayList;
 import java.util.List;
@@ -156,6 +158,9 @@ public class Drive extends SubsystemBase {
   }
 
   public void periodic() {
+
+    RobotObserver.robotPose = poseEstimator.getEstimatedPosition();
+
     if (DriverStation.getMatchTime() - lastSelfCheck > SELF_CHECK_INTERVAL) {
       runSelfCheck();
       lastSelfCheck = DriverStation.getMatchTime();
@@ -336,6 +341,10 @@ public class Drive extends SubsystemBase {
       new Translation2d(-TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0),
       new Translation2d(-TRACK_WIDTH_X / 2.0, -TRACK_WIDTH_Y / 2.0)
     };
+  }
+
+  public Command generatePath(Pose2d goal, PathConstraints pathConstraints) {
+    return AutoBuilder.pathfindToPose(goal, pathConstraints);
   }
 
   public Command followPathChoreo(String path) {

@@ -15,10 +15,10 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.util.DriveFeedforward;
+import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -26,6 +26,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.lib.navi.Action;
+import frc.lib.navi.Navi;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -45,6 +47,8 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   // private final Vision vision;
+
+  private final Navi navi;
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
 
@@ -89,6 +93,13 @@ public class RobotContainer {
         // vision = new Vision();
         break;
     }
+
+    navi = new Navi(drive);
+    navi.addAction(
+        new Action(new Pose2d(2, 2, Rotation2d.fromDegrees(0)), new PrintCommand("Action1")));
+    navi.addAction(
+        new Action(new Pose2d(8, 8, Rotation2d.fromDegrees(0)), new PrintCommand("Action2")));
+
     NamedCommands.registerCommand("IC", new PrintCommand("Intaking"));
     NamedCommands.registerCommand("INC", new PrintCommand("Indexing"));
     NamedCommands.registerCommand("WSC", new PrintCommand("Wing Shot"));
@@ -109,6 +120,21 @@ public class RobotContainer {
     // Set up autos
     autoChooser.addOption("Choreo", drive.followPathChoreo("Test2"));
     autoChooser.addOption("PathPlanner", drive.followPathPP("Example Path"));
+    autoChooser.addOption(
+        "Pathfinding",
+        AutoBuilder.pathfindToPose(
+            new Pose2d(15, 3.0, Rotation2d.fromDegrees(180)),
+            new PathConstraints(4.0, 4.0, Units.degreesToRadians(360), Units.degreesToRadians(540)),
+            0));
+
+    Navi navi = new Navi(drive);
+    navi.addAction(
+        new Action(new Pose2d(2, 2, Rotation2d.fromDegrees(0)), new PrintCommand("Action1")));
+    navi.addAction(
+        new Action(new Pose2d(8, 8, Rotation2d.fromDegrees(0)), new PrintCommand("Action2")));
+    navi.setShouldRepeat(true);
+    Command naviAuto = navi.buildCommandSequence();
+    autoChooser.addOption("Navi Auto", naviAuto);
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -144,11 +170,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return autoChooser
-        .get()
-        .withName("Selected Auto Command")
-        .andThen(() -> drive.runVelocity(new ChassisSpeeds(), new DriveFeedforward[] {}))
-        .withName("StopMotor")
-        .andThen(new PrintCommand("---------- Finished and set to 0----------"));
+    return autoChooser.get();
   }
 }

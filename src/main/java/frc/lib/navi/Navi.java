@@ -27,9 +27,9 @@ public class Navi {
   public Command buildCommandSequence() {
     SequentialCommandGroup commandGroup = new SequentialCommandGroup();
     for (Action action : actions) {
-      Pose2d targetPose = action.getTargetPose();
+      Pose2d targetPose = action.targetPose();
       Command navigateCommand = driveSubsystem.generatePath(targetPose, DEFAULT_PATH_CONSTRAINTS);
-      Command targetCommand = action.getTargetCommand();
+      Command targetCommand = action.targetCommand();
       commandGroup.addCommands(navigateCommand, targetCommand);
     }
 

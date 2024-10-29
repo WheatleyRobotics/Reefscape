@@ -21,6 +21,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import java.util.List;
+
+import frc.lib.navi.Navi;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -99,9 +101,7 @@ public class Robot extends LoggedRobot {
 
     robotContainer = new RobotContainer();
 
-    Pathfinding.setDynamicObstacles(
-        List.of(new Pair<>(new Translation2d(6, 1), new Translation2d(6, 10))),
-        RobotObserver.robotPose.getTranslation());
+    Navi.addObstacle(List.of(new Pair<>(new Translation2d(6, 1), new Translation2d(6, 10))));
   }
 
   /** This function is called periodically during all modes. */

@@ -27,7 +27,7 @@ import edu.wpi.first.math.util.Units;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-  public static final Mode currentMode = Mode.SIM;
+  public static final Mode currentMode = Mode.REAL;
 
   public enum Mode {
     /** Running on a real robot. */
@@ -46,9 +46,9 @@ public final class Constants {
           1.84,
           new ModuleConfig(
               0.0508,
-              Units.feetToMeters(14.5),
+              Units.feetToMeters(17.6),
               1.1,
-              DCMotor.getNeoVortex(1).withReduction(6.75),
+              DCMotor.getNeoVortex(1).withReduction(6.12),
               55,
               1),
           0.64,

@@ -1,11 +1,17 @@
 package frc.lib.navi;
 
 import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.pathfinding.Pathfinding;
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.RobotObserver;
 import frc.robot.subsystems.drive.Drive;
 import java.util.ArrayList;
+import java.util.List;
+
 import lombok.Setter;
 
 public class Navi {
@@ -38,5 +44,9 @@ public class Navi {
     } else {
       return commandGroup;
     }
+  }
+
+  public static void addObstacle(List<Pair<Translation2d, Translation2d>> obstacles){
+    Pathfinding.setDynamicObstacles(obstacles, RobotObserver.robotPose.getTranslation());
   }
 }

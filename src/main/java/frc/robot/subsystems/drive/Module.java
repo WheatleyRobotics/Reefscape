@@ -21,11 +21,22 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import frc.lib.Fault;
 import frc.robot.Constants;
+import frc.robot.util.LoggedTunableNumber;
 import java.util.List;
 import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
 public class Module {
+  // Define LoggedTunableNumbers for drive PID gains
+  private final LoggedTunableNumber driveKp;
+  private final LoggedTunableNumber driveKi;
+  private final LoggedTunableNumber driveKd;
+
+  // Define LoggedTunableNumbers for turn PID gains
+  private final LoggedTunableNumber turnKp;
+  private final LoggedTunableNumber turnKi;
+  private final LoggedTunableNumber turnKd;
+
   private static final double WHEEL_RADIUS = Units.inchesToMeters(2.0);
   static final double ODOMETRY_FREQUENCY = 250.0;
 
@@ -45,28 +56,66 @@ public class Module {
     this.io = io;
     this.index = index;
 
+    driveKp = new LoggedTunableNumber("Module" + "/DriveKp");
+    driveKi = new LoggedTunableNumber("Module" + "/DriveKi");
+    driveKd = new LoggedTunableNumber("Module" + "/DriveKd");
+
+    turnKp = new LoggedTunableNumber("Module" + "/TurnKp");
+    turnKi = new LoggedTunableNumber("Module" + "/TurnKi");
+    turnKd = new LoggedTunableNumber("Module" + "/TurnKd");
+
     // Switch constants based on mode (the physics simulator is treated as a
     // separate robot with different tuning)
     switch (Constants.currentMode) {
       case REAL:
       case REPLAY:
         driveFeedforward = new SimpleMotorFeedforward(0.1, 0.13);
-        driveFeedback = new PIDController(0.05, 0.0, 0.0);
-        turnFeedback = new PIDController(7.0, 0.0, 0.0);
+
+        // Initialize default values for drive PID gains
+        driveKp.initDefault(0.05);
+        driveKi.initDefault(0.0);
+        driveKd.initDefault(0.0);
+
+        // Initialize default values for turn PID gains
+        turnKp.initDefault(7.0);
+        turnKi.initDefault(0.0);
+        turnKd.initDefault(0.0);
         break;
+
       case SIM:
         driveFeedforward = new SimpleMotorFeedforward(0.0, 0.13);
-        driveFeedback = new PIDController(0.1, 0.0, 0.0);
-        turnFeedback = new PIDController(10.0, 0.0, 0.0);
+
+        // Initialize default values for drive PID gains
+        driveKp.initDefault(0.0);
+        driveKi.initDefault(0.0);
+        driveKd.initDefault(0.0);
+
+        // Initialize default values for turn PID gains
+        turnKp.initDefault(0.0);
+        turnKi.initDefault(0.0);
+        turnKd.initDefault(0.0);
         break;
+
       default:
         driveFeedforward = new SimpleMotorFeedforward(0.0, 0.0);
-        driveFeedback = new PIDController(0.0, 0.0, 0.0);
-        turnFeedback = new PIDController(0.0, 0.0, 0.0);
+
+        // Initialize default values for drive PID gains
+        driveKp.initDefault(0.0);
+        driveKi.initDefault(0.0);
+        driveKd.initDefault(0.0);
+
+        // Initialize default values for turn PID gains
+        turnKp.initDefault(0.0);
+        turnKi.initDefault(0.0);
+        turnKd.initDefault(0.0);
         break;
     }
 
+    // Initialize PID controllers with the values from LoggedTunableNumbers
+    driveFeedback = new PIDController(driveKp.get(), driveKi.get(), driveKd.get());
+    turnFeedback = new PIDController(turnKp.get(), turnKi.get(), turnKd.get());
     turnFeedback.enableContinuousInput(-Math.PI, Math.PI);
+
     setBrakeMode(true);
   }
 
@@ -109,6 +158,29 @@ public class Module {
                 + driveFeedback.calculate(inputs.driveVelocityRadPerSec, velocityRadPerSec));
       }
     }
+
+    LoggedTunableNumber.ifChanged(
+        index * 10 + 1,
+        () -> {
+          driveFeedback.setP(driveKp.get());
+          driveFeedback.setI(driveKi.get());
+          driveFeedback.setD(driveKd.get());
+        },
+        driveKp,
+        driveKi,
+        driveKd);
+
+    // Update turn PID gains if they've changed
+    LoggedTunableNumber.ifChanged(
+        index * 10 + 2,
+        () -> {
+          turnFeedback.setP(turnKp.get());
+          turnFeedback.setI(turnKi.get());
+          turnFeedback.setD(turnKd.get());
+        },
+        turnKp,
+        turnKi,
+        turnKd);
 
     // Calculate positions for odometry
     int sampleCount = inputs.odometryTimestamps.length; // All signals are sampled together

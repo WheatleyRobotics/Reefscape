@@ -11,7 +11,6 @@ import frc.robot.RobotObserver;
 import frc.robot.subsystems.drive.Drive;
 import java.util.ArrayList;
 import java.util.List;
-
 import lombok.Setter;
 
 public class Navi {
@@ -46,7 +45,7 @@ public class Navi {
     }
   }
 
-  public static void addObstacle(List<Pair<Translation2d, Translation2d>> obstacles){
+  public static void addObstacle(List<Pair<Translation2d, Translation2d>> obstacles) {
     Pathfinding.setDynamicObstacles(obstacles, RobotObserver.robotPose.getTranslation());
   }
 }

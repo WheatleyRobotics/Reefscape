@@ -7,6 +7,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.PubSubOption;
 import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.networktables.StringTopic;
+import edu.wpi.first.wpilibj.Timer;
 
 public final class Elastic {
   private static final StringTopic topic =
@@ -18,6 +19,14 @@ public final class Elastic {
   public static void sendAlert(ElasticNotification alert) {
     try {
       publisher.set(objectMapper.writeValueAsString(alert));
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public static void sendAlert(String notification, ElasticNotification.NotificationLevel level) {
+    try {
+      publisher.set(objectMapper.writeValueAsString(new ElasticNotification(level, "Robot", notification)));
     } catch (JsonProcessingException e) {
       e.printStackTrace();
     }

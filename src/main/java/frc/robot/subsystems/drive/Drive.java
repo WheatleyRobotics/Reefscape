@@ -114,7 +114,7 @@ public class Drive extends SubsystemBase {
             new PIDConstants(0.0, 0.0, 0.0), // Translation PID constants
             new PIDConstants(0.0, 0.0, 0.0) // Rotation PID constants
             ),
-        Constants.robotConfig, // The robot configuration
+        Constants.getRobotConfig(), // The robot configuration
         () -> {
           // Boolean supplier that controls when the path will be mirrored for the red alliance
           // This will flip the path being followed to the red side of the field.

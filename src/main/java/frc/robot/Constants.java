@@ -17,6 +17,8 @@ import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.RobotBase;
+import frc.lib.Elastic;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -27,7 +29,57 @@ import edu.wpi.first.math.util.Units;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-  public static final Mode currentMode = Mode.REAL;
+  private static RobotType robotType = RobotType.COMP;
+
+  public static RobotType getRobot() {
+    if (RobotBase.isReal() && robotType == RobotType.SIM) {
+      Elastic.sendAlert("Invalid robot selected, using competition robot as default.", Elastic.ElasticNotification.NotificationLevel.ERROR);
+      robotType = RobotType.COMP;
+    }
+    return robotType;
+  }
+
+  public static Mode getMode() {
+    return switch (robotType) {
+      case DEV, COMP -> RobotBase.isReal() ? Mode.REAL : Mode.REPLAY;
+      case SIM -> Mode.SIM;
+    };
+  }
+
+  public static RobotConfig getRobotConfig(){
+    return switch (robotType) {
+      case DEV, COMP -> new RobotConfig(
+              9,
+              1.84,
+              new ModuleConfig(
+                      0.0508,
+                      Units.feetToMeters(17.6),
+                      1.1,
+                      DCMotor.getNeoVortex(1).withReduction(6.12),
+                      55,
+                      1),
+              0.64,
+              0.64);
+      case SIM -> new RobotConfig(
+              9,
+              1.84,
+              new ModuleConfig(
+                      0.0508,
+                      Units.feetToMeters(17.6),
+                      1.1,
+                      DCMotor.getNeoVortex(1).withReduction(6.12),
+                      55,
+                      1),
+              0.64,
+              0.64);
+    };
+  }
+
+  public enum RobotType{
+    COMP,
+    DEV,
+    SIM
+  }
 
   public enum Mode {
     /** Running on a real robot. */
@@ -39,18 +91,11 @@ public final class Constants {
     /** Replaying from a log file. */
     REPLAY
   }
+  public static void main(String... args) {
+    if (robotType == RobotType.SIM) {
+      System.err.println("Cannot deploy, invalid robot selected: " + robotType);
+      System.exit(1);
+    }
+  }
 
-  public static RobotConfig robotConfig =
-      new RobotConfig(
-          9,
-          1.84,
-          new ModuleConfig(
-              0.0508,
-              Units.feetToMeters(17.6),
-              1.1,
-              DCMotor.getNeoVortex(1).withReduction(6.12),
-              55,
-              1),
-          0.64,
-          0.64);
 }

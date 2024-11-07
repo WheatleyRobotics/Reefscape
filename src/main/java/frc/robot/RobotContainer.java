@@ -119,7 +119,6 @@ public class RobotContainer {
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     // Set up autos
     autoChooser.addOption("Choreo", drive.followPathChoreo("Test2"));
-    autoChooser.addOption("PathPlanner", drive.followPathPP("Example Path"));
     autoChooser.addOption(
         "Pathfinding",
         AutoBuilder.pathfindToPose(

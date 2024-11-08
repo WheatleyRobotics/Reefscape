@@ -47,6 +47,7 @@ import frc.robot.Constants;
 import frc.robot.RobotObserver;
 import frc.robot.util.LocalADStarAK;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -109,7 +110,7 @@ public class Drive extends SubsystemBase {
         this::getPose, // Robot pose supplier
         this::setPose, // Method to reset odometry (will be called if your auto has a starting pose)
         this::getSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-        this::runVelocity, // Corrected lambda expression
+        this::runVelocityy, // Corrected lambda expression
         new PPHolonomicDriveController(
             new PIDConstants(0.0, 0.0, 0.0), // Translation PID constants
             new PIDConstants(0.0, 0.0, 0.0) // Rotation PID constants
@@ -227,7 +228,12 @@ public class Drive extends SubsystemBase {
    *
    * @param speeds Speeds in meters/sec
    */
-  public void runVelocity(ChassisSpeeds speeds, DriveFeedforward[] feedforwards) {
+  public void runVelocityy(ChassisSpeeds speeds, DriveFeedforward[] feedforwards) {}
+
+  public void runVelocity(ChassisSpeeds speeds) {
+    Logger.recordOutput(
+        "RunVelocity/StackTrace", Arrays.toString(Thread.currentThread().getStackTrace()));
+    Logger.recordOutput("RunVelocity/Speeds", speeds);
     // Calculate module setpoints
     ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
@@ -247,7 +253,7 @@ public class Drive extends SubsystemBase {
 
   /** Stops the drive. */
   public void stop() {
-    runVelocity(new ChassisSpeeds(), new DriveFeedforward[0]);
+    runVelocityy(new ChassisSpeeds(), new DriveFeedforward[0]);
   }
 
   /**

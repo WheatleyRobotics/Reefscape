@@ -15,10 +15,8 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -119,12 +117,6 @@ public class RobotContainer {
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     // Set up autos
     autoChooser.addOption("Choreo", drive.followPathChoreo("Test2"));
-    autoChooser.addOption(
-        "Pathfinding",
-        AutoBuilder.pathfindToPose(
-            new Pose2d(15, 3.0, Rotation2d.fromDegrees(180)),
-            new PathConstraints(4.0, 4.0, Units.degreesToRadians(360), Units.degreesToRadians(540)),
-            0));
 
     Navi navi = new Navi(drive);
     navi.addAction(

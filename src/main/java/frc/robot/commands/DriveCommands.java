@@ -13,7 +13,6 @@
 
 package frc.robot.commands;
 
-import com.pathplanner.lib.util.DriveFeedforward;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -51,11 +50,6 @@ public class DriveCommands {
               new Rotation2d(xSupplier.getAsDouble(), ySupplier.getAsDouble());
           double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
 
-          if (linearMagnitude == 0 && omega == 0) {
-            drive.stop();
-            return;
-          }
-
           // Square values
           linearMagnitude = linearMagnitude * linearMagnitude;
           omega = Math.copySign(omega * omega, omega);
@@ -73,15 +67,18 @@ public class DriveCommands {
 
           Logger.recordOutput("Linear Velocity", linearVelocity);
 
-          drive.runVelocity(
+          ChassisSpeeds cs =
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
                   linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
                   omega * drive.getMaxAngularSpeedRadPerSec(),
                   isFlipped
                       ? drive.getRotation().plus(new Rotation2d(Math.PI))
-                      : drive.getRotation()),
-              new DriveFeedforward[0]);
+                      : drive.getRotation());
+
+          Logger.recordOutput("ChassisSpeeds", cs);
+
+          drive.runVelocity(cs);
         },
         drive);
   }

@@ -110,7 +110,7 @@ public class Drive extends SubsystemBase {
         this::getPose, // Robot pose supplier
         this::setPose, // Method to reset odometry (will be called if your auto has a starting pose)
         this::getSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-        this::runVelocityy, // Corrected lambda expression
+             (speeds, feedforwards) -> runVelocity(speeds), // Corrected lambda expression
         new PPHolonomicDriveController(
             new PIDConstants(0.0, 0.0, 0.0), // Translation PID constants
             new PIDConstants(0.0, 0.0, 0.0) // Rotation PID constants
@@ -228,7 +228,6 @@ public class Drive extends SubsystemBase {
    *
    * @param speeds Speeds in meters/sec
    */
-  public void runVelocityy(ChassisSpeeds speeds, DriveFeedforward[] feedforwards) {}
 
   public void runVelocity(ChassisSpeeds speeds) {
     Logger.recordOutput(
@@ -253,7 +252,7 @@ public class Drive extends SubsystemBase {
 
   /** Stops the drive. */
   public void stop() {
-    runVelocityy(new ChassisSpeeds(), new DriveFeedforward[0]);
+    runVelocity(new ChassisSpeeds());
   }
 
   /**

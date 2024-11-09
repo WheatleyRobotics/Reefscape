@@ -65,20 +65,13 @@ public class DriveCommands {
               DriverStation.getAlliance().isPresent()
                   && DriverStation.getAlliance().get() == Alliance.Red;
 
-          Logger.recordOutput("Linear Velocity", linearVelocity);
-
-          ChassisSpeeds cs =
-              ChassisSpeeds.fromFieldRelativeSpeeds(
+          drive.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(
                   linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
                   linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
                   omega * drive.getMaxAngularSpeedRadPerSec(),
                   isFlipped
-                      ? drive.getRotation().plus(new Rotation2d(Math.PI))
-                      : drive.getRotation());
-
-          Logger.recordOutput("ChassisSpeeds", cs);
-
-          drive.runVelocity(cs);
+                          ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                          : drive.getRotation()));
         },
         drive);
   }

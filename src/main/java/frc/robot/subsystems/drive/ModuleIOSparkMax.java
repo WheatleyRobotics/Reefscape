@@ -94,6 +94,9 @@ public class ModuleIOSparkMax implements ModuleIO {
         throw new RuntimeException("Invalid module index");
     }
 
+    driveSparkFlex.set(0);
+    turnSparkMax.set(0);
+
     driveSparkFlex.restoreFactoryDefaults();
     turnSparkMax.restoreFactoryDefaults();
 

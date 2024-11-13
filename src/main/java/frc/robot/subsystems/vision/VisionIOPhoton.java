@@ -9,7 +9,7 @@ import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 
 public class VisionIOPhoton implements VisionIO {
-  PhotonCamera leftCamera = new PhotonCamera("leftCamera");
+  PhotonCamera leftCamera = new PhotonCamera("leftCam");
   Transform3d robotToLeftCamera =
       new Transform3d(
           new Translation3d(0.5, 0.0, 0.5),
@@ -18,7 +18,7 @@ public class VisionIOPhoton implements VisionIO {
               0)); // Cam mounted facing forward, half a meter forward of center, half a meter up
   // from center.
 
-  PhotonCamera rightCamera = new PhotonCamera("rightCamera");
+  PhotonCamera rightCamera = new PhotonCamera("rightCam");
   Transform3d robotToRightCamera =
       new Transform3d(
           new Translation3d(0.5, 0.0, 0.5),

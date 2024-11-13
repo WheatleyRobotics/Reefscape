@@ -24,8 +24,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.lib.navi.Action;
-import frc.lib.navi.Navi;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -44,9 +42,6 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
-  // private final Vision vision;
-
-  private final Navi navi;
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
 
@@ -65,10 +60,8 @@ public class RobotContainer {
                 new ModuleIOSparkMax(1),
                 new ModuleIOSparkMax(2),
                 new ModuleIOSparkMax(3));
-        // vision = new Vision(new VisionIOPhoton());
         break;
       case SIM:
-        // Sim robot, instantiate physics sim IO implementations
         drive =
             new Drive(
                 new GyroIO() {},
@@ -76,7 +69,6 @@ public class RobotContainer {
                 new ModuleIOSim(),
                 new ModuleIOSim(),
                 new ModuleIOSim());
-        // vision = new Vision(new VisionIOSim());
         break;
 
       default:
@@ -88,15 +80,8 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-        // vision = new Vision();
         break;
     }
-
-    navi = new Navi(drive);
-    navi.addAction(
-        new Action(new Pose2d(2, 2, Rotation2d.fromDegrees(0)), new PrintCommand("Action1")));
-    navi.addAction(
-        new Action(new Pose2d(8, 8, Rotation2d.fromDegrees(0)), new PrintCommand("Action2")));
 
     NamedCommands.registerCommand("IC", new PrintCommand("Intaking"));
     NamedCommands.registerCommand("INC", new PrintCommand("Indexing"));
@@ -118,14 +103,6 @@ public class RobotContainer {
     // Set up autos
     autoChooser.addOption("Choreo", drive.followPathChoreo("Test2"));
 
-    Navi navi = new Navi(drive);
-    navi.addAction(
-        new Action(new Pose2d(2, 2, Rotation2d.fromDegrees(0)), new PrintCommand("Action1")));
-    navi.addAction(
-        new Action(new Pose2d(8, 8, Rotation2d.fromDegrees(0)), new PrintCommand("Action2")));
-    navi.setShouldRepeat(true);
-    Command naviAuto = navi.buildCommandSequence();
-    autoChooser.addOption("Navi Auto", naviAuto);
     // Configure the button bindings
     configureButtonBindings();
   }

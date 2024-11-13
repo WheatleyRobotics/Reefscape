@@ -40,24 +40,15 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.lib.Elastic;
-import frc.lib.Fault;
 import frc.robot.Constants;
-import frc.robot.RobotObserver;
 import frc.robot.util.LocalADStarAK;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Drive extends SubsystemBase {
-  private double SELF_CHECK_INTERVAL = 1.0;
-  private double lastSelfCheck = 0.0;
-  private List<Fault> currentFaults = new ArrayList<>();
-
   private static final double TRACK_WIDTH_X = Units.inchesToMeters(25.0);
   private static final double TRACK_WIDTH_Y = Units.inchesToMeters(25.0);
   private static final double DRIVE_BASE_RADIUS =
@@ -158,14 +149,6 @@ public class Drive extends SubsystemBase {
   }
 
   public void periodic() {
-
-    RobotObserver.robotPose = poseEstimator.getEstimatedPosition();
-
-    if (DriverStation.getMatchTime() - lastSelfCheck > SELF_CHECK_INTERVAL) {
-      runSelfCheck();
-      lastSelfCheck = DriverStation.getMatchTime();
-    }
-
     odometryLock.lock(); // Prevents odometry updates while reading data
     gyroIO.updateInputs(gyroInputs);
     for (var module : modules) {
@@ -376,23 +359,6 @@ public class Drive extends SubsystemBase {
     } catch (Exception e) {
       DriverStation.reportError("Oh no: " + e.getMessage(), e.getStackTrace());
       return Commands.none();
-    }
-  }
-
-  public void runSelfCheck() {
-    currentFaults.clear(); // Clear previous faults before checking again
-
-    // Run the self-check for each module and collect faults
-    for (Module module : modules) {
-      List<Fault> moduleFaults = module.selfCheck();
-      currentFaults.addAll(moduleFaults);
-    }
-
-    // Log or handle the results
-    if (!currentFaults.isEmpty()) {
-      for (Fault currentFault : currentFaults) {
-        Elastic.sendAlert(currentFault.toNotification("Drive Subsystem Fault"));
-      }
     }
   }
 }

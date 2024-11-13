@@ -15,4 +15,7 @@ public interface VisionIO {
   public default VisionPose getVisionPose() {
     return new VisionPose();
   }
+
+  public default void visionSimPeriodic(Pose2d robotSimPose) {}
+  ;
 }

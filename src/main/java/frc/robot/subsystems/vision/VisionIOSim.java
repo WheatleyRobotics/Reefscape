@@ -3,7 +3,9 @@ package frc.robot.subsystems.vision;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import frc.lib.structs.VisionPose;
 import frc.robot.Constants;
@@ -12,9 +14,11 @@ import java.util.Optional;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.estimation.TargetModel;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
+import org.photonvision.simulation.VisionTargetSim;
 import org.photonvision.targeting.PhotonPipelineResult;
 
 public class VisionIOSim implements VisionIO {
@@ -32,6 +36,24 @@ public class VisionIOSim implements VisionIO {
   private VisionSystemSim visionSimRightCam;
   private double lastEstTimestamp = 0;
   private AprilTagFieldLayout kTagLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
+
+  TargetModel targetModel1 = new TargetModel(0.5, 0.25);
+  TargetModel targetModel2 = new TargetModel(0.5, 0.25);
+  TargetModel targetModel3 = new TargetModel(0.5, 0.25);
+  TargetModel targetModel4 = new TargetModel(0.5, 0.25);
+  TargetModel targetModel5 = new TargetModel(0.5, 0.25);
+
+  Pose3d targetPose1 = new Pose3d(0, 0, 0, new Rotation3d(0, 0, 0));
+  Pose3d targetPose2 = new Pose3d(0, 0, 0, new Rotation3d(0, 0, 0));
+  Pose3d targetPose3 = new Pose3d(0, 0, 0, new Rotation3d(0, 0, 0));
+  Pose3d targetPose4 = new Pose3d(0, 0, 0, new Rotation3d(0, 0, 0));
+  Pose3d targetPose5 = new Pose3d(0, 0, 0, new Rotation3d(0, 0, 0));
+
+  VisionTargetSim visionTarget1 = new VisionTargetSim(targetPose1, targetModel1);
+  VisionTargetSim visionTarget2 = new VisionTargetSim(targetPose2, targetModel2);
+  VisionTargetSim visionTarget3 = new VisionTargetSim(targetPose3, targetModel3);
+  VisionTargetSim visionTarget4 = new VisionTargetSim(targetPose4, targetModel4);
+  VisionTargetSim visionTarget5 = new VisionTargetSim(targetPose5, targetModel5);
 
   public VisionIOSim() {
     photonEstimatorLeftCam =
@@ -73,6 +95,33 @@ public class VisionIOSim implements VisionIO {
     visionSimLeftCam.addCamera(cameraSimLeftCam, Constants.robotToLeftCamera);
     visionSimRightCam.addCamera(cameraSimRightCam, Constants.robotToRightCamera);
 
+    cameraSimLeftCam.enableDrawWireframe(true);
+    cameraSimRightCam.enableDrawWireframe(true);
+
+    visionSimLeftCam.addVisionTargets(visionTarget1);
+    visionSimRightCam.addVisionTargets(visionTarget1);
+
+    visionSimLeftCam.addVisionTargets(visionTarget2);
+    visionSimRightCam.addVisionTargets(visionTarget2);
+
+    visionSimLeftCam.addVisionTargets(visionTarget3);
+    visionSimRightCam.addVisionTargets(visionTarget3);
+
+    visionSimLeftCam.addVisionTargets(visionTarget4);
+    visionSimRightCam.addVisionTargets(visionTarget4);
+
+    visionSimLeftCam.addVisionTargets(visionTarget5);
+    visionSimRightCam.addVisionTargets(visionTarget5);
+
+    // Enable the raw and processed streams. These are enabled by default.
+    cameraSimLeftCam.enableRawStream(true);
+    cameraSimLeftCam.enableProcessedStream(true);
+
+    cameraSimRightCam.enableRawStream(true);
+    cameraSimRightCam.enableProcessedStream(true);
+
+    // Enable drawing a wireframe visualization of the field to the camera streams.
+    // This is extremely resource-intensive and is disabled by default.
     cameraSimLeftCam.enableDrawWireframe(true);
     cameraSimRightCam.enableDrawWireframe(true);
   }
@@ -130,8 +179,8 @@ public class VisionIOSim implements VisionIO {
   }
 
   // ----- Simulation
-
-  public void simulationPeriodic(Pose2d robotSimPose) {
+  @Override
+  public void visionSimPeriodic(Pose2d robotSimPose) {
     visionSimLeftCam.update(robotSimPose);
     visionSimRightCam.update(robotSimPose);
   }

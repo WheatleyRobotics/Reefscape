@@ -27,6 +27,10 @@ public class Vision extends SubsystemBase {
 
   @Override
   public void periodic() {
+    io.forEach(
+        (cam) -> {
+          cam.visionSimPeriodic(RobotObserver.robotPose);
+        });
     RobotObserver.visionPose = getCombinedPose();
   }
 

@@ -21,7 +21,6 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.pathfinding.Pathfinding;
-import com.pathplanner.lib.util.DriveFeedforward;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -110,7 +109,7 @@ public class Drive extends SubsystemBase {
         this::getPose, // Robot pose supplier
         this::setPose, // Method to reset odometry (will be called if your auto has a starting pose)
         this::getSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-             (speeds, feedforwards) -> runVelocity(speeds), // Corrected lambda expression
+        (speeds, feedforwards) -> runVelocity(speeds), // Corrected lambda expression
         new PPHolonomicDriveController(
             new PIDConstants(0.0, 0.0, 0.0), // Translation PID constants
             new PIDConstants(0.0, 0.0, 0.0) // Rotation PID constants
@@ -228,7 +227,6 @@ public class Drive extends SubsystemBase {
    *
    * @param speeds Speeds in meters/sec
    */
-
   public void runVelocity(ChassisSpeeds speeds) {
     Logger.recordOutput(
         "RunVelocity/StackTrace", Arrays.toString(Thread.currentThread().getStackTrace()));

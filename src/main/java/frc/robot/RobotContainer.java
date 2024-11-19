@@ -92,15 +92,6 @@ public class RobotContainer {
 
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
-    autoChooser.addOption(
-        "Drive Forward",
-        new FSDCommand(
-            drive,
-            new Pose2d(5, 5, new Rotation2d()),
-            new Pose2d(10, 10, new Rotation2d()),
-            null,
-            null));
-
     // Set up SysId routines
     autoChooser.addOption(
         "Drive SysId (Quasistatic Forward)",
@@ -139,12 +130,6 @@ public class RobotContainer {
                         drive.setPose(
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
-                .ignoringDisable(true));
-
-    controller
-        .x()
-        .onTrue(
-            Commands.runOnce(() -> System.out.println(drive.getPose().toString()), drive)
                 .ignoringDisable(true));
   }
 

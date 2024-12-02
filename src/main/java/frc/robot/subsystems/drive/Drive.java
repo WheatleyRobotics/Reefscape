@@ -99,7 +99,7 @@ public class Drive extends SubsystemBase {
     AutoBuilder.configure(
         this::getPose, // Robot pose supplier
         this::setPose, // Method to reset odometry (will be called if your auto has a starting pose)
-        this::getSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+        () -> kinematics.toChassisSpeeds(getModuleStates()), // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
         (speeds, feedforwards) -> runVelocity(speeds), // Corrected lambda expression
         new PPHolonomicDriveController(
             new PIDConstants(0.0, 0.0, 0.0), // Translation PID constants
@@ -211,9 +211,6 @@ public class Drive extends SubsystemBase {
    * @param speeds Speeds in meters/sec
    */
   public void runVelocity(ChassisSpeeds speeds) {
-    Logger.recordOutput(
-        "RunVelocity/StackTrace", Arrays.toString(Thread.currentThread().getStackTrace()));
-    Logger.recordOutput("RunVelocity/Speeds", speeds);
     // Calculate module setpoints
     ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
@@ -276,11 +273,6 @@ public class Drive extends SubsystemBase {
       states[i] = modules[i].getPosition();
     }
     return states;
-  }
-
-  @AutoLogOutput(key = "Drive/MeasuredSpeeds")
-  private ChassisSpeeds getSpeeds() {
-    return kinematics.toChassisSpeeds(getModuleStates());
   }
 
   /** Returns the current odometry pose. */

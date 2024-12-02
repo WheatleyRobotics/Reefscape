@@ -13,6 +13,11 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.config.ModuleConfig;
+import com.pathplanner.lib.config.RobotConfig;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean constants. This
  * class should not be used for any other purpose. All constants should be declared globally (i.e. public static). Do
@@ -34,4 +39,17 @@ public final class Constants {
         /** Replaying from a log file. */
         REPLAY
     }
+
+    public static RobotConfig robotConfig = new RobotConfig(
+            9,
+            1.84,
+            new ModuleConfig(
+                    0.0508,
+                    Units.feetToMeters(17.6),
+                    1.1,
+                    DCMotor.getNeoVortex(1).withReduction(6.12),
+                    55,
+                    1),
+            0.64,
+            0.64);
 }

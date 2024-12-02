@@ -14,9 +14,6 @@
 package frc.robot.subsystems.drive;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import frc.lib.Fault;
-import java.util.ArrayList;
-import java.util.List;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface ModuleIO {
@@ -46,15 +43,4 @@ public interface ModuleIO {
 
     /** Run the turn motor at the specified voltage. */
     public default void setTurnVoltage(double volts) {}
-
-    /** Enable or disable brake mode on the drive motor. */
-    public default void setDriveBrakeMode(boolean enable) {}
-
-    /** Enable or disable brake mode on the turn motor. */
-    public default void setTurnBrakeMode(boolean enable) {}
-
-    public default List<Fault> selfCheck() {
-        return new ArrayList<>(0);
-    }
-    ;
 }

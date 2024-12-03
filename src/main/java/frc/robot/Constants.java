@@ -27,7 +27,7 @@ import edu.wpi.first.math.util.Units;
  * reduce verbosity.
  */
 public final class Constants {
-    public static final Mode currentMode = Mode.REAL;
+    public static final Mode currentMode = Mode.SIM;
 
     public enum Mode {
         /** Running on a real robot. */

@@ -35,27 +35,36 @@ public class DriveConstants {
       };
 
   // Zeroed rotation values for each module, see setup instructions
-  public static final Rotation2d frontLeftZeroRotation = Rotation2d.fromRotations(0.290527);
-  public static final Rotation2d frontRightZeroRotation = Rotation2d.fromRotations(0.095215);
-  public static final Rotation2d backLeftZeroRotation = Rotation2d.fromRotations(-0.360352);
-  public static final Rotation2d backRightZeroRotation = Rotation2d.fromRotations(-0.5 + 0.41254);
+  public static final Rotation2d frontLeftZeroRotation =
+      Rotation2d.fromRotations(0.290527); // 0.290527
+  public static final Rotation2d frontRightZeroRotation =
+      Rotation2d.fromRotations(0.095215); // 0.095215
+  public static final Rotation2d backLeftZeroRotation =
+      Rotation2d.fromRotations(0.360352 + 0.25); // 0.360352
+  public static final Rotation2d backRightZeroRotation =
+      Rotation2d.fromRotations(-0.5 + 0.41254); // -0.5 + 0.41254
 
   // Device CAN IDs
   public static final int pigeonCanId = 0;
 
+  // Front right 2
+  // Front left 1
+  // Back left 3
+  // Back right 4
+
   public static final int frontLeftDriveCanId = 41;
-  public static final int backLeftDriveCanId = 42;
-  public static final int frontRightDriveCanId = 43;
+  public static final int frontRightDriveCanId = 42;
+  public static final int backLeftDriveCanId = 43;
   public static final int backRightDriveCanId = 44;
 
   public static final int frontLeftTurnCanId = 51;
-  public static final int backLeftTurnCanId = 52;
-  public static final int frontRightTurnCanId = 53;
+  public static final int frontRightTurnCanId = 52;
+  public static final int backLeftTurnCanId = 53;
   public static final int backRightTurnCanId = 54;
 
   public static final int frontLeftTurnCancoderId = 31;
-  public static final int backLeftTurnCancoderId = 32;
-  public static final int frontRightTurnCancoderId = 33;
+  public static final int frontRightTurnCancoderId = 32;
+  public static final int backLeftTurnCancoderId = 33;
   public static final int backRightTurnCancoderId = 34;
 
   // Drive motor configuration
@@ -88,11 +97,13 @@ public class DriveConstants {
 
   // Turn encoder configuration
   public static final boolean turnEncoderInverted = true;
-  public static final double turnEncoderPositionFactor = 2 * Math.PI; // Rotations -> Radians
-  public static final double turnEncoderVelocityFactor = (2 * Math.PI) / 60.0; // RPM -> Rad/Sec
+  public static final double turnEncoderPositionFactor =
+      2 * Math.PI / turnMotorReduction; // Rotor Rotations -> Wheel Radians
+  public static final double turnEncoderVelocityFactor =
+      (2 * Math.PI) / 60.0 / turnMotorReduction; // Rotor RPM -> Wheel Rad/Sec
 
   // Turn PID configuration
-  public static final double turnKp = 2.0;
+  public static final double turnKp = 0.3;
   public static final double turnKd = 0.0;
   public static final double turnSimP = 8.0;
   public static final double turnSimD = 0.0;

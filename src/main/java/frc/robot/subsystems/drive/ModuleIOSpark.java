@@ -16,6 +16,7 @@ package frc.robot.subsystems.drive;
 import static frc.robot.subsystems.drive.DriveConstants.*;
 import static frc.robot.util.SparkUtil.*;
 
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase;
@@ -34,6 +35,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import java.util.Queue;
 import java.util.function.DoubleSupplier;
 
@@ -99,8 +101,8 @@ public class ModuleIOSpark implements ModuleIO {
         new CANcoder(
             switch (module) {
               case 0 -> frontLeftTurnCancoderId;
-              case 1 -> backLeftTurnCancoderId;
-              case 2 -> frontRightTurnCancoderId;
+              case 1 -> frontRightTurnCancoderId;
+              case 2 -> backLeftTurnCancoderId;
               case 3 -> backRightTurnCancoderId;
               default -> 0;
             });
@@ -147,16 +149,15 @@ public class ModuleIOSpark implements ModuleIO {
     // Configure turn motor
     var turnConfig = new SparkMaxConfig();
     turnConfig
-        .inverted(turnInverted)
+        .inverted(true)
         .idleMode(IdleMode.kBrake)
         .smartCurrentLimit(turnMotorCurrentLimit)
         .voltageCompensation(12.0);
     turnConfig
-        .absoluteEncoder
-        .inverted(turnEncoderInverted)
+        .encoder
         .positionConversionFactor(turnEncoderPositionFactor)
         .velocityConversionFactor(turnEncoderVelocityFactor)
-        .averageDepth(2);
+        .uvwAverageDepth(2);
     turnConfig
         .closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
@@ -165,10 +166,10 @@ public class ModuleIOSpark implements ModuleIO {
         .pidf(turnKp, 0.0, turnKd, 0.0);
     turnConfig
         .signals
-        .absoluteEncoderPositionAlwaysOn(true)
-        .absoluteEncoderPositionPeriodMs((int) (1000.0 / odometryFrequency))
-        .absoluteEncoderVelocityAlwaysOn(true)
-        .absoluteEncoderVelocityPeriodMs(20)
+        .primaryEncoderPositionAlwaysOn(true)
+        .primaryEncoderPositionPeriodMs((int) (1000.0 / odometryFrequency))
+        .primaryEncoderVelocityAlwaysOn(true)
+        .primaryEncoderVelocityPeriodMs(20)
         .appliedOutputPeriodMs(20)
         .busVoltagePeriodMs(20)
         .outputCurrentPeriodMs(20);
@@ -180,16 +181,14 @@ public class ModuleIOSpark implements ModuleIO {
             turnSpark.configure(
                 turnConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
 
+    cancoder.getConfigurator().apply(new CANcoderConfiguration());
     // **Initialize turn encoder from CANcoder**
-    double absoluteDegrees =
-        cancoder.getAbsolutePosition().getValueAsDouble(); // Returns degrees from 0 to 360
-    double absoluteRadians = Math.toRadians(absoluteDegrees);
-    // Adjust for zero rotation offset and wrap into [-pi, pi]
-    double adjustedRadians =
-        MathUtil.inputModulus(absoluteRadians - zeroRotation.getRadians(), -Math.PI, Math.PI);
-    // Convert from radians to encoder units
-    double initialTurnPosition = adjustedRadians / turnEncoderPositionFactor;
-    turnEncoder.setPosition(initialTurnPosition);
+    tryUntilOk(
+        turnSpark,
+        5,
+        () ->
+            turnEncoder.setPosition(
+                Units.rotationsToRadians(cancoder.getAbsolutePosition().getValueAsDouble())));
 
     // Create odometry queues
     timestampQueue = SparkOdometryThread.getInstance().makeTimestampQueue();
@@ -217,7 +216,7 @@ public class ModuleIOSpark implements ModuleIO {
     ifOk(
         turnSpark,
         turnEncoder::getPosition,
-        (value) -> inputs.turnPosition = new Rotation2d(value).minus(zeroRotation));
+        (value) -> inputs.turnPosition = new Rotation2d(value).minus(zeroRotation)); // here
     ifOk(turnSpark, turnEncoder::getVelocity, (value) -> inputs.turnVelocityRadPerSec = value);
     ifOk(
         turnSpark,
@@ -227,15 +226,9 @@ public class ModuleIOSpark implements ModuleIO {
     inputs.turnConnected = turnConnectedDebounce.calculate(!sparkStickyFault);
 
     // Update CANcoder inputs
-    try {
-      double absoluteDegrees = cancoder.getAbsolutePosition().getValueAsDouble();
-      double absoluteRadians = Math.toRadians(absoluteDegrees);
-      inputs.turnAbsolutePosition = new Rotation2d(absoluteRadians);
-      inputs.cancoderConnected = true;
-    } catch (Exception e) {
-      // If there's an error reading the CANcoder, mark it as disconnected
-      inputs.cancoderConnected = false;
-    }
+    inputs.cancoderConnected = cancoder.isConnected();
+    inputs.turnAbsolutePosition =
+        Rotation2d.fromRadians(cancoder.getAbsolutePosition().getValueAsDouble());
 
     // Update odometry inputs
     inputs.odometryTimestamps =

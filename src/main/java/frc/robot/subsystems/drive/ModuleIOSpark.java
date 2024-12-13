@@ -36,7 +36,6 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
-
 import java.util.Queue;
 import java.util.function.DoubleSupplier;
 
@@ -184,7 +183,12 @@ public class ModuleIOSpark implements ModuleIO {
 
     cancoder.getConfigurator().apply(new CANcoderConfiguration());
     // **Initialize turn encoder from CANcoder**
-      tryUntilOk(turnSpark, 5, () -> turnEncoder.setPosition(Units.rotationsToRadians(cancoder.getAbsolutePosition().getValueAsDouble())));
+    tryUntilOk(
+        turnSpark,
+        5,
+        () ->
+            turnEncoder.setPosition(
+                Units.rotationsToRadians(cancoder.getAbsolutePosition().getValueAsDouble())));
 
     // Create odometry queues
     timestampQueue = SparkOdometryThread.getInstance().makeTimestampQueue();
@@ -223,7 +227,8 @@ public class ModuleIOSpark implements ModuleIO {
 
     // Update CANcoder inputs
     inputs.cancoderConnected = cancoder.isConnected();
-    inputs.turnAbsolutePosition = Rotation2d.fromRadians(cancoder.getAbsolutePosition().getValueAsDouble());
+    inputs.turnAbsolutePosition =
+        Rotation2d.fromRadians(cancoder.getAbsolutePosition().getValueAsDouble());
 
     // Update odometry inputs
     inputs.odometryTimestamps =

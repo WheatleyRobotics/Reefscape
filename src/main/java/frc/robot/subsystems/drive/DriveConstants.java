@@ -35,27 +35,32 @@ public class DriveConstants {
       };
 
   // Zeroed rotation values for each module, see setup instructions
-  public static final Rotation2d frontLeftZeroRotation = Rotation2d.fromRotations(0.292513);
-  public static final Rotation2d frontRightZeroRotation = Rotation2d.fromRotations(0.0947);
-  public static final Rotation2d backLeftZeroRotation = Rotation2d.fromRotations(-0.3627);
-  public static final Rotation2d backRightZeroRotation = Rotation2d.fromRotations(-0.258);
+  public static final Rotation2d frontLeftZeroRotation = Rotation2d.fromRadians(0.291); // 1.527
+  public static final Rotation2d frontRightZeroRotation = Rotation2d.fromRadians(-0.365); // 1.238
+  public static final Rotation2d backLeftZeroRotation = Rotation2d.fromRadians(0.094); // 0.138916
+  public static final Rotation2d backRightZeroRotation = Rotation2d.fromRadians(-0.260); // 0.238770
 
   // Device CAN IDs
   public static final int pigeonCanId = 0;
 
+  // Front right 2
+  // Front left 1
+  // Back left 3
+  // Back right 4
+
   public static final int frontLeftDriveCanId = 41;
-  public static final int backLeftDriveCanId = 42;
-  public static final int frontRightDriveCanId = 43;
+  public static final int backLeftDriveCanId = 43;
+  public static final int frontRightDriveCanId = 42;
   public static final int backRightDriveCanId = 44;
 
   public static final int frontLeftTurnCanId = 51;
-  public static final int backLeftTurnCanId = 52;
-  public static final int frontRightTurnCanId = 53;
+  public static final int backLeftTurnCanId = 53;
+  public static final int frontRightTurnCanId = 52;
   public static final int backRightTurnCanId = 54;
 
   public static final int frontLeftTurnCancoderId = 31;
-  public static final int backLeftTurnCancoderId = 32;
-  public static final int frontRightTurnCancoderId = 33;
+  public static final int backLeftTurnCancoderId = 33;
+  public static final int frontRightTurnCancoderId = 32;
   public static final int backRightTurnCancoderId = 34;
 
   // Drive motor configuration

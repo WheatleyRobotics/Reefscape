@@ -38,11 +38,16 @@ public class DriveConstants {
   public static final Rotation2d frontLeftZeroRotation =
       Rotation2d.fromRotations(0.290527); // 0.290527
   public static final Rotation2d frontRightZeroRotation =
-      Rotation2d.fromRotations(0.095215); // 0.095215
+      Rotation2d.fromRotations(0.095215)
+          .plus(Rotation2d.fromRadians(0.17))
+          .minus(Rotation2d.fromRadians(0.151)); // 0.095215
   public static final Rotation2d backLeftZeroRotation =
-      Rotation2d.fromRotations(0.360352 + 0.25); // 0.360352
+      Rotation2d.fromRotations(0.360352 + 0.25).plus(Rotation2d.fromRadians(0.16)); // 0.360352
   public static final Rotation2d backRightZeroRotation =
-      Rotation2d.fromRotations(-0.5 + 0.41254); // -0.5 + 0.41254
+      Rotation2d.fromRotations(-0.5 + 0.41254)
+          .minus(Rotation2d.fromRadians(0.14))
+          .plus(Rotation2d.fromRadians(0.076))
+          .plus(Rotation2d.fromRadians(0.05)); // -0.5 + 0.41254
 
   // Device CAN IDs
   public static final int pigeonCanId = 0;
@@ -82,8 +87,8 @@ public class DriveConstants {
   // Drive PID configuration
   public static final double driveKp = 0.0;
   public static final double driveKd = 0.0;
-  public static final double driveKs = 0.0;
-  public static final double driveKv = 0.1;
+  public static final double driveKs = 0.1;
+  public static final double driveKv = 0.11;
   public static final double driveSimP = 0.05;
   public static final double driveSimD = 0.0;
   public static final double driveSimKs = 0.0;
@@ -103,7 +108,7 @@ public class DriveConstants {
       (2 * Math.PI) / 60.0 / turnMotorReduction; // Rotor RPM -> Wheel Rad/Sec
 
   // Turn PID configuration
-  public static final double turnKp = 0.3;
+  public static final double turnKp = 0.4;
   public static final double turnKd = 0.0;
   public static final double turnSimP = 8.0;
   public static final double turnSimD = 0.0;

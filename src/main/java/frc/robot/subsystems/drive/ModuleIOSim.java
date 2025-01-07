@@ -21,15 +21,21 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import frc.robot.util.LoggedTunableNumber;
 
 /** Physics sim implementation of module IO. */
 public class ModuleIOSim implements ModuleIO {
   private final DCMotorSim driveSim;
   private final DCMotorSim turnSim;
 
+  private static final LoggedTunableNumber drivekP =
+      new LoggedTunableNumber("Drive/Module/DrivekSimP", driveSimP);
+  private static final LoggedTunableNumber drivekD =
+      new LoggedTunableNumber("Drive/Module/DrivekSimD", driveSimD);
+
   private boolean driveClosedLoop = false;
   private boolean turnClosedLoop = false;
-  private PIDController driveController = new PIDController(driveSimP, 0, driveSimD);
+  private PIDController driveController = new PIDController(drivekP.get(), 0, drivekD.get());
   private PIDController turnController = new PIDController(turnSimP, 0, turnSimD);
   private double driveFFVolts = 0.0;
   private double driveAppliedVolts = 0.0;
@@ -89,6 +95,12 @@ public class ModuleIOSim implements ModuleIO {
     inputs.odometryTimestamps = new double[] {Timer.getFPGATimestamp()};
     inputs.odometryDrivePositionsRad = new double[] {inputs.drivePositionRad};
     inputs.odometryTurnPositions = new Rotation2d[] {inputs.turnPosition};
+
+    LoggedTunableNumber.ifChanged(
+        hashCode(),
+        () -> driveController.setPID(drivekP.get(), 0, drivekD.get()),
+        drivekP,
+        drivekD);
   }
 
   @Override

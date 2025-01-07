@@ -36,6 +36,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import frc.robot.util.LoggedTunableNumber;
 import java.util.Queue;
 import java.util.function.DoubleSupplier;
 
@@ -45,6 +46,15 @@ import java.util.function.DoubleSupplier;
  */
 public class ModuleIOSpark implements ModuleIO {
   private final Rotation2d zeroRotation;
+
+  private static final LoggedTunableNumber tuningDriveKp =
+      new LoggedTunableNumber("Drive/Module/DrivekP", driveKp);
+  private static final LoggedTunableNumber tuningDriveKd =
+      new LoggedTunableNumber("Drive/Module/DrivekD", driveKd);
+  private static final LoggedTunableNumber tuningTurnKp =
+      new LoggedTunableNumber("Drive/Module/TurnkP", turnKp);
+  private static final LoggedTunableNumber tuningTurnKd =
+      new LoggedTunableNumber("Drive/Module/TurnkD", turnKd);
 
   // Hardware objects
   private final SparkBase driveSpark;
@@ -127,7 +137,7 @@ public class ModuleIOSpark implements ModuleIO {
     driveConfig
         .closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        .pidf(driveKp, 0.0, driveKd, 0.0);
+        .pidf(tuningDriveKp.get(), 0.0, tuningDriveKd.get(), 0.0);
     driveConfig
         .signals
         .primaryEncoderPositionAlwaysOn(true)
@@ -163,7 +173,7 @@ public class ModuleIOSpark implements ModuleIO {
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         .positionWrappingEnabled(true)
         .positionWrappingInputRange(turnPIDMinInput, turnPIDMaxInput)
-        .pidf(turnKp, 0.0, turnKd, 0.0);
+        .pidf(tuningTurnKp.get(), 0.0, tuningTurnKd.get(), 0.0);
     turnConfig
         .signals
         .primaryEncoderPositionAlwaysOn(true)
@@ -242,6 +252,17 @@ public class ModuleIOSpark implements ModuleIO {
     timestampQueue.clear();
     drivePositionQueue.clear();
     turnPositionQueue.clear();
+
+    LoggedTunableNumber.ifChanged(
+        hashCode(),
+        () -> new SparkFlexConfig().closedLoop.pid(tuningDriveKp.get(), 0, tuningDriveKd.get()),
+        tuningDriveKp,
+        tuningDriveKd);
+    LoggedTunableNumber.ifChanged(
+        hashCode(),
+        () -> new SparkFlexConfig().closedLoop.pid(tuningTurnKp.get(), 0, tuningTurnKd.get()),
+        tuningTurnKp,
+        tuningTurnKd);
   }
 
   @Override

@@ -1,4 +1,5 @@
 {
+  "java.import.gradle.annotationProcessing.enabled": false,
   "java.configuration.updateBuildConfiguration": "automatic",
   "java.server.launchMode": "Standard",
   "files.exclude": {
@@ -28,5 +29,6 @@
     },
     null
   ],
-  "java.test.defaultConfig": "WPIlibUnitTests"
+  "java.test.defaultConfig": "WPIlibUnitTests",
+  "java.debug.settings.onBuildFailureProceed": true
 }

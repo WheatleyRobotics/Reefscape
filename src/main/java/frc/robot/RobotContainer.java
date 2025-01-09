@@ -62,14 +62,13 @@ public class RobotContainer {
                 new ModuleIOSpark(1),
                 new ModuleIOSpark(2),
                 new ModuleIOSpark(3));
-        /*
-        vision =
+
+        /*vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOLimelight(camera0Name, drive::getRotation),
-                new VisionIOLimelight(camera1Name, drive::getRotation));
-
-         */
+                new VisionIOPhotonVision(camera0Name, drive::getRotation),
+                new VisionIOPhotonVision(camera1Name, drive::getRotation));
+        */
         break;
 
       case SIM:
@@ -88,9 +87,8 @@ public class RobotContainer {
                 new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
                 new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
 
+            break;
          */
-        break;
-
       default:
         // Replayed robot, disable IO implementations
         drive =

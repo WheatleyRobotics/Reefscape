@@ -22,7 +22,7 @@ import edu.wpi.first.math.util.Units;
 
 public class DriveConstants {
   public static final double maxSpeedMetersPerSec = Units.feetToMeters(17.6);
-  public static final double odometryFrequency = 150; // Hz
+  public static final double odometryFrequency = 100; // Hz
   public static final double trackWidth = Units.inchesToMeters(25);
   public static final double wheelBase = Units.inchesToMeters(25);
   public static final double driveBaseRadius = Math.hypot(trackWidth / 2.0, wheelBase / 2.0);
@@ -117,7 +117,7 @@ public class DriveConstants {
   public static final double turnPIDMaxInput = 2 * Math.PI; // Radians
 
   // PathPlanner configuration
-  public static final double robotMassKg = 74.088;
+  public static final double robotMassKg = 22.5;
   public static final double robotMOI = 6.883;
   public static final double wheelCOF = 1.2;
   public static final RobotConfig ppConfig =

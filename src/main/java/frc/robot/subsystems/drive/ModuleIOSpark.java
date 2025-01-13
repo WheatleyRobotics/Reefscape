@@ -19,15 +19,13 @@ import static frc.robot.util.SparkUtil.*;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.SparkBase;
+import com.revrobotics.spark.*;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
-import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.ClosedLoopConfig.ClosedLoopSlot;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
@@ -37,7 +35,6 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import java.util.Queue;
-import java.util.function.DoubleSupplier;
 
 /**
  * Module IO implementation for Spark Flex drive motor controller, Spark Max turn motor controller,
@@ -138,14 +135,17 @@ public class ModuleIOSpark implements ModuleIO {
         .busVoltagePeriodMs(20)
         .outputCurrentPeriodMs(20);
 
-    tryUntilOk(
+    /*tryUntilOk(
         driveSpark,
         5,
         () ->
             driveSpark.configure(
                 driveConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
     tryUntilOk(driveSpark, 5, () -> driveEncoder.setPosition(0.0));
-
+    */
+    driveSpark.configure(
+        driveConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    driveEncoder.setPosition(0.0);
     // Configure turn motor
     var turnConfig = new SparkMaxConfig();
     turnConfig
@@ -173,23 +173,26 @@ public class ModuleIOSpark implements ModuleIO {
         .appliedOutputPeriodMs(20)
         .busVoltagePeriodMs(20)
         .outputCurrentPeriodMs(20);
-
+    /*
     tryUntilOk(
         turnSpark,
         5,
         () ->
             turnSpark.configure(
-                turnConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
-
+                turnConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));*/
+    turnSpark.configure(turnConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     cancoder.getConfigurator().apply(new CANcoderConfiguration());
     // **Initialize turn encoder from CANcoder**
+    /*
     tryUntilOk(
         turnSpark,
         5,
         () ->
             turnEncoder.setPosition(
                 Units.rotationsToRadians(cancoder.getAbsolutePosition().getValueAsDouble())));
-
+    */
+    turnEncoder.setPosition(
+        Units.rotationsToRadians(cancoder.getAbsolutePosition().getValueAsDouble()));
     // Create odometry queues
     timestampQueue = SparkOdometryThread.getInstance().makeTimestampQueue();
     drivePositionQueue =
@@ -202,6 +205,7 @@ public class ModuleIOSpark implements ModuleIO {
   public void updateInputs(ModuleIOInputs inputs) {
     // Update drive inputs
     sparkStickyFault = false;
+    /*
     ifOk(driveSpark, driveEncoder::getPosition, (value) -> inputs.drivePositionRad = value);
     ifOk(driveSpark, driveEncoder::getVelocity, (value) -> inputs.driveVelocityRadPerSec = value);
     ifOk(
@@ -223,7 +227,17 @@ public class ModuleIOSpark implements ModuleIO {
         new DoubleSupplier[] {turnSpark::getAppliedOutput, turnSpark::getBusVoltage},
         (values) -> inputs.turnAppliedVolts = values[0] * values[1]);
     ifOk(turnSpark, turnSpark::getOutputCurrent, (value) -> inputs.turnCurrentAmps = value);
-    inputs.turnConnected = turnConnectedDebounce.calculate(!sparkStickyFault);
+    */
+    inputs.drivePositionRad = driveEncoder.getPosition();
+    inputs.driveVelocityRadPerSec = driveEncoder.getVelocity();
+    inputs.driveAppliedVolts = driveSpark.getBusVoltage();
+    inputs.driveCurrentAmps = driveSpark.getOutputCurrent();
+    // inputs.driveConnected = driveConnectedDebounce.calculate(!sparkStickyFault);
+    inputs.turnPosition = new Rotation2d(turnEncoder.getPosition()).minus(zeroRotation);
+    inputs.turnVelocityRadPerSec = turnEncoder.getVelocity();
+    inputs.turnAppliedVolts = turnSpark.getBusVoltage();
+    inputs.turnCurrentAmps = turnSpark.getOutputCurrent();
+    // inputs.turnConnected = turnConnectedDebounce.calculate(!sparkStickyFault);
 
     // Update CANcoder inputs
     inputs.cancoderConnected = cancoder.isConnected();
@@ -258,7 +272,11 @@ public class ModuleIOSpark implements ModuleIO {
   public void setDriveVelocity(double velocityRadPerSec) {
     double ffVolts = driveKs * Math.signum(velocityRadPerSec) + driveKv * velocityRadPerSec;
     driveController.setReference(
-        velocityRadPerSec, ControlType.kVelocity, 0, ffVolts, ArbFFUnits.kVoltage);
+        velocityRadPerSec,
+        ControlType.kVelocity,
+        ClosedLoopSlot.kSlot0.value,
+        ffVolts,
+        ArbFFUnits.kVoltage);
   }
 
   @Override

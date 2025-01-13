@@ -19,6 +19,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
+import frc.robot.Constants;
 
 public class DriveConstants {
   public static final double maxSpeedMetersPerSec = Units.feetToMeters(17.6);
@@ -36,18 +37,36 @@ public class DriveConstants {
 
   // Zeroed rotation values for each module, see setup instructions
   public static final Rotation2d frontLeftZeroRotation =
-      Rotation2d.fromRotations(0.290527); // 0.290527
+      switch (Constants.getRobotType()) {
+        case SIMBOT -> new Rotation2d();
+        case DEVBOT -> Rotation2d.fromRotations(0.132);
+        case COMPBOT -> Rotation2d.fromRotations(0.290527); // 0.290527
+      };
   public static final Rotation2d frontRightZeroRotation =
-      Rotation2d.fromRotations(0.095215)
-          .plus(Rotation2d.fromRadians(0.17))
-          .minus(Rotation2d.fromRadians(0.151)); // 0.095215
+      switch (Constants.getRobotType()) {
+        case SIMBOT -> new Rotation2d();
+        case DEVBOT -> Rotation2d.fromRotations(-0.453);
+        case COMPBOT -> Rotation2d.fromRotations(0.095215)
+            .plus(Rotation2d.fromRadians(0.17))
+            .minus(Rotation2d.fromRadians(0.151)); // 0.095215
+      };
   public static final Rotation2d backLeftZeroRotation =
-      Rotation2d.fromRotations(0.360352 + 0.25).plus(Rotation2d.fromRadians(0.16)); // 0.360352
+      switch (Constants.getRobotType()) {
+        case SIMBOT -> new Rotation2d();
+        case DEVBOT -> Rotation2d.fromRotations(-0.305);
+        case COMPBOT -> Rotation2d.fromRotations(0.360352 + 0.25)
+            .plus(Rotation2d.fromRadians(0.16)); // 0.360352
+      };
+
   public static final Rotation2d backRightZeroRotation =
-      Rotation2d.fromRotations(-0.5 + 0.41254)
-          .minus(Rotation2d.fromRadians(0.14))
-          .plus(Rotation2d.fromRadians(0.076))
-          .plus(Rotation2d.fromRadians(0.05)); // -0.5 + 0.41254
+      switch (Constants.getRobotType()) {
+        case SIMBOT -> new Rotation2d();
+        case DEVBOT -> Rotation2d.fromRotations(-0.112);
+        case COMPBOT -> Rotation2d.fromRotations(-0.5 + 0.41254)
+            .minus(Rotation2d.fromRadians(0.14))
+            .plus(Rotation2d.fromRadians(0.076))
+            .plus(Rotation2d.fromRadians(0.05)); // -0.5 + 0.41254
+      };
 
   // Device CAN IDs
   public static final int pigeonCanId = 0;

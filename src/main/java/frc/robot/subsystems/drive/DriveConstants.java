@@ -22,7 +22,7 @@ import edu.wpi.first.math.util.Units;
 
 public class DriveConstants {
   public static final double maxSpeedMetersPerSec = Units.feetToMeters(17.6);
-  public static final double odometryFrequency = 100.0; // Hz
+  public static final double odometryFrequency = 100; // Hz
   public static final double trackWidth = Units.inchesToMeters(25);
   public static final double wheelBase = Units.inchesToMeters(25);
   public static final double driveBaseRadius = Math.hypot(trackWidth / 2.0, wheelBase / 2.0);
@@ -73,8 +73,9 @@ public class DriveConstants {
   public static final int backRightTurnCancoderId = 34;
 
   // Drive motor configuration
-  public static final int driveMotorCurrentLimit = 50;
-  public static final double wheelRadiusMeters = 0.067;
+  public static final int driveMotorCurrentLimit = 40;
+  public static final double wheelRadiusMeters = Units.inchesToMeters(1.98);
+  ;
   public static final double driveMotorReduction = 6.75; // MK4i L2
   public static final DCMotor driveGearbox = DCMotor.getNeoVortex(1);
 
@@ -108,15 +109,15 @@ public class DriveConstants {
       (2 * Math.PI) / 60.0 / turnMotorReduction; // Rotor RPM -> Wheel Rad/Sec
 
   // Turn PID configuration
-  public static final double turnKp = 0.38;
-  public static final double turnKd = 0.0;
+  public static final double turnKp = 0.3;
+  public static final double turnKd = 0.01;
   public static final double turnSimP = 8.0;
   public static final double turnSimD = 0.0;
   public static final double turnPIDMinInput = 0; // Radians
   public static final double turnPIDMaxInput = 2 * Math.PI; // Radians
 
   // PathPlanner configuration
-  public static final double robotMassKg = 74.088;
+  public static final double robotMassKg = 22.5;
   public static final double robotMOI = 6.883;
   public static final double wheelCOF = 1.2;
   public static final RobotConfig ppConfig =

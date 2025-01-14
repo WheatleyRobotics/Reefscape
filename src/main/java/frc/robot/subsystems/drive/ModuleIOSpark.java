@@ -123,7 +123,7 @@ public class ModuleIOSpark implements ModuleIO {
     driveConfig
         .closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        .pidf(driveKp, 0.0, driveKd, 0.0);
+        .pidf(controlSettings.driveKp, 0.0, controlSettings.driveKd, 0.0);
     driveConfig
         .signals
         .primaryEncoderPositionAlwaysOn(true)
@@ -162,7 +162,7 @@ public class ModuleIOSpark implements ModuleIO {
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         .positionWrappingEnabled(true)
         .positionWrappingInputRange(turnPIDMinInput, turnPIDMaxInput)
-        .pidf(turnKp, 0.0, turnKd, 0.0);
+        .pidf(controlSettings.driveKp, 0.0, controlSettings.driveKd, 0.0);
     turnConfig
         .signals
         .primaryEncoderPositionAlwaysOn(true)
@@ -269,7 +269,9 @@ public class ModuleIOSpark implements ModuleIO {
 
   @Override
   public void setDriveVelocity(double velocityRadPerSec) {
-    double ffVolts = driveKs * Math.signum(velocityRadPerSec) + driveKv * velocityRadPerSec;
+    double ffVolts =
+        controlSettings.driveKs * Math.signum(velocityRadPerSec)
+            + controlSettings.driveKv * velocityRadPerSec;
     driveController.setReference(
         velocityRadPerSec,
         ControlType.kVelocity,

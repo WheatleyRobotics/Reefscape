@@ -23,10 +23,12 @@ import edu.wpi.first.wpilibj.RobotBase;
 public final class Constants {
   public static final Mode simMode = Mode.SIM;
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
-  private static RobotType robotType = RobotType.DEVBOT;
+  public static final RobotType robotType = RobotType.DEVBOT;
 
-  public static RobotType getRobotType() {
-    return robotType;
+  public static enum RobotType {
+    DEVBOT,
+    COMPBOT,
+    SIMBOT
   }
 
   public static enum Mode {

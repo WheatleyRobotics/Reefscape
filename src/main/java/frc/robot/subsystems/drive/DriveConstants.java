@@ -20,6 +20,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
+import frc.robot.util.swerve.ControlSettings;
 
 public class DriveConstants {
   public static final double maxSpeedMetersPerSec = Units.feetToMeters(17.6);
@@ -37,44 +38,37 @@ public class DriveConstants {
 
   // Zeroed rotation values for each module, see setup instructions
   public static final Rotation2d frontLeftZeroRotation =
-      switch (Constants.getRobotType()) {
-        case SIMBOT -> new Rotation2d();
-        case DEVBOT -> Rotation2d.fromRotations(0.132);
-        case COMPBOT -> Rotation2d.fromRotations(0.290527); // 0.290527
+      switch (Constants.robotType) {
+        case COMPBOT -> Rotation2d.fromRotations(0);
+        case SIMBOT -> Rotation2d.fromRotations(0);
+        case DEVBOT -> Rotation2d.fromRotations(0.290527);
       };
   public static final Rotation2d frontRightZeroRotation =
-      switch (Constants.getRobotType()) {
-        case SIMBOT -> new Rotation2d();
-        case DEVBOT -> Rotation2d.fromRotations(-0.453);
-        case COMPBOT -> Rotation2d.fromRotations(0.095215)
+      switch (Constants.robotType) {
+        case COMPBOT -> Rotation2d.fromRotations(0);
+        case SIMBOT -> Rotation2d.fromRotations(0);
+        case DEVBOT -> Rotation2d.fromRotations(0.095215)
             .plus(Rotation2d.fromRadians(0.17))
-            .minus(Rotation2d.fromRadians(0.151)); // 0.095215
+            .minus(Rotation2d.fromRadians(0.151));
       };
   public static final Rotation2d backLeftZeroRotation =
-      switch (Constants.getRobotType()) {
-        case SIMBOT -> new Rotation2d();
-        case DEVBOT -> Rotation2d.fromRotations(-0.305);
-        case COMPBOT -> Rotation2d.fromRotations(0.360352 + 0.25)
-            .plus(Rotation2d.fromRadians(0.16)); // 0.360352
+      switch (Constants.robotType) {
+        case COMPBOT -> Rotation2d.fromRotations(0);
+        case SIMBOT -> Rotation2d.fromRotations(0);
+        case DEVBOT -> Rotation2d.fromRotations(0.360352 + 0.25).plus(Rotation2d.fromRadians(0.16));
       };
-
   public static final Rotation2d backRightZeroRotation =
-      switch (Constants.getRobotType()) {
-        case SIMBOT -> new Rotation2d();
-        case DEVBOT -> Rotation2d.fromRotations(-0.112);
-        case COMPBOT -> Rotation2d.fromRotations(-0.5 + 0.41254)
+      switch (Constants.robotType) {
+        case COMPBOT -> Rotation2d.fromRotations(0);
+        case SIMBOT -> Rotation2d.fromRotations(0);
+        case DEVBOT -> Rotation2d.fromRotations(-0.5 + 0.41254)
             .minus(Rotation2d.fromRadians(0.14))
             .plus(Rotation2d.fromRadians(0.076))
-            .plus(Rotation2d.fromRadians(0.05)); // -0.5 + 0.41254
+            .plus(Rotation2d.fromRadians(0.05));
       };
 
   // Device CAN IDs
   public static final int pigeonCanId = 0;
-
-  // Front right 2
-  // Front left 1
-  // Back left 3
-  // Back right 4
 
   public static final int frontLeftDriveCanId = 41;
   public static final int frontRightDriveCanId = 42;
@@ -93,8 +87,12 @@ public class DriveConstants {
 
   // Drive motor configuration
   public static final int driveMotorCurrentLimit = 40;
-  public static final double wheelRadiusMeters = Units.inchesToMeters(1.98);
-  ;
+  public static final double wheelRadiusMeters =
+      switch (Constants.robotType) {
+        case COMPBOT -> Units.inchesToMeters(3.5);
+        case SIMBOT -> Units.inchesToMeters(3.5);
+        case DEVBOT -> Units.inchesToMeters(1.98);
+      };
   public static final double driveMotorReduction = 6.75; // MK4i L2
   public static final DCMotor driveGearbox = DCMotor.getNeoVortex(1);
 
@@ -105,14 +103,13 @@ public class DriveConstants {
       (2 * Math.PI) / 60.0 / driveMotorReduction; // Rotor RPM -> Wheel Rad/Sec
 
   // Drive PID configuration
-  public static final double driveKp = 0.001;
-  public static final double driveKd = 0.02;
-  public static final double driveKs = 0.1;
-  public static final double driveKv = 0.11;
-  public static final double driveSimP = 0.05;
-  public static final double driveSimD = 0.0;
-  public static final double driveSimKs = 0.0;
-  public static final double driveSimKv = 0.0789;
+
+  public static final ControlSettings controlSettings =
+      switch (Constants.robotType) {
+        case COMPBOT -> new ControlSettings(0.001, 0.02, 0.1, 0.11, 0.05, 0.01);
+        case SIMBOT -> new ControlSettings(0.05, 0.02, 0.0, 0.0789, 8.0, 0.0);
+        case DEVBOT -> new ControlSettings(0.001, 0.02, 0.1, 0.11, 0.3, 0.01);
+      };
 
   // Turn motor configuration
   public static final boolean turnInverted = false;
@@ -127,28 +124,33 @@ public class DriveConstants {
   public static final double turnEncoderVelocityFactor =
       (2 * Math.PI) / 60.0 / turnMotorReduction; // Rotor RPM -> Wheel Rad/Sec
 
-  // Turn PID configuration
-  public static final double turnKp = 0.3;
-  public static final double turnKd = 0.01;
-  public static final double turnSimP = 8.0;
-  public static final double turnSimD = 0.0;
   public static final double turnPIDMinInput = 0; // Radians
   public static final double turnPIDMaxInput = 2 * Math.PI; // Radians
 
   // PathPlanner configuration
-  public static final double robotMassKg = 22.5;
-  public static final double robotMOI = 6.883;
-  public static final double wheelCOF = 1.2;
   public static final RobotConfig ppConfig =
-      new RobotConfig(
-          robotMassKg,
-          robotMOI,
-          new ModuleConfig(
-              wheelRadiusMeters,
-              maxSpeedMetersPerSec,
-              wheelCOF,
-              driveGearbox.withReduction(driveMotorReduction),
-              driveMotorCurrentLimit,
-              1),
-          moduleTranslations);
+      switch (Constants.robotType) {
+        case COMPBOT -> new RobotConfig(
+            74.088,
+            6.883,
+            new ModuleConfig(
+                wheelRadiusMeters,
+                maxSpeedMetersPerSec,
+                1.2,
+                driveGearbox.withReduction(driveMotorReduction),
+                driveMotorCurrentLimit,
+                1),
+            moduleTranslations);
+        case DEVBOT, SIMBOT -> new RobotConfig(
+            74.088,
+            6.883,
+            new ModuleConfig(
+                wheelRadiusMeters,
+                maxSpeedMetersPerSec,
+                1.2,
+                driveGearbox.withReduction(driveMotorReduction),
+                driveMotorCurrentLimit,
+                1),
+            moduleTranslations);
+      };
 }

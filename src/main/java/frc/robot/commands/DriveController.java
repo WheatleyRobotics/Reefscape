@@ -39,8 +39,8 @@ public class DriveController extends Command {
   private final Pose2d targetPose;
   private final Timer timer = new Timer();
 
-  private final PIDController xController = new PIDController(linearkP, 0.0, linearkP);
-  private final PIDController yController = new PIDController(linearkP, 0.0, linearkP);
+  private final PIDController xController = new PIDController(linearkP, 0.0, linearkD);
+  private final PIDController yController = new PIDController(linearkP, 0.0, linearkD);
   private final PIDController thetaController = new PIDController(thetakP, 0.0, thetakD);
 
   public DriveController(Drive drive, Pose2d targetPose) {

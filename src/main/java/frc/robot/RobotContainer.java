@@ -32,6 +32,7 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOSpark;
 import frc.robot.subsystems.vision.*;
+import frc.robot.util.RobotState;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -41,6 +42,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+  RobotState robotState = RobotState.getInstance();
   // Subsystems
   private final Drive drive;
   private final Vision vision;
@@ -160,6 +162,7 @@ public class RobotContainer {
                     () -> {
                       drive.setPose(new Pose2d(drive.getPose().getTranslation(), new Rotation2d()));
                       drive.setYaw(new Rotation2d());
+                      RobotState.getInstance().resetPose(drive.getPose());
                     },
                     drive)
                 .ignoringDisable(true));

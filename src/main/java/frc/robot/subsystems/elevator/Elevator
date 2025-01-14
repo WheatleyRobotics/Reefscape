@@ -1,0 +1,49 @@
+// Copyright (c) 2024 FRC 6328
+// http://github.com/Mechanical-Advantage
+//
+// Use of this source code is governed by an MIT-style
+// license that can be found in the LICENSE file at
+// the root directory of this project.
+
+package org.littletonrobotics.frc2024.subsystems.superstructure;
+
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
+import org.littletonrobotics.frc2024.util.Alert;
+import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
+
+public  class Elevator{
+
+  
+  private final ElevatorIO io;
+  private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
+  private final Alert disconnected;
+
+  public  Elevator(ElevatorIO io){
+    this.io = io;
+    disconnected = new Alert(name + " disconnected!", Alert.AlertType.WARNING);
+  }
+  public void periodic() {
+    io.updateInputs(inputs);
+    Logger.processInputs("Elevator", inputs);
+    Logger.recordOutput("Superstructure/" + name + "/Goal", getGoal().toString());
+  }
+
+  @AutoLogOutput(key = "Superstructure/{name}/AtGoal")
+  public boolean atGoal() {
+    return atGoal;
+  }
+
+  @AutoLogOutput(key = "Superstructure/{name}/Extended")
+  public boolean extended() {
+    return getGoal().getState() == SlamElevatorState.EXTENDING && atGoal;
+  }
+
+  @AutoLogOutput(key = "Superstructure/{name}/Retracted")
+  public boolean retracted() {
+    return getGoal().getState() == SlamElevatorState.RETRACTING && atGoal;
+  }
+}

@@ -25,7 +25,6 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.ClosedLoopConfig.ClosedLoopSlot;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
@@ -274,7 +273,7 @@ public class ModuleIOSpark implements ModuleIO {
     driveController.setReference(
         velocityRadPerSec,
         ControlType.kVelocity,
-        ClosedLoopSlot.kSlot0.value,
+        ClosedLoopSlot.kSlot0,
         ffVolts,
         ArbFFUnits.kVoltage);
   }

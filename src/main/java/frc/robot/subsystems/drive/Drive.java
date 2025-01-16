@@ -54,6 +54,9 @@ import org.littletonrobotics.junction.Logger;
 
 public class Drive extends SubsystemBase {
   static final Lock odometryLock = new ReentrantLock();
+  // private final SwerveSetpointGenerator setpointGenerator; needs the max steering/rotation
+  // velocity of the modules to implement. Can be found by using Ascope and plotting
+  // private SwerveSetpoint previouSetpoint;
   private final GyroIO gyroIO;
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
   private final Module[] modules = new Module[4]; // FL, FR, BL, BR

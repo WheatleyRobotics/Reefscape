@@ -14,6 +14,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.RobotBase;
+import frc.robot.Constants.RobotType;
 
 /**
  * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
@@ -23,10 +24,19 @@ import edu.wpi.first.wpilibj.RobotBase;
 public final class Constants {
   public static final Mode simMode = Mode.SIM;
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
-  private static RobotType robotType = RobotType.DEVBOT;
+  public static final double loopPeriodSecs = 0.02;
+  private static RobotType robotType = RobotType.COMPBOT;
+  public static final boolean tuningMode = false;
 
   public static RobotType getRobotType() {
     return robotType;
+  }
+
+  public static Mode getMode() {
+    return switch (robotType) {
+      case DEVBOT, COMPBOT -> RobotBase.isReal() ? Mode.REAL : Mode.REPLAY;
+      case SIMBOT -> Mode.SIM;
+    };
   }
 
   public static enum Mode {

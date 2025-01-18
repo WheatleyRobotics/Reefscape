@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Coral to first score"
+            "pathName": "Human Player Place Left"
           }
         }
       ]
@@ -15,5 +15,5 @@
   },
   "resetOdom": true,
   "folder": null,
-  "choreoAuto": true
+  "choreoAuto": false
 }

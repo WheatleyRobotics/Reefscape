@@ -1,6 +1,9 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
+// Copyright (c) 2024 FRC 6328
+// http://github.com/Mechanical-Advantage
+//
+// Use of this source code is governed by an MIT-style
+// license that can be found in the LICENSE file at
+// the root directory of this project.
 
 package frc.robot.subsystems.superstructure.arm;
 
@@ -9,13 +12,15 @@ import org.littletonrobotics.junction.AutoLog;
 public interface ArmIO {
   @AutoLog
   class ArmIOInputs {
-    public boolean motorConnected = true;
+    public boolean armMotorConnected = true;
+
     public double positionRads = 0.0;
     public double absoluteEncoderPositionRads = 0.0;
     public double relativeEncoderPositionRads = 0.0;
     public double velocityRadsPerSec = 0.0;
     public double appliedVolts = 0.0;
     public double supplyCurrentAmps = 0.0;
+    public double torqueCurrentAmps = 0.0;
     public double tempCelcius = 0.0;
     public boolean absoluteEncoderConnected = true;
   }

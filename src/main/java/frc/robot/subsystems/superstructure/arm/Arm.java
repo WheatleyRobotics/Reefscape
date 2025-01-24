@@ -1,13 +1,4 @@
-// Copyright (c) 2024 FRC 6328
-// http://github.com/Mechanical-Advantage
-//
-// Use of this source code is governed by an MIT-style
-// license that can be found in the LICENSE file at
-// the root directory of this project.
-
 package frc.robot.subsystems.superstructure.arm;
-
-import static frc.robot.subsystems.superstructure.arm.ArmConstants.*;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
@@ -26,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+
+import static frc.robot.subsystems.superstructure.arm.ArmConstants.*;
 
 public class Arm {
   private static final LoggedTunableNumber kP = new LoggedTunableNumber("Arm/Gains/kP", gains.kP());
@@ -47,33 +40,23 @@ public class Arm {
       new LoggedTunableNumber("Arm/SmoothVelocity", profileConstraints.maxVelocity * 0.75);
   private static final LoggedTunableNumber smoothAcceleration =
       new LoggedTunableNumber("Arm/SmoothAcceleration", profileConstraints.maxAcceleration * 0.5);
-  private static final LoggedTunableNumber prepareClimbVelocity =
-      new LoggedTunableNumber("Arm/PrepareClimbVelocity", 1.5);
-  private static final LoggedTunableNumber prepareClimbAcceleration =
-      new LoggedTunableNumber("Arm/PrepareClimbAcceleration", 2.5);
   private static final LoggedTunableNumber lowerLimitDegrees =
-      new LoggedTunableNumber("Arm/LowerLimitDegrees", minAngle.getDegrees());
+          new LoggedTunableNumber("Arm/LowerLimitDegrees", minAngle.getDegrees());
   private static final LoggedTunableNumber upperLimitDegrees =
-      new LoggedTunableNumber("Arm/UpperLimitDegrees", maxAngle.getDegrees());
+          new LoggedTunableNumber("Arm/UpperLimitDegrees", maxAngle.getDegrees());
 
-  // Profile constraints
   public static final Supplier<TrapezoidProfile.Constraints> maxProfileConstraints =
       () -> new TrapezoidProfile.Constraints(maxVelocity.get(), maxAcceleration.get());
   public static final Supplier<TrapezoidProfile.Constraints> smoothProfileConstraints =
       () -> new TrapezoidProfile.Constraints(smoothVelocity.get(), smoothAcceleration.get());
-  public static final Supplier<TrapezoidProfile.Constraints> prepareClimbProfileConstraints =
-      () ->
-          new TrapezoidProfile.Constraints(
-              prepareClimbVelocity.get(), prepareClimbAcceleration.get());
 
   @RequiredArgsConstructor
   public enum Goal {
     STOW(() -> 0),
-    STATION_INTAKE(new LoggedTunableNumber("Arm/StationIntakeDegrees", 45.0)),
-    PREPARE_CLIMB(new LoggedTunableNumber("Arm/PrepareClimbDegrees", 105.0)),
-    CLIMB(new LoggedTunableNumber("Arm/ClimbDegrees", 88.0)),
-    RESET_CLIMB(new LoggedTunableNumber("Arm/ResetClimbDegrees", 30.0)),
-    CUSTOM(new LoggedTunableNumber("Arm/CustomSetpoint", 20.0));
+    L1(new LoggedTunableNumber("Arm/L1", 40.0)),
+    L2(new LoggedTunableNumber("Arm/L2", 45.0)),
+    L3(new LoggedTunableNumber("Arm/L3", 110.0)),
+    L4(new LoggedTunableNumber("Arm/L4", 55.0));
 
     private final DoubleSupplier armSetpointSupplier;
 
@@ -96,15 +79,16 @@ public class Arm {
   private double goalAngle;
   private ArmFeedforward ff;
 
-  private final Alert motorDisconnected =
+  private final Alert armMotorDisconnected =
       new Alert("Arm leader motor disconnected!", Alert.AlertType.kWarning);
+  private final Alert followerMotorDisconnected =
+      new Alert("Arm follower motor disconnected!", Alert.AlertType.kWarning);
   private final Alert absoluteEncoderDisconnected =
       new Alert("Arm absolute encoder disconnected!", Alert.AlertType.kWarning);
 
   private BooleanSupplier disableSupplier = DriverStation::isDisabled;
-  private BooleanSupplier coastSupplier = () -> false;
-  private boolean brakeModeEnabled = true;
 
+  private boolean brakeModeEnabled = true;
   private boolean wasNotAuto = false;
 
   public Arm(ArmIO io) {
@@ -118,38 +102,22 @@ public class Arm {
     ff = new ArmFeedforward(kS.get(), kG.get(), kV.get(), kA.get());
   }
 
-  public void setOverrides(
-      BooleanSupplier disableOverride,
-      BooleanSupplier coastOverride,
-      BooleanSupplier halfStowOverride) {
+  public void setOverrides(BooleanSupplier disableOverride) {
     disableSupplier = () -> disableOverride.getAsBoolean() || DriverStation.isDisabled();
-    coastSupplier = coastOverride;
   }
 
-  /*
   private double getStowAngle() {
-    if (DriverStation.isTeleopEnabled()
-        && RobotState.getInstance().inCloseShootingZone()
-        && !halfStowSupplier.getAsBoolean()) {
-      return MathUtil.clamp(
-          setpointState.position,
-          minAngle.getRadians(),
-          Units.degreesToRadians(partialStowUpperLimitDegrees.get()));
-    } else {
-      return minAngle.getRadians();
-    }
-  }*/
+    return Goal.STOW.getRads();
+  }
 
   public void periodic() {
     // Process inputs
     io.updateInputs(inputs);
     Logger.processInputs("Arm", inputs);
 
-    // Set alerts
-    motorDisconnected.set(!inputs.motorConnected);
+    armMotorDisconnected.set(!inputs.armMotorConnected);
     absoluteEncoderDisconnected.set(!inputs.absoluteEncoderConnected);
 
-    // Update controllers
     LoggedTunableNumber.ifChanged(
         hashCode(), () -> io.setPID(kP.get(), kI.get(), kD.get()), kP, kI, kD);
     LoggedTunableNumber.ifChanged(
@@ -160,8 +128,6 @@ public class Arm {
         kV,
         kA);
 
-    // Check if disabled
-    // Also run first cycle of auto to reset arm
     if (disableSupplier.getAsBoolean()
         || (Constants.getMode() == Constants.Mode.SIM
             && DriverStation.isAutonomousEnabled()
@@ -170,15 +136,17 @@ public class Arm {
       // Reset profile when disabled
       setpointState = new TrapezoidProfile.State(inputs.positionRads, 0);
     }
-    // Track autonomous enabled
-    wasNotAuto = !DriverStation.isAutonomousEnabled();
 
-    // Set coast mode with override
-    setBrakeMode(!coastSupplier.getAsBoolean());
+    wasNotAuto = !DriverStation.isAutonomousEnabled();
 
     // Don't run profile when characterizing, coast mode, or disabled
     if (!characterizing && brakeModeEnabled && !disableSupplier.getAsBoolean()) {
       // Run closed loop
+      goalAngle =
+          goal.getRads();
+      if (goal == Goal.STOW) {
+        goalAngle = getStowAngle();
+      }
       setpointState =
           profile.calculate(
               Constants.loopPeriodSecs,
@@ -197,10 +165,7 @@ public class Arm {
         io.runSetpoint(
             setpointState.position, ff.calculate(setpointState.position, setpointState.velocity));
       }
-      Logger.recordOutput("Arm/GoalAngle", goalAngle);
     }
-
-    // Logs
     Logger.recordOutput("Arm/SetpointAngle", setpointState.position);
     Logger.recordOutput("Arm/SetpointVelocity", setpointState.velocity);
     Logger.recordOutput("Superstructure/Arm/Goal", goal);

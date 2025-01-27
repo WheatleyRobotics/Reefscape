@@ -1,9 +1,16 @@
-package frc.robot.subsystems.superstructure.arm;
+// Copyright (c) 2024 FRC 6328
+// http://github.com/Mechanical-Advantage
+//
+// Use of this source code is governed by an MIT-style
+// license that can be found in the LICENSE file at
+// the root directory of this project.
 
-import static frc.robot.subsystems.superstructure.arm.ArmConstants.*;
+package frc.robot.subsystems.superstructure.elevator;
+
+import static frc.robot.subsystems.superstructure.elevator.ElevatorConstants.*;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
@@ -20,35 +27,50 @@ import lombok.Setter;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-public class Arm {
-  private static final LoggedTunableNumber kP = new LoggedTunableNumber("Arm/Gains/kP", gains.kP());
-  private static final LoggedTunableNumber kI = new LoggedTunableNumber("Arm/Gains/kI", gains.kI());
-  private static final LoggedTunableNumber kD = new LoggedTunableNumber("Arm/Gains/kD", gains.kD());
+public class Elevator {
+  private static final LoggedTunableNumber kP =
+      new LoggedTunableNumber("Elevator/Gains/kP", gains.kP());
+  private static final LoggedTunableNumber kI =
+      new LoggedTunableNumber("Elevator/Gains/kI", gains.kI());
+  private static final LoggedTunableNumber kD =
+      new LoggedTunableNumber("Elevator/Gains/kD", gains.kD());
   private static final LoggedTunableNumber kS =
-      new LoggedTunableNumber("Arm/Gains/kS", gains.ffkS());
+      new LoggedTunableNumber("Elevator/Gains/kS", gains.ffkS());
   private static final LoggedTunableNumber kV =
-      new LoggedTunableNumber("Arm/Gains/kV", gains.ffkV());
+      new LoggedTunableNumber("Elevator/Gains/kV", gains.ffkV());
   private static final LoggedTunableNumber kA =
-      new LoggedTunableNumber("Arm/Gains/kA", gains.ffkA());
+      new LoggedTunableNumber("Elevator/Gains/kA", gains.ffkA());
   private static final LoggedTunableNumber kG =
-      new LoggedTunableNumber("Arm/Gains/kG", gains.ffkG());
+      new LoggedTunableNumber("Elevator/Gains/kG", gains.ffkG());
   private static final LoggedTunableNumber maxVelocity =
-      new LoggedTunableNumber("Arm/Velocity", profileConstraints.maxVelocity);
+      new LoggedTunableNumber("Elevator/Velocity", profileConstraints.maxVelocity);
   private static final LoggedTunableNumber maxAcceleration =
-      new LoggedTunableNumber("Arm/Acceleration", profileConstraints.maxAcceleration);
+      new LoggedTunableNumber("Elevator/Acceleration", profileConstraints.maxAcceleration);
   private static final LoggedTunableNumber smoothVelocity =
-      new LoggedTunableNumber("Arm/SmoothVelocity", profileConstraints.maxVelocity * 0.75);
+      new LoggedTunableNumber("Elevator/SmoothVelocity", profileConstraints.maxVelocity * 0.75);
   private static final LoggedTunableNumber smoothAcceleration =
-      new LoggedTunableNumber("Arm/SmoothAcceleration", profileConstraints.maxAcceleration * 0.5);
+      new LoggedTunableNumber(
+          "Elevator/SmoothAcceleration", profileConstraints.maxAcceleration * 0.5);
+  private static final LoggedTunableNumber prepareClimbVelocity =
+      new LoggedTunableNumber("Elevator/PrepareClimbVelocity", 1.5);
+  private static final LoggedTunableNumber prepareClimbAcceleration =
+      new LoggedTunableNumber("Elevator/PrepareClimbAcceleration", 2.5);
   private static final LoggedTunableNumber lowerLimitDegrees =
-      new LoggedTunableNumber("Arm/LowerLimitDegrees", minAngle.getDegrees());
+      new LoggedTunableNumber("Elevator/LowerLimitDegrees", minAngle.getDegrees());
   private static final LoggedTunableNumber upperLimitDegrees =
-      new LoggedTunableNumber("Arm/UpperLimitDegrees", maxAngle.getDegrees());
+      new LoggedTunableNumber("Elevator/UpperLimitDegrees", maxAngle.getDegrees());
+  private static final LoggedTunableNumber partialStowUpperLimitDegrees =
+      new LoggedTunableNumber("Elevator/PartialStowUpperLimitDegrees", 30.0);
 
+  // Profile constraints
   public static final Supplier<TrapezoidProfile.Constraints> maxProfileConstraints =
       () -> new TrapezoidProfile.Constraints(maxVelocity.get(), maxAcceleration.get());
   public static final Supplier<TrapezoidProfile.Constraints> smoothProfileConstraints =
       () -> new TrapezoidProfile.Constraints(smoothVelocity.get(), smoothAcceleration.get());
+  public static final Supplier<TrapezoidProfile.Constraints> prepareClimbProfileConstraints =
+      () ->
+          new TrapezoidProfile.Constraints(
+              prepareClimbVelocity.get(), prepareClimbAcceleration.get());
 
   @RequiredArgsConstructor
   public enum Goal {
@@ -58,18 +80,18 @@ public class Arm {
     L3(new LoggedTunableNumber("Arm/L3", 110.0)),
     L4(new LoggedTunableNumber("Arm/L4", 55.0));
 
-    private final DoubleSupplier armSetpointSupplier;
+    private final DoubleSupplier elevatorSetpointSupplier;
 
     private double getRads() {
-      return Units.degreesToRadians(armSetpointSupplier.getAsDouble());
+      return Units.degreesToRadians(elevatorSetpointSupplier.getAsDouble());
     }
   }
 
   @AutoLogOutput @Getter @Setter private Goal goal = Goal.STOW;
   private boolean characterizing = false;
 
-  private final ArmIO io;
-  private final ArmIOInputsAutoLogged inputs = new ArmIOInputsAutoLogged();
+  private final ElevatorIO io;
+  private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
 
   @AutoLogOutput @Setter private double currentCompensation = 0.0;
   private TrapezoidProfile.Constraints currentConstraints = maxProfileConstraints.get();
@@ -77,21 +99,20 @@ public class Arm {
   private TrapezoidProfile.State setpointState = new TrapezoidProfile.State();
 
   private double goalAngle;
-  private ArmFeedforward ff;
+  private ElevatorFeedforward ff;
 
-  private final Alert armMotorDisconnected =
-      new Alert("Arm leader motor disconnected!", Alert.AlertType.kWarning);
+  private final Alert leaderMotorDisconnected =
+      new Alert("Elevator leader motor disconnected!", Alert.AlertType.kWarning);
   private final Alert followerMotorDisconnected =
-      new Alert("Arm follower motor disconnected!", Alert.AlertType.kWarning);
-  private final Alert absoluteEncoderDisconnected =
-      new Alert("Arm absolute encoder disconnected!", Alert.AlertType.kWarning);
+      new Alert("Elevator follower motor disconnected!", Alert.AlertType.kWarning);
 
   private BooleanSupplier disableSupplier = DriverStation::isDisabled;
-
+  private BooleanSupplier coastSupplier = () -> false;
   private boolean brakeModeEnabled = true;
+
   private boolean wasNotAuto = false;
 
-  public Arm(ArmIO io) {
+  public Elevator(ElevatorIO io) {
     this.io = io;
     io.setBrakeMode(true);
 
@@ -99,35 +120,43 @@ public class Arm {
         new TrapezoidProfile(
             new TrapezoidProfile.Constraints(maxVelocity.get(), maxAcceleration.get()));
     io.setPID(kP.get(), kI.get(), kD.get());
-    ff = new ArmFeedforward(kS.get(), kG.get(), kV.get(), kA.get());
+    ff = new ElevatorFeedforward(kS.get(), kG.get(), kV.get(), kA.get());
   }
 
-  public void setOverrides(BooleanSupplier disableOverride) {
+  public void setOverrides(
+      BooleanSupplier disableOverride,
+      BooleanSupplier coastOverride,
+      BooleanSupplier halfStowOverride) {
     disableSupplier = () -> disableOverride.getAsBoolean() || DriverStation.isDisabled();
+    coastSupplier = coastOverride;
   }
 
   private double getStowAngle() {
-    return Goal.STOW.getRads();
+    return minAngle.getRadians();
   }
 
   public void periodic() {
     // Process inputs
     io.updateInputs(inputs);
-    Logger.processInputs("Arm", inputs);
+    Logger.processInputs("Elevator", inputs);
 
-    armMotorDisconnected.set(!inputs.armMotorConnected);
-    absoluteEncoderDisconnected.set(!inputs.absoluteEncoderConnected);
+    // Set alerts
+    leaderMotorDisconnected.set(!inputs.leaderMotorConnected);
+    followerMotorDisconnected.set(!inputs.followerMotorConnected);
 
+    // Update controllers
     LoggedTunableNumber.ifChanged(
         hashCode(), () -> io.setPID(kP.get(), kI.get(), kD.get()), kP, kI, kD);
     LoggedTunableNumber.ifChanged(
         hashCode(),
-        () -> ff = new ArmFeedforward(kS.get(), kG.get(), kV.get(), kA.get()),
+        () -> ff = new ElevatorFeedforward(kS.get(), kG.get(), kV.get(), kA.get()),
         kS,
         kG,
         kV,
         kA);
 
+    // Check if disabled
+    // Also run first cycle of auto to reset elevator
     if (disableSupplier.getAsBoolean()
         || (Constants.getMode() == Constants.Mode.SIM
             && DriverStation.isAutonomousEnabled()
@@ -136,13 +165,16 @@ public class Arm {
       // Reset profile when disabled
       setpointState = new TrapezoidProfile.State(inputs.positionRads, 0);
     }
-
+    // Track autonomous enabled
     wasNotAuto = !DriverStation.isAutonomousEnabled();
+
+    // Set coast mode with override
+    setBrakeMode(!coastSupplier.getAsBoolean());
 
     // Don't run profile when characterizing, coast mode, or disabled
     if (!characterizing && brakeModeEnabled && !disableSupplier.getAsBoolean()) {
       // Run closed loop
-      goalAngle = goal.getRads();
+      goalAngle = goal.getRads(); // TODO: Rework closed loop control
       if (goal == Goal.STOW) {
         goalAngle = getStowAngle();
       }
@@ -165,16 +197,16 @@ public class Arm {
             setpointState.position, ff.calculate(setpointState.position, setpointState.velocity));
       }
     }
-    Logger.recordOutput("Arm/SetpointAngle", setpointState.position);
-    Logger.recordOutput("Arm/SetpointVelocity", setpointState.velocity);
-    Logger.recordOutput("Superstructure/Arm/Goal", goal);
+    Logger.recordOutput("Elevator/SetpointAngle", setpointState.position);
+    Logger.recordOutput("Elevator/SetpointVelocity", setpointState.velocity);
+    Logger.recordOutput("Superstructure/Elevator/Goal", goal);
   }
 
   public void stop() {
     io.stop();
   }
 
-  @AutoLogOutput(key = "Superstructure/Arm/AtGoal")
+  @AutoLogOutput(key = "Superstructure/Elevator/AtGoal")
   public boolean atGoal() {
     return EqualsUtil.epsilonEquals(setpointState.position, goalAngle, 1e-3);
   }

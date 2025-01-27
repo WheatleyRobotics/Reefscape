@@ -1,33 +1,25 @@
-package frc.robot.subsystems.superstructure.arm;
+package frc.robot.subsystems.superstructure.elevator;
 
 import static frc.robot.Constants.RobotType.*;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.robot.Constants;
 
-public class ArmConstants {
+public class ElevatorConstants {
   public static final double reduction = 1.0; // TODO: Tune everything
-  public static int motorID =
+  public static int leadMotorID =
       switch (Constants.getRobotType()) {
         case SIMBOT -> 11;
         case DEVBOT -> 25;
         case COMPBOT -> 11;
       };
 
-  public static int encoderID =
+  public static int followerMotorID =
       switch (Constants.getRobotType()) {
         case SIMBOT -> 11;
         case DEVBOT -> 25;
         case COMPBOT -> 11;
-      };
-
-  public static final double armEncoderOffsetRads =
-      switch (Constants.getRobotType()) {
-        default -> 1.21784482;
-          // corresponding to an arm position of 0.1043106935762236 rad
-        case DEVBOT -> -1.233 - Math.PI / 2.0;
       };
 
   public static final Rotation2d minAngle =
@@ -36,10 +28,6 @@ public class ArmConstants {
         case DEVBOT -> Rotation2d.fromDegrees(10.0);
       };
   public static final Rotation2d maxAngle = Rotation2d.fromDegrees(110.0);
-
-  public static final double armLength = 20.0;
-
-  public static final Translation2d armOrigin = new Translation2d(-0.238, 0.298);
 
   public static final boolean leaderInverted = false;
 

@@ -8,6 +8,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.util.Color;
 import frc.robot.Constants;
 import frc.robot.util.EqualsUtil;
 import frc.robot.util.LoggedTunableNumber;
@@ -79,10 +80,12 @@ public class Arm {
   private double goalAngle;
   private ArmFeedforward ff;
 
-  private final Alert armMotorDisconnected =
+  private final ArmVisualizer measuredVisualizer;
+  private final ArmVisualizer setpointVisualizer;
+  private final ArmVisualizer goalVisualizer;
+
+  private final Alert leaderMotorDisconnected =
       new Alert("Arm leader motor disconnected!", Alert.AlertType.kWarning);
-  private final Alert followerMotorDisconnected =
-      new Alert("Arm follower motor disconnected!", Alert.AlertType.kWarning);
   private final Alert absoluteEncoderDisconnected =
       new Alert("Arm absolute encoder disconnected!", Alert.AlertType.kWarning);
 
@@ -100,6 +103,11 @@ public class Arm {
             new TrapezoidProfile.Constraints(maxVelocity.get(), maxAcceleration.get()));
     io.setPID(kP.get(), kI.get(), kD.get());
     ff = new ArmFeedforward(kS.get(), kG.get(), kV.get(), kA.get());
+
+    // Set up visualizers
+    measuredVisualizer = new ArmVisualizer("Measured", Color.kBlack);
+    setpointVisualizer = new ArmVisualizer("Setpoint", Color.kGreen);
+    goalVisualizer = new ArmVisualizer("Goal", Color.kBlue);
   }
 
   public void setOverrides(BooleanSupplier disableOverride) {
@@ -115,7 +123,8 @@ public class Arm {
     io.updateInputs(inputs);
     Logger.processInputs("Arm", inputs);
 
-    armMotorDisconnected.set(!inputs.armMotorConnected);
+    // Set alerts
+    leaderMotorDisconnected.set(!inputs.armMotorConnected);
     absoluteEncoderDisconnected.set(!inputs.absoluteEncoderConnected);
 
     LoggedTunableNumber.ifChanged(
@@ -164,7 +173,14 @@ public class Arm {
         io.runSetpoint(
             setpointState.position, ff.calculate(setpointState.position, setpointState.velocity));
       }
+
+      goalVisualizer.update(goalAngle);
+      Logger.recordOutput("Arm/GoalAngle", goalAngle);
     }
+
+    // Logs
+    measuredVisualizer.update(inputs.positionRads);
+    setpointVisualizer.update(setpointState.position);
     Logger.recordOutput("Arm/SetpointAngle", setpointState.position);
     Logger.recordOutput("Arm/SetpointVelocity", setpointState.velocity);
     Logger.recordOutput("Superstructure/Arm/Goal", goal);

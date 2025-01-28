@@ -1,8 +1,5 @@
 package frc.robot.subsystems.superstructure.elevator;
 
-import static frc.robot.Constants.RobotType.*;
-
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.robot.Constants;
 
@@ -22,12 +19,11 @@ public class ElevatorConstants {
         case COMPBOT -> 11;
       };
 
-  public static final Rotation2d minAngle =
+  public static final double minHeight =
       switch (Constants.getRobotType()) {
-        default -> Rotation2d.fromDegrees(5.8); // Measured from hardstop 3/31/24
-        case DEVBOT -> Rotation2d.fromDegrees(10.0);
+        default -> 0.1; // Measured from hardstop 3/31/24
       };
-  public static final Rotation2d maxAngle = Rotation2d.fromDegrees(110.0);
+  public static final double maxheight = 1;
 
   public static final boolean leaderInverted = false;
 

@@ -56,9 +56,9 @@ public class Elevator {
   private static final LoggedTunableNumber prepareClimbAcceleration =
       new LoggedTunableNumber("Elevator/PrepareClimbAcceleration", 2.5);
   private static final LoggedTunableNumber lowerLimitDegrees =
-      new LoggedTunableNumber("Elevator/LowerLimitDegrees", minAngle.getDegrees());
+      new LoggedTunableNumber("Elevator/LowerLimitDegrees", minHeight);
   private static final LoggedTunableNumber upperLimitDegrees =
-      new LoggedTunableNumber("Elevator/UpperLimitDegrees", maxAngle.getDegrees());
+      new LoggedTunableNumber("Elevator/UpperLimitDegrees", maxheight);
   private static final LoggedTunableNumber partialStowUpperLimitDegrees =
       new LoggedTunableNumber("Elevator/PartialStowUpperLimitDegrees", 30.0);
 
@@ -98,7 +98,7 @@ public class Elevator {
   private TrapezoidProfile profile;
   private TrapezoidProfile.State setpointState = new TrapezoidProfile.State();
 
-  private double goalAngle;
+  private double goalHeight;
   private ElevatorFeedforward ff;
 
   private final Alert leaderMotorDisconnected =
@@ -131,8 +131,8 @@ public class Elevator {
     coastSupplier = coastOverride;
   }
 
-  private double getStowAngle() {
-    return minAngle.getRadians();
+  private double getStowHeight() {
+    return minHeight;
   }
 
   public void periodic() {
@@ -174,9 +174,9 @@ public class Elevator {
     // Don't run profile when characterizing, coast mode, or disabled
     if (!characterizing && brakeModeEnabled && !disableSupplier.getAsBoolean()) {
       // Run closed loop
-      goalAngle = goal.getRads(); // TODO: Rework closed loop control
+      goalHeight = goal.getRads();
       if (goal == Goal.STOW) {
-        goalAngle = getStowAngle();
+        goalHeight = getStowHeight();
       }
       setpointState =
           profile.calculate(
@@ -184,20 +184,18 @@ public class Elevator {
               setpointState,
               new TrapezoidProfile.State(
                   MathUtil.clamp(
-                      goalAngle,
+                      goalHeight,
                       Units.degreesToRadians(lowerLimitDegrees.get()),
                       Units.degreesToRadians(upperLimitDegrees.get())),
                   0.0));
-      if (goal == Goal.STOW
-          && EqualsUtil.epsilonEquals(goalAngle, minAngle.getRadians())
-          && atGoal()) {
+      if (goal == Goal.STOW && EqualsUtil.epsilonEquals(goalHeight, minHeight) && atGoal()) {
         io.stop();
       } else {
         io.runSetpoint(
             setpointState.position, ff.calculate(setpointState.position, setpointState.velocity));
       }
     }
-    Logger.recordOutput("Elevator/SetpointAngle", setpointState.position);
+    Logger.recordOutput("Elevator/SetpointHeight", setpointState.position);
     Logger.recordOutput("Elevator/SetpointVelocity", setpointState.velocity);
     Logger.recordOutput("Superstructure/Elevator/Goal", goal);
   }
@@ -208,7 +206,7 @@ public class Elevator {
 
   @AutoLogOutput(key = "Superstructure/Elevator/AtGoal")
   public boolean atGoal() {
-    return EqualsUtil.epsilonEquals(setpointState.position, goalAngle, 1e-3);
+    return EqualsUtil.epsilonEquals(setpointState.position, goalHeight, 1e-3);
   }
 
   public void setBrakeMode(boolean enabled) {
@@ -231,7 +229,7 @@ public class Elevator {
   }
 
   public double getCharacterizationVelocity() {
-    return inputs.velocityRadsPerSec;
+    return inputs.velocityMetersPerSec;
   }
 
   public void endCharacterization() {

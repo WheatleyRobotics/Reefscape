@@ -4,10 +4,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.NeutralOut;
-import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
-import com.ctre.phoenix6.controls.TorqueCurrentFOC;
-import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
@@ -29,12 +26,10 @@ public class ArmIOFalcon implements ArmIO {
   private final StatusSignal<Current> supplyCurrent;
   private final StatusSignal<Current> torqueCurrent;
   private final StatusSignal<Temperature> tempCelsius;
-  // TODO: Remove FOC control
-  private final VoltageOut voltageControl =
-      new VoltageOut(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
+  private final VoltageOut voltageControl = new VoltageOut(0.0).withUpdateFreqHz(0.0);
   private final TorqueCurrentFOC currentControl = new TorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
-  private final PositionTorqueCurrentFOC positionControl =
-      new PositionTorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
+  private final PositionDutyCycle positionControl =
+      new PositionDutyCycle(0.0).withUpdateFreqHz(0.0);
 
   private final TalonFXConfiguration config = new TalonFXConfiguration();
 

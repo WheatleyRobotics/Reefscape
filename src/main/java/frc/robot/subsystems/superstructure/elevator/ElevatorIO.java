@@ -9,9 +9,9 @@ public interface ElevatorIO {
     public boolean followerMotorConnected = true;
 
     public double positionRads = 0.0;
-    public double absoluteEncoderPositionRads = 0.0;
-    public double relativeEncoderPositionRads = 0.0;
-    public double velocityRadsPerSec = 0.0;
+    public double absoluteEncoderPositionMeters = 0.0;
+    public double relativeEncoderPositionMeters = 0.0;
+    public double velocityMetersPerSec = 0.0;
     public double[] appliedVolts = new double[] {};
     public double[] supplyCurrentAmps = new double[] {};
     public double[] torqueCurrentAmps = new double[] {};

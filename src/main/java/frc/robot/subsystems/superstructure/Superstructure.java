@@ -22,118 +22,118 @@ import org.littletonrobotics.junction.Logger;
 
 public class Superstructure extends SubsystemBase {
 
-    @NoArgsConstructor(force = true)
-    @RequiredArgsConstructor
-    @Getter
-    public enum Goal {
-        STOW,
-        L1,
-        L2,
-        L3,
-        L4;
+  @NoArgsConstructor(force = true)
+  @RequiredArgsConstructor
+  @Getter
+  public enum Goal {
+    STOW,
+    L1,
+    L2,
+    L3,
+    L4;
 
-        private final boolean climbingGoal;
+    private final boolean climbingGoal;
+  }
+
+  @Getter private Goal currentGoal = Goal.STOW;
+  @Getter private Goal desiredGoal = Goal.STOW;
+  private Goal lastGoal = Goal.STOW;
+
+  private final Arm arm;
+  private final Elevator elevator;
+
+  private Timer goalTimer = new Timer();
+
+  public Superstructure(Arm arm, Elevator elevator) {
+    this.arm = arm;
+    this.elevator = elevator;
+
+    setDefaultCommand(setGoalCommand(Goal.STOW));
+    goalTimer.start();
+  }
+
+  @Override
+  public void periodic() {
+    if (DriverStation.isDisabled()) {
+      setDefaultCommand(setGoalCommand(Goal.STOW));
+      arm.stop();
     }
 
-    @Getter private Goal currentGoal = Goal.STOW;
-    @Getter private Goal desiredGoal = Goal.STOW;
-    private Goal lastGoal = Goal.STOW;
+    // Reset timer
+    if (currentGoal != lastGoal) {
+      goalTimer.reset();
+    }
+    lastGoal = currentGoal;
 
-    private final Arm arm;
-    private final Elevator elevator;
-
-    private Timer goalTimer = new Timer();
-
-    public Superstructure(Arm arm, Elevator elevator) {
-        this.arm = arm;
-        this.elevator = elevator;
-
-        setDefaultCommand(setGoalCommand(Goal.STOW));
-        goalTimer.start();
+    switch (currentGoal) {
+      case STOW -> {
+        arm.setGoal(Arm.Goal.STOW);
+        elevator.setGoal(Elevator.Goal.STOW);
+      }
+      case L1 -> {
+        arm.setGoal(Arm.Goal.L1);
+        elevator.setGoal(Elevator.Goal.L1);
+      }
+      case L2 -> {
+        arm.setGoal(Arm.Goal.L2);
+        elevator.setGoal(Elevator.Goal.L2);
+      }
+      case L3 -> {
+        arm.setGoal(Arm.Goal.L3);
+        elevator.setGoal(Elevator.Goal.L3);
+      }
+      case L4 -> {
+        arm.setGoal(Arm.Goal.L4);
+        elevator.setGoal(Elevator.Goal.L4);
+      }
     }
 
-    @Override
-    public void periodic() {
-        if (DriverStation.isDisabled()) {
-            setDefaultCommand(setGoalCommand(Goal.STOW));
-            arm.stop();
-        }
+    arm.periodic();
+    elevator.periodic();
 
-        // Reset timer
-        if (currentGoal != lastGoal) {
-            goalTimer.reset();
-        }
-        lastGoal = currentGoal;
+    Logger.recordOutput("Superstructure/GoalState", desiredGoal);
+    Logger.recordOutput("Superstructure/CurrentState", currentGoal);
+  }
 
-        switch (currentGoal) {
-            case STOW -> {
-                arm.setGoal(Arm.Goal.STOW);
-                elevator.setGoal(Elevator.Goal.STOW);
-            }
-            case L1 -> {
-                arm.setGoal(Arm.Goal.L1);
-                elevator.setGoal(Elevator.Goal.L1);
-            }
-            case L2 -> {
-                arm.setGoal(Arm.Goal.L2);
-                elevator.setGoal(Elevator.Goal.L2);
-            }
-            case L3 -> {
-                arm.setGoal(Arm.Goal.L3);
-                elevator.setGoal(Elevator.Goal.L3);
-            }
-            case L4 -> {
-                arm.setGoal(Arm.Goal.L4);
-                elevator.setGoal(Elevator.Goal.L4);
-            }
-        }
+  /** Set goal of superstructure */
+  private void setGoal(Goal goal) {
+    if (desiredGoal == goal) return;
+    desiredGoal = goal;
+  }
 
-        arm.periodic();
-        elevator.periodic();
+  /** Command to set goal of superstructure */
+  public Command setGoalCommand(Goal goal) {
+    return startEnd(() -> setGoal(goal), () -> setGoal(Goal.STOW))
+        .withName("Superstructure " + goal);
+  }
 
-        Logger.recordOutput("Superstructure/GoalState", desiredGoal);
-        Logger.recordOutput("Superstructure/CurrentState", currentGoal);
-    }
+  /** Command to set goal of superstructure with additional profile constraints on arm */
+  public Command setGoalWithConstraintsCommand(
+      Goal goal, TrapezoidProfile.Constraints armProfileConstraints) {
+    return setGoalCommand(goal)
+        .beforeStarting(() -> arm.setProfileConstraints(armProfileConstraints))
+        .finallyDo(() -> arm.setProfileConstraints(Arm.maxProfileConstraints.get()));
+  }
 
-    /** Set goal of superstructure */
-    private void setGoal(Goal goal) {
-        if (desiredGoal == goal) return;
-        desiredGoal = goal;
-    }
+  @AutoLogOutput(key = "Superstructure/CompletedGoal")
+  public boolean atGoal() {
+    return currentGoal == desiredGoal && arm.atGoal() && elevator.atGoal();
+  }
 
-    /** Command to set goal of superstructure */
-    public Command setGoalCommand(Goal goal) {
-        return startEnd(() -> setGoal(goal), () -> setGoal(Goal.STOW))
-                .withName("Superstructure " + goal);
-    }
+  @AutoLogOutput(key = "Superstructure/AtArmGoal")
+  public boolean atArmGoal() {
+    return currentGoal == desiredGoal && arm.atGoal();
+  }
 
-    /** Command to set goal of superstructure with additional profile constraints on arm */
-    public Command setGoalWithConstraintsCommand(
-            Goal goal, TrapezoidProfile.Constraints armProfileConstraints) {
-        return setGoalCommand(goal)
-                .beforeStarting(() -> arm.setProfileConstraints(armProfileConstraints))
-                .finallyDo(() -> arm.setProfileConstraints(Arm.maxProfileConstraints.get()));
-    }
+  public void runArmCharacterization(double input) {
+    arm.runCharacterization(input);
+  }
 
-    @AutoLogOutput(key = "Superstructure/CompletedGoal")
-    public boolean atGoal() {
-        return currentGoal == desiredGoal && arm.atGoal() && elevator.atGoal();
-    }
+  public double getArmCharacterizationVelocity() {
+    return arm.getCharacterizationVelocity();
+  }
 
-    @AutoLogOutput(key = "Superstructure/AtArmGoal")
-    public boolean atArmGoal() {
-        return currentGoal == desiredGoal && arm.atGoal();
-    }
-
-    public void runArmCharacterization(double input) {
-        arm.runCharacterization(input);
-    }
-
-    public double getArmCharacterizationVelocity() {
-        return arm.getCharacterizationVelocity();
-    }
-
-    public void endArmCharacterization() {
-        arm.endCharacterization();
-    }
+  public void endArmCharacterization() {
+    arm.endCharacterization();
+  }
 }

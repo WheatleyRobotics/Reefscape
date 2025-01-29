@@ -162,10 +162,7 @@ public class RobotContainer {
                     },
                     drive)
                 .ignoringDisable(true));
-
-    controller
-        .y()
-        .onTrue(new DriveController(drive, new Pose2d(3.7, 3, Rotation2d.fromDegrees(40))));
+    controller.y().onTrue(new DriveController(true, drive));
   }
 
   /**

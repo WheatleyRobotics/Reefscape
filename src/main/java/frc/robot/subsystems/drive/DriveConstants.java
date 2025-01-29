@@ -95,7 +95,7 @@ public class DriveConstants {
   public static final int driveMotorCurrentLimit = 40;
   public static final double wheelRadiusMeters = Units.inchesToMeters(1.98);
   ;
-  public static final double driveMotorReduction = 6.75; // MK4i L2
+  public static final double driveMotorReduction = 6.12; // MK4i L3
   public static final DCMotor driveGearbox = DCMotor.getNeoVortex(1);
 
   // Drive encoder configuration

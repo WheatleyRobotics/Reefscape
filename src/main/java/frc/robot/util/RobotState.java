@@ -10,10 +10,7 @@ package frc.robot.util;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -23,6 +20,7 @@ import frc.robot.subsystems.drive.DriveConstants;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import lombok.Getter;
+import lombok.Setter;
 import org.littletonrobotics.junction.AutoLogOutput;
 
 public class RobotState {
@@ -61,11 +59,61 @@ public class RobotState {
   // Assume gyro starts at zero
   private Rotation2d gyroOffset = new Rotation2d();
 
+  @Getter
+  @Setter
+  @AutoLogOutput(key = "RobotState/Zone")
+  private Zones currentZone = Zones.Z1;
+
+  public enum Zones {
+    Z1(0),
+    Z2(1),
+    Z3(2),
+    Z4(3),
+    Z5(4),
+    Z6(5);
+    @Getter private final int face;
+
+    Zones(int face) {
+      this.face = face;
+    }
+  }
+
   private RobotState() {
     for (int i = 0; i < 3; ++i) {
       qStdDevs.set(i, 0, Math.pow(odometryStateStdDevs.get(i, 0), 2));
     }
     kinematics = new SwerveDriveKinematics(DriveConstants.moduleTranslations);
+  }
+
+  public void update() {
+    Translation2d flippedReef;
+    if (AllianceFlipUtil.shouldFlip()) {
+      flippedReef = AllianceFlipUtil.apply(FieldConstants.Reef.center);
+    } else {
+      flippedReef = FieldConstants.Reef.center;
+    }
+    double angle =
+        -Math.atan2(
+            getEstimatedPose().getY() - flippedReef.getY(),
+            getEstimatedPose().getX() - flippedReef.getX());
+
+    angle += Math.PI / 6.0;
+
+    double normalizedAngle = (angle + (2 * Math.PI)) % (2 * Math.PI);
+
+    if (normalizedAngle >= 0 && normalizedAngle < Math.PI / 3) {
+      currentZone = Zones.Z1;
+    } else if (normalizedAngle >= Math.PI / 3 && normalizedAngle < 2 * Math.PI / 3) {
+      currentZone = Zones.Z2;
+    } else if (normalizedAngle >= 2 * Math.PI / 3 && normalizedAngle < Math.PI) {
+      currentZone = Zones.Z3;
+    } else if (normalizedAngle >= Math.PI && normalizedAngle < 4 * Math.PI / 3) {
+      currentZone = Zones.Z4;
+    } else if (normalizedAngle >= 4 * Math.PI / 3 && normalizedAngle < 5 * Math.PI / 3) {
+      currentZone = Zones.Z5;
+    } else if (normalizedAngle >= 5 * Math.PI / 3 && normalizedAngle < 2 * Math.PI) {
+      currentZone = Zones.Z6;
+    }
   }
 
   public void resetPose(Pose2d pose) {

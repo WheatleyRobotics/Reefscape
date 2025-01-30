@@ -7,7 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Place preload CORAL on REEF Left"
+            "pathName": "Source-Z6"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
           }
         }
       ]

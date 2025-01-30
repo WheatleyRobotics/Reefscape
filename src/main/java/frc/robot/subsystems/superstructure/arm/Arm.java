@@ -192,7 +192,7 @@ public class Arm {
 
   @AutoLogOutput(key = "Superstructure/Arm/AtGoal")
   public boolean atGoal() {
-    return EqualsUtil.epsilonEquals(setpointState.position, goalAngle, 1e-1);
+    return EqualsUtil.epsilonEquals(setpointState.position, goalAngle, 1e-3);
   }
 
   public void setBrakeMode(boolean enabled) {

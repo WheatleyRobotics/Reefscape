@@ -18,7 +18,7 @@ import static frc.robot.subsystems.vision.VisionConstants.*;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -32,18 +32,30 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOSpark;
+import frc.robot.subsystems.rollers.RollerSystemIOFalcon;
+import frc.robot.subsystems.rollers.RollerSystemIOSim;
 import frc.robot.subsystems.superstructure.Superstructure;
-import frc.robot.subsystems.superstructure.Superstructure.Goal;
+import frc.robot.subsystems.superstructure.SuperstructureState;
 import frc.robot.subsystems.superstructure.arm.Arm;
 import frc.robot.subsystems.superstructure.arm.ArmIO;
 import frc.robot.subsystems.superstructure.arm.ArmIOFalcon;
 import frc.robot.subsystems.superstructure.arm.ArmIOSim;
+import frc.robot.subsystems.superstructure.dispenser.Dispenser;
+import frc.robot.subsystems.superstructure.dispenser.DispenserIOFalcon;
+import frc.robot.subsystems.superstructure.dispenser.DispenserIOSim;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIO;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOFalcon;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
+import frc.robot.subsystems.superstructure.slam.Slam;
+import frc.robot.subsystems.superstructure.slam.SlamIOFalcon;
+import frc.robot.subsystems.superstructure.slam.SlamIOSim;
 import frc.robot.subsystems.vision.*;
+import frc.robot.util.Container;
 import frc.robot.util.RobotState;
+import java.util.Random;
+import java.util.Set;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -55,12 +67,9 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   RobotState robotState = RobotState.getInstance();
   // Subsystems
-  private final Drive drive;
-  private final Vision vision;
-  private final Arm arm;
+  private Drive drive;
+  private Vision vision;
   private final Superstructure superstructure;
-  private final Elevator elevator;
-
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
 
@@ -69,6 +78,10 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    Arm arm = null;
+    Elevator elevator = null;
+    Dispenser dispenser = null;
+    Slam slam = null;
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
@@ -86,7 +99,12 @@ public class RobotContainer {
                 new VisionIOPhotonVision(camera1Name, robotToCamera1));
         arm = new Arm(new ArmIOFalcon());
         elevator = new Elevator(new ElevatorIOFalcon());
-        superstructure = new Superstructure(arm, elevator);
+        dispenser =
+            new Dispenser(
+                new DispenserIOFalcon(),
+                new RollerSystemIOFalcon(0, "*", 0, false, false, 1.0),
+                new RollerSystemIOFalcon(0, "*", 0, false, false, 1.0));
+        slam = new Slam(new SlamIOFalcon(), new RollerSystemIOFalcon(0, "*", 0, false, false, 1.0));
         break;
 
       case SIM:
@@ -104,11 +122,14 @@ public class RobotContainer {
                 new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
                 new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
         arm = new Arm(new ArmIOSim());
-        elevator =
-            new Elevator(
-                new ElevatorIOSim(
-                    Units.inchesToMeters(11.872), 32.0 / 10.0, Units.inchesToMeters(.5)));
-        superstructure = new Superstructure(arm, elevator);
+        elevator = new Elevator(new ElevatorIOSim());
+        dispenser =
+            new Dispenser(
+                new DispenserIOSim(),
+                new RollerSystemIOSim(DCMotor.getKrakenX60Foc(1), 1.0, 0.2),
+                new RollerSystemIOSim(DCMotor.getKrakenX60Foc(1), 1.0, 0.2));
+        slam =
+            new Slam(new SlamIOSim(), new RollerSystemIOSim(DCMotor.getKrakenX60Foc(1), 1.0, 0.02));
         break;
 
       default:
@@ -123,10 +144,9 @@ public class RobotContainer {
         vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         arm = new Arm(new ArmIO() {});
         elevator = new Elevator(new ElevatorIO() {});
-        superstructure = new Superstructure(arm, elevator);
         break;
     }
-
+    superstructure = new Superstructure(elevator, dispenser, slam);
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
@@ -190,12 +210,27 @@ public class RobotContainer {
                     },
                     drive)
                 .ignoringDisable(true));
+    var random = new Random();
+    Container<Integer> randomInt = new Container<>();
+    randomInt.value = 1;
+    controller
+        .x()
+        .onTrue(
+            Commands.runOnce(
+                () -> randomInt.value = random.nextInt(SuperstructureState.State.values().length)));
     controller
         .y()
-        .onTrue(
-            superstructure.setGoalCommand(
-                Goal.L4)); // new DriveController(drive, new Pose2d(3.7, 3,
-    // Rotation2d.fromDegrees(40)))
+        .whileTrue(
+            Commands.defer(
+                () -> {
+                  Logger.recordOutput(
+                      "RandomState", SuperstructureState.State.values()[randomInt.value]);
+                  return superstructure.runGoal(
+                      SuperstructureState.State.values()[randomInt.value].getValue());
+                },
+                Set.of(superstructure)));
+    // .onTrue(new DriveController(drive, new Pose2d(3.7, 3, Rotation2d.fromDegrees(40)))); //
+    //
   }
 
   /**

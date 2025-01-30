@@ -50,7 +50,7 @@ public class ArmConstants {
         case COMPBOT -> new Gains(.05, 0.0, 250.0, 8.4, 0.0, 0.0, 22.9);
       };
   public static TrapezoidProfile.Constraints profileConstraints =
-      new TrapezoidProfile.Constraints(2 * Math.PI, 100);
+      new TrapezoidProfile.Constraints(2 * Math.PI, 15);
 
   public record Gains(
       double kP, double kI, double kD, double ffkS, double ffkV, double ffkA, double ffkG) {}

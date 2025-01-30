@@ -5,8 +5,8 @@ import static frc.robot.Constants.RobotType.COMPBOT;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
@@ -73,7 +73,6 @@ public class DriveController extends Command {
       RobotState.Zones zone = RobotState.getInstance().getCurrentZone();
       double x;
       double y;
-      double theta;
 
       if (AllianceFlipUtil.shouldFlip()) {
         x = AllianceFlipUtil.applyX(FieldConstants.Reef.centerFaces[zone.getFace()].getX());
@@ -83,22 +82,24 @@ public class DriveController extends Command {
         y = FieldConstants.Reef.centerFaces[zone.getFace()].getY();
       }
 
-      Translation2d flippedReef;
-      if (AllianceFlipUtil.shouldFlip()) {
-        flippedReef = AllianceFlipUtil.apply(FieldConstants.Reef.center);
-      } else {
-        flippedReef = FieldConstants.Reef.center;
-      }
+      double adjustedX =
+          x
+              + Units.inchesToMeters(-(14.5 + 5))
+                  * Math.cos(
+                      FieldConstants.Reef.centerFaces[zone.getFace()].getRotation().getRadians());
+      double adjustedY =
+          y
+              + Units.inchesToMeters(-(14.5 + 5))
+                  * Math.sin(
+                      FieldConstants.Reef.centerFaces[zone.getFace()].getRotation().getRadians());
 
-      theta =
-          Math.atan2(
-              RobotState.getInstance().getEstimatedPose().getY() - flippedReef.getY(),
-              RobotState.getInstance().getEstimatedPose().getX() - flippedReef.getX());
-
-      theta += Math.PI / 6.0;
-      double normalizedAngle = (theta + (2 * Math.PI)) % (2 * Math.PI);
-      this.targetPose = new Pose2d(x, y, Rotation2d.fromRadians(normalizedAngle));
-      Logger.recordOutput("RobotController", this.targetPose);
+      this.targetPose =
+          new Pose2d(
+              adjustedX, adjustedY, FieldConstants.Reef.centerFaces[zone.getFace()].getRotation());
+      Logger.recordOutput("RobotController/Adjusted", this.targetPose);
+      Logger.recordOutput(
+          "RobotController/Unadjusted",
+          new Pose2d(x, y, FieldConstants.Reef.centerFaces[zone.getFace()].getRotation()));
     }
 
     timer.restart();
@@ -132,9 +133,15 @@ public class DriveController extends Command {
 
   @Override
   public boolean isFinished() {
-    return targetPose
-            .getTranslation()
-            .getDistance(RobotState.getInstance().getEstimatedPose().getTranslation())
-        < 0.05;
+    return (targetPose
+                .getTranslation()
+                .getDistance(RobotState.getInstance().getEstimatedPose().getTranslation())
+            < 0.03)
+        && (RobotState.getInstance()
+                .getEstimatedPose()
+                .getRotation()
+                .minus(targetPose.getRotation())
+                .getDegrees()
+            < 5);
   }
 }

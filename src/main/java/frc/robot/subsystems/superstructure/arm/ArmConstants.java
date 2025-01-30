@@ -37,7 +37,7 @@ public class ArmConstants {
       };
   public static final Rotation2d maxAngle = Rotation2d.fromDegrees(110.0);
 
-  public static final double armLength = 20.0;
+  public static final double armLength = 5;
 
   public static final Translation2d armOrigin = new Translation2d(-0.238, 0.298);
 
@@ -45,12 +45,12 @@ public class ArmConstants {
 
   public static final Gains gains =
       switch (Constants.getRobotType()) {
-        case SIMBOT -> new Gains(90.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-        case DEVBOT -> new Gains(75.0, 0.0, 2.5, 0.0, 0.0, 0.0, 0.0);
-        case COMPBOT -> new Gains(7000.0, 0.0, 250.0, 8.4, 0.0, 0.0, 22.9);
+        case SIMBOT -> new Gains(90, 00, 0.0, 0.0, 0.0, 0.0, 0.0);
+        case DEVBOT -> new Gains(.05, 0.0, 2.5, 0.0, 0.0, 0.0, 0.0);
+        case COMPBOT -> new Gains(.05, 0.0, 250.0, 8.4, 0.0, 0.0, 22.9);
       };
   public static TrapezoidProfile.Constraints profileConstraints =
-      new TrapezoidProfile.Constraints(2 * Math.PI, 15);
+      new TrapezoidProfile.Constraints(2 * Math.PI, 100);
 
   public record Gains(
       double kP, double kI, double kD, double ffkS, double ffkV, double ffkA, double ffkG) {}

@@ -1,3 +1,3 @@
 package frc.robot.subsystems.superstructure.elevator;
 
-public class ElevatorIOFalcon {}
+public class ElevatorIOFalcon implements ElevatorIO {}

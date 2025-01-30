@@ -53,7 +53,7 @@ public class Arm {
 
   @RequiredArgsConstructor
   public enum Goal {
-    STOW(() -> 0),
+    STOW(() -> 20),
     L1(new LoggedTunableNumber("Arm/L1", 40.0)),
     L2(new LoggedTunableNumber("Arm/L2", 45.0)),
     L3(new LoggedTunableNumber("Arm/L3", 110.0)),
@@ -84,8 +84,8 @@ public class Arm {
   private final ArmVisualizer setpointVisualizer;
   private final ArmVisualizer goalVisualizer;
 
-  private final Alert leaderMotorDisconnected =
-      new Alert("Arm leader motor disconnected!", Alert.AlertType.kWarning);
+  private final Alert motorDisconnected =
+      new Alert("Arm  motor disconnected!", Alert.AlertType.kWarning);
   private final Alert absoluteEncoderDisconnected =
       new Alert("Arm absolute encoder disconnected!", Alert.AlertType.kWarning);
 
@@ -115,7 +115,7 @@ public class Arm {
   }
 
   private double getStowAngle() {
-    return Goal.STOW.getRads();
+    return minAngle.getRadians();
   }
 
   public void periodic() {
@@ -124,7 +124,7 @@ public class Arm {
     Logger.processInputs("Arm", inputs);
 
     // Set alerts
-    leaderMotorDisconnected.set(!inputs.armMotorConnected);
+    motorDisconnected.set(!inputs.armMotorConnected);
     absoluteEncoderDisconnected.set(!inputs.absoluteEncoderConnected);
 
     LoggedTunableNumber.ifChanged(
@@ -192,7 +192,7 @@ public class Arm {
 
   @AutoLogOutput(key = "Superstructure/Arm/AtGoal")
   public boolean atGoal() {
-    return EqualsUtil.epsilonEquals(setpointState.position, goalAngle, 1e-3);
+    return EqualsUtil.epsilonEquals(setpointState.position, goalAngle, 1e-1);
   }
 
   public void setBrakeMode(boolean enabled) {

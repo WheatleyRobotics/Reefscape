@@ -2,13 +2,35 @@
   "NTProvider": {
     "types": {
       "/AdvantageKit/RealOutputs/Alerts": "Alerts",
+      "/AdvantageKit/RealOutputs/Arm/Mechanism2d/Goal": "Mechanism2d",
+      "/AdvantageKit/RealOutputs/Arm/Mechanism2d/Measured": "Mechanism2d",
+      "/AdvantageKit/RealOutputs/Arm/Mechanism2d/Setpoint": "Mechanism2d",
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Alerts": "Alerts",
       "/SmartDashboard/Auto Choices": "String Chooser",
       "/SmartDashboard/VisionSystemSim-main/Sim Field": "Field2d"
     }
   },
+  "NetworkTables": {
+    "Retained Values": {
+      "open": false
+    },
+    "transitory": {
+      "AdvantageKit": {
+        "Arm": {
+          "open": true
+        },
+        "open": true
+      }
+    }
+  },
   "NetworkTables Info": {
+    "Clients": {
+      "open": true
+    },
+    "shuffleboard@2": {
+      "open": true
+    },
     "visible": true
   }
 }

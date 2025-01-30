@@ -18,6 +18,7 @@ import static frc.robot.subsystems.vision.VisionConstants.*;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -25,8 +26,22 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.DriveController;
-import frc.robot.subsystems.drive.*;
+import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.GyroIO;
+import frc.robot.subsystems.drive.GyroIOPigeon2;
+import frc.robot.subsystems.drive.ModuleIO;
+import frc.robot.subsystems.drive.ModuleIOSim;
+import frc.robot.subsystems.drive.ModuleIOSpark;
+import frc.robot.subsystems.superstructure.Superstructure;
+import frc.robot.subsystems.superstructure.Superstructure.Goal;
+import frc.robot.subsystems.superstructure.arm.Arm;
+import frc.robot.subsystems.superstructure.arm.ArmIO;
+import frc.robot.subsystems.superstructure.arm.ArmIOFalcon;
+import frc.robot.subsystems.superstructure.arm.ArmIOSim;
+import frc.robot.subsystems.superstructure.elevator.Elevator;
+import frc.robot.subsystems.superstructure.elevator.ElevatorIO;
+import frc.robot.subsystems.superstructure.elevator.ElevatorIOFalcon;
+import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
 import frc.robot.subsystems.vision.*;
 import frc.robot.util.RobotState;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -42,6 +57,9 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final Vision vision;
+  private final Arm arm;
+  private final Superstructure superstructure;
+  private final Elevator elevator;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -66,7 +84,9 @@ public class RobotContainer {
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVision(camera0Name, robotToCamera0),
                 new VisionIOPhotonVision(camera1Name, robotToCamera1));
-
+        arm = new Arm(new ArmIOFalcon());
+        elevator = new Elevator(new ElevatorIOFalcon());
+        superstructure = new Superstructure(arm, elevator);
         break;
 
       case SIM:
@@ -83,7 +103,12 @@ public class RobotContainer {
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
                 new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
-
+        arm = new Arm(new ArmIOSim());
+        elevator =
+            new Elevator(
+                new ElevatorIOSim(
+                    Units.inchesToMeters(11.872), 32.0 / 10.0, Units.inchesToMeters(.5)));
+        superstructure = new Superstructure(arm, elevator);
         break;
 
       default:
@@ -96,6 +121,9 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {});
         vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+        arm = new Arm(new ArmIO() {});
+        elevator = new Elevator(new ElevatorIO() {});
+        superstructure = new Superstructure(arm, elevator);
         break;
     }
 
@@ -145,7 +173,7 @@ public class RobotContainer {
                 drive,
                 () -> -controller.getLeftY(),
                 () -> -controller.getLeftX(),
-                () -> new Rotation2d()));
+                () -> new Rotation2d().fromDegrees(60)));
 
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
@@ -162,10 +190,12 @@ public class RobotContainer {
                     },
                     drive)
                 .ignoringDisable(true));
-
     controller
         .y()
-        .onTrue(new DriveController(drive, new Pose2d(3.7, 3, Rotation2d.fromDegrees(40))));
+        .onTrue(
+            superstructure.setGoalCommand(
+                Goal.L4)); // new DriveController(drive, new Pose2d(3.7, 3,
+    // Rotation2d.fromDegrees(40)))
   }
 
   /**

@@ -12,8 +12,8 @@ public interface ElevatorIO {
     public double absoluteEncoderPositionMeters = 0.0;
     public double relativeEncoderPositionMeters = 0.0;
     public double velocityMetersPerSec = 0.0;
-    public double[] appliedVolts = new double[] {};
-    public double[] supplyCurrentAmps = new double[] {};
+    public double appliedVolts = 0.0;
+    public double supplyCurrentAmps = 0.0;
     public double[] torqueCurrentAmps = new double[] {};
     public double[] tempCelcius = new double[] {};
     public boolean absoluteEncoderConnected = true;

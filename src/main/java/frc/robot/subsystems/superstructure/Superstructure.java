@@ -67,8 +67,8 @@ public class Superstructure extends SubsystemBase {
 
     switch (currentGoal) {
       case STOW -> {
-        arm.setGoal(Arm.Goal.STOW);
-        elevator.setGoal(Elevator.Goal.STOW);
+        arm.setGoal(Arm.Goal.L4);
+        elevator.setGoal(Elevator.Goal.L4);
       }
       case L1 -> {
         arm.setGoal(Arm.Goal.L1);

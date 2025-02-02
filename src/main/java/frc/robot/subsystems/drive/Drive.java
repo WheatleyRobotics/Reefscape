@@ -46,7 +46,6 @@ import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.util.LocalADStarAK;
 import frc.robot.util.RobotState;
-import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -168,13 +167,6 @@ public class Drive extends SubsystemBase {
                 modulePositions[moduleIndex].angle);
         lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
       }
-      RobotState.getInstance()
-          .addOdometryObservation(
-              new RobotState.OdometryObservation(
-                  modulePositions,
-                  Optional.ofNullable(
-                      gyroInputs.connected ? gyroInputs.odometryYawPositions[i] : null),
-                  sampleTimestamps[i]));
 
       // Update gyro angle
       if (gyroInputs.connected) {
@@ -192,6 +184,7 @@ public class Drive extends SubsystemBase {
 
     // Update gyro alert
     gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
+    RobotState.getInstance().setPose(poseEstimator.getEstimatedPosition());
   }
 
   /**

@@ -6,12 +6,10 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.subsystems.drive.Drive;
-import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
 import frc.robot.util.RobotState;
 import org.littletonrobotics.junction.Logger;
@@ -42,65 +40,23 @@ public class DriveController extends Command {
   private final Drive drive;
   private Pose2d targetPose;
   private final Timer timer = new Timer();
-  private boolean left = false;
-
-  private boolean autoAlign = false;
+  private boolean right;
 
   private final PIDController xController = new PIDController(linearkP, 0.0, linearkD);
   private final PIDController yController = new PIDController(linearkP, 0.0, linearkD);
   private final PIDController thetaController = new PIDController(thetakP, 0.0, thetakD);
 
-  public DriveController(Pose2d targetPose, Drive drive) {
+  public DriveController(boolean right, Drive drive) {
     this.drive = drive;
-    this.targetPose = targetPose;
-
-    thetaController.enableContinuousInput(-Math.PI, Math.PI);
-    addRequirements(drive);
-  }
-
-  public DriveController(boolean left, Drive drive) {
-    this.drive = drive;
-    this.left = left;
-    this.autoAlign = true;
+    this.right = right;
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
     addRequirements(drive);
   }
 
   @Override
   public void initialize() {
-
-    if (autoAlign) {
-      RobotState.Zones zone = RobotState.getInstance().getCurrentZone();
-      double x;
-      double y;
-
-      if (AllianceFlipUtil.shouldFlip()) {
-        x = AllianceFlipUtil.applyX(FieldConstants.Reef.centerFaces[zone.getFace()].getX());
-        y = AllianceFlipUtil.applyY(FieldConstants.Reef.centerFaces[zone.getFace()].getY());
-      } else {
-        x = FieldConstants.Reef.centerFaces[zone.getFace()].getX();
-        y = FieldConstants.Reef.centerFaces[zone.getFace()].getY();
-      }
-
-      double adjustedX =
-          x
-              + Units.inchesToMeters(-(14.5 + 5))
-                  * Math.cos(
-                      FieldConstants.Reef.centerFaces[zone.getFace()].getRotation().getRadians());
-      double adjustedY =
-          y
-              + Units.inchesToMeters(-(14.5 + 5))
-                  * Math.sin(
-                      FieldConstants.Reef.centerFaces[zone.getFace()].getRotation().getRadians());
-
-      this.targetPose =
-          new Pose2d(
-              adjustedX, adjustedY, FieldConstants.Reef.centerFaces[zone.getFace()].getRotation());
-      Logger.recordOutput("RobotController/Adjusted", this.targetPose);
-      Logger.recordOutput(
-          "RobotController/Unadjusted",
-          new Pose2d(x, y, FieldConstants.Reef.centerFaces[zone.getFace()].getRotation()));
-    }
+    this.targetPose = FieldConstants.getNearestBranch(right);
+    Logger.recordOutput("RobotController/targetPose", this.targetPose);
 
     timer.restart();
 
@@ -111,7 +67,7 @@ public class DriveController extends Command {
 
   @Override
   public void execute() {
-    Pose2d robot = RobotState.getInstance().getEstimatedPose();
+    Pose2d robot = RobotState.getInstance().getPose();
     double xFeedback = xController.calculate(robot.getX(), targetPose.getX());
     double yFeedback = yController.calculate(robot.getY(), targetPose.getY());
     double thetaFeedback =
@@ -135,13 +91,14 @@ public class DriveController extends Command {
   public boolean isFinished() {
     return (targetPose
                 .getTranslation()
-                .getDistance(RobotState.getInstance().getEstimatedPose().getTranslation())
-            < 0.03)
-        && (RobotState.getInstance()
-                .getEstimatedPose()
-                .getRotation()
-                .minus(targetPose.getRotation())
-                .getDegrees()
-            < 5);
+                .getDistance(RobotState.getInstance().getPose().getTranslation())
+            < 0.05)
+        && (Math.abs(
+                RobotState.getInstance()
+                    .getPose()
+                    .getRotation()
+                    .minus(targetPose.getRotation())
+                    .getDegrees())
+            < 0.1);
   }
 }

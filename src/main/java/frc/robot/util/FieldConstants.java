@@ -207,4 +207,40 @@ public class FieldConstants {
     private final AprilTagFieldLayout layout;
     private final String layoutString;
   }
+
+  /**
+   * Adjusts a pose by a given offset in inches.
+   *
+   * @param pose The pose to adjust.
+   * @param offsetInches The offset in inches.
+   * @return The adjusted pose.
+   */
+  public static Pose2d adjustPose(Pose2d pose, double offsetInches) {
+    double adjustedX =
+        pose.getX()
+            + Units.inchesToMeters((offsetInches)) * Math.cos(pose.getRotation().getRadians());
+    double adjustedY =
+        pose.getY()
+            + Units.inchesToMeters((offsetInches)) * Math.sin(pose.getRotation().getRadians());
+
+    return new Pose2d(adjustedX, adjustedY, pose.getRotation());
+  }
+
+  /**
+   * @return The nearest adjusted branch pose
+   */
+  public static Pose2d getNearestBranch(boolean left) {
+    RobotState.Zones zone = RobotState.getInstance().getCurrentZone();
+    Pose2d targetPose2D =
+        left
+            ? FieldConstants.Reef.branchPositions
+                .get(zone.getFace() * 2)
+                .get(ReefHeight.L1)
+                .toPose2d()
+            : FieldConstants.Reef.branchPositions
+                .get(zone.getFace() * 2 + 1)
+                .get(ReefHeight.L1)
+                .toPose2d();
+    return AllianceFlipUtil.getCorrected(FieldConstants.adjustPose(targetPose2D, 20));
+  }
 }

@@ -147,9 +147,6 @@ public class RobotContainer {
                 () -> -controller.getLeftX(),
                 () -> new Rotation2d()));
 
-    // Switch to X pattern when X button is pressed
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
-
     // Reset gyro to 0° when B button is pressed
     controller
         .b()
@@ -162,7 +159,9 @@ public class RobotContainer {
                     },
                     drive)
                 .ignoringDisable(true));
+
     controller.y().onTrue(new DriveController(true, drive));
+    controller.x().onTrue(new DriveController(false, drive));
   }
 
   /**

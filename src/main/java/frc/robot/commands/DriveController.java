@@ -1,7 +1,5 @@
 package frc.robot.commands;
 
-import static frc.robot.Constants.RobotType.COMPBOT;
-
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -11,7 +9,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.FieldConstants;
-import frc.robot.util.RobotState;
+import frc.robot.RobotState;
 import org.littletonrobotics.junction.Logger;
 
 public class DriveController extends Command {
@@ -57,6 +55,7 @@ public class DriveController extends Command {
   public void initialize() {
     this.targetPose = FieldConstants.getNearestBranch(right);
     Logger.recordOutput("RobotController/targetPose", this.targetPose);
+    RobotState.getInstance().setAutoAlign(true);
 
     timer.restart();
 
@@ -84,6 +83,7 @@ public class DriveController extends Command {
 
   @Override
   public void end(boolean interrupted) {
+    RobotState.getInstance().setAutoAlign(false);
     drive.runVelocity(new ChassisSpeeds());
   }
 

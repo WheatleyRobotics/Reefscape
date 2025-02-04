@@ -25,6 +25,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotState;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 import java.util.LinkedList;
 import java.util.List;
@@ -126,24 +127,33 @@ public class Vision extends SubsystemBase {
         }
 
         // Calculate standard deviations
-        double stdDevFactor =
-            Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount();
-        double linearStdDev = linearStdDevBaseline * stdDevFactor;
-        double angularStdDev = angularStdDevBaseline * stdDevFactor;
-        if (observation.type() == PoseObservationType.MEGATAG_2) {
-          linearStdDev *= linearStdDevMegatag2Factor;
-          angularStdDev *= angularStdDevMegatag2Factor;
-        }
-        if (cameraIndex < cameraStdDevFactors.length) {
-          linearStdDev *= cameraStdDevFactors[cameraIndex];
-          angularStdDev *= cameraStdDevFactors[cameraIndex];
-        }
+        if(RobotState.getInstance().isAutoAlign()){
+          if (observation.type() == PoseObservationType.MEGATAG_2) {
+            consumer.accept(
+                    observation.pose().toPose2d(),
+                    observation.timestamp(),
+                    VecBuilder.fill(0.0, Double.MAX_VALUE, 0.0));
+          }
+        }else{
+          double stdDevFactor =
+                  Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount();
+          double linearStdDev = linearStdDevBaseline * stdDevFactor;
+          double angularStdDev = angularStdDevBaseline * stdDevFactor;
+          if (observation.type() == PoseObservationType.MEGATAG_2) {
+            linearStdDev *= linearStdDevMegatag2Factor;
+            angularStdDev *= angularStdDevMegatag2Factor;
+          }
+          if (cameraIndex < cameraStdDevFactors.length) {
+            linearStdDev *= cameraStdDevFactors[cameraIndex];
+            angularStdDev *= cameraStdDevFactors[cameraIndex];
+          }
 
-        // Send vision observation
-        consumer.accept(
-            observation.pose().toPose2d(),
-            observation.timestamp(),
-            VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev));
+          // Send vision observation
+          consumer.accept(
+                  observation.pose().toPose2d(),
+                  observation.timestamp(),
+                  VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev));
+        }
       }
 
       // Log camera datadata

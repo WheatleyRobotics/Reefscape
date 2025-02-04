@@ -5,9 +5,11 @@
 // license that can be found in the LICENSE file at
 // the root directory of this project.
 
-package frc.robot.util;
+package frc.robot;
 
 import edu.wpi.first.math.geometry.*;
+import frc.robot.util.AllianceFlipUtil;
+import frc.robot.util.FieldConstants;
 import lombok.Data;
 import lombok.Getter;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -27,6 +29,10 @@ public class RobotState {
   @AutoLogOutput(key = "RobotState/Zone")
   private Zones currentZone = Zones.Z1;
 
+  @AutoLogOutput(key = "RobotState/AutoAlign")
+  private boolean autoAlign = false;
+
+  @Getter
   public enum Zones {
     Z1(0),
     Z2(1),
@@ -34,7 +40,7 @@ public class RobotState {
     Z4(3),
     Z5(4),
     Z6(5);
-    @Getter private final int face;
+    private final int face;
 
     Zones(int face) {
       this.face = face;

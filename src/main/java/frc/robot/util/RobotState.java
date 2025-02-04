@@ -8,10 +8,11 @@
 package frc.robot.util;
 
 import edu.wpi.first.math.geometry.*;
+import lombok.Data;
 import lombok.Getter;
-import lombok.Setter;
 import org.littletonrobotics.junction.AutoLogOutput;
 
+@Data
 public class RobotState {
   private static RobotState instance;
 
@@ -20,13 +21,9 @@ public class RobotState {
     return instance;
   }
 
-  @Getter
-  @Setter
   @AutoLogOutput(key = "RobotState/Pose")
   private Pose2d pose = new Pose2d();
 
-  @Getter
-  @Setter
   @AutoLogOutput(key = "RobotState/Zone")
   private Zones currentZone = Zones.Z1;
 
@@ -46,15 +43,19 @@ public class RobotState {
 
   public void update() {
     Translation2d flippedReef;
+    double angle;
     if (AllianceFlipUtil.shouldFlip()) {
       flippedReef = AllianceFlipUtil.apply(FieldConstants.Reef.center);
+      angle = -Math.atan2(pose.getY() - flippedReef.getY(), pose.getX() - flippedReef.getX());
+
+      angle += Math.PI / 6.0;
+
     } else {
       flippedReef = FieldConstants.Reef.center;
+      angle = -Math.atan2(pose.getY() - flippedReef.getY(), pose.getX() - flippedReef.getX());
+
+      angle += Math.PI + Math.PI / 6.0;
     }
-    double angle = -Math.atan2(pose.getY() - flippedReef.getY(), pose.getX() - flippedReef.getX());
-
-    angle += Math.PI / 6.0;
-
     double normalizedAngle = (angle + (2 * Math.PI)) % (2 * Math.PI);
 
     if (normalizedAngle >= 0 && normalizedAngle < Math.PI / 3) {

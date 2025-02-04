@@ -138,7 +138,7 @@ public class RobotContainer {
             () -> -controller.getRightX()));
 
     controller
-        .leftTrigger() // .button(3) in sim
+        .leftBumper()
         .whileTrue(
             DriveCommands.joystickDrive(
                 drive,
@@ -169,8 +169,8 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    controller.rightBumper().onTrue(new DriveController(true, drive));
-    controller.leftBumper().onTrue(new DriveController(false, drive));
+    controller.leftTrigger(0.8).onTrue(new DriveController(false, drive));
+    controller.rightTrigger(0.8).onTrue(new DriveController(true, drive));
   }
 
   /**

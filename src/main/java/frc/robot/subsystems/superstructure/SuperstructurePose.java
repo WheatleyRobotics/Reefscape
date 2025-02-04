@@ -20,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 
 public record SuperstructurePose(DoubleSupplier elevatorHeight, Supplier<Rotation2d> pivotAngle) {
   private static final double reversedHeightOffset = Units.inchesToMeters(5.0);
-  private static final double algaeIntakeAngle = -105.0;
+  private static final double algaeIntakeAngle = 180.0;
   private static final double groundToCarriageZero = carriageOrigin3d.getZ();
 
   // Read distance to branch from robot state to calculate positions
@@ -53,7 +53,7 @@ public record SuperstructurePose(DoubleSupplier elevatorHeight, Supplier<Rotatio
             ReefHeight.L4.height
                 - groundToCarriageZero
                 - pivotLength * Rotation2d.fromDegrees(-45.0).getSin()),
-        new LoggedTunableNumber("Superstructure/L4/Pivot", -45.0)),
+        new LoggedTunableNumber("Superstructure/L4/Pivot", 180)),
     ALGAE_FLOOR_INTAKE(
         "AlgaeFloorIntake",
         Units.inchesToMeters(16.5)

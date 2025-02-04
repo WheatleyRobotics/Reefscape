@@ -9,6 +9,12 @@
           "data": {
             "pathName": "Human Player Place Left"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "CL4"
+          }
         }
       ]
     }

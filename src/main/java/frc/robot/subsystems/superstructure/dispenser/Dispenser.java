@@ -33,13 +33,13 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Dispenser {
-  public static final Rotation2d minAngle = Rotation2d.fromDegrees(-140.0);
-  public static final Rotation2d maxAngle = Rotation2d.fromDegrees(160.0);
+  public static final Rotation2d minAngle = Rotation2d.fromDegrees(0);
+  public static final Rotation2d maxAngle = Rotation2d.fromDegrees(360);
   private static final double maxAngleRad = calculateFinalAngle(maxAngle).getRadians();
   private static final double minAngleRad = calculateFinalAngle(minAngle).getRadians();
 
   // Tunable numbers
-  private static final LoggedTunableNumber kP = new LoggedTunableNumber("Dispenser/kP", 4000.0);
+  private static final LoggedTunableNumber kP = new LoggedTunableNumber("Dispenser/kP", 8000.0);
   private static final LoggedTunableNumber kD = new LoggedTunableNumber("Dispenser/kD", 2000.0);
   private static final LoggedTunableNumber kS = new LoggedTunableNumber("Dispenser/kS", 1.2);
   private static final LoggedTunableNumber kG = new LoggedTunableNumber("Dispenser/kG", 0.0);

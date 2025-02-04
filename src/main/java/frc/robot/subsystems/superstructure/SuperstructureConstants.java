@@ -14,7 +14,8 @@ import edu.wpi.first.math.geometry.Translation3d;
 
 public class SuperstructureConstants {
   // 2d position of superstructure root on robot (x forward from back, y off the bellypan)
-  public static final Translation2d superstructureOrigin2d = new Translation2d(0.10686, 0.06357);
+  public static final Translation2d superstructureOrigin2d =
+      new Translation2d(0.10686, 0.06357); // TODO Find all of these constants in the CAD
   public static final Translation3d superstructureOrigin3d =
       new Translation3d(superstructureOrigin2d.getX(), 0.0, superstructureOrigin2d.getY());
   public static final double pivotLength = 0.16;
@@ -31,7 +32,7 @@ public class SuperstructureConstants {
           + 2 * (stageHeight - stageToStage)
           + stageHeight
           - carriageToStage;
-  public static final Rotation2d elevatorAngle = Rotation2d.fromDegrees(82.0);
+  public static final Rotation2d elevatorAngle = Rotation2d.fromDegrees(90);
   public static final Translation3d carriageOrigin3d =
       superstructureOrigin3d.plus(
           new Translation3d(

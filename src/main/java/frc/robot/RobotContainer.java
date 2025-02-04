@@ -16,6 +16,7 @@ package frc.robot;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -36,10 +37,6 @@ import frc.robot.subsystems.rollers.RollerSystemIOFalcon;
 import frc.robot.subsystems.rollers.RollerSystemIOSim;
 import frc.robot.subsystems.superstructure.Superstructure;
 import frc.robot.subsystems.superstructure.SuperstructureState;
-import frc.robot.subsystems.superstructure.arm.Arm;
-import frc.robot.subsystems.superstructure.arm.ArmIO;
-import frc.robot.subsystems.superstructure.arm.ArmIOFalcon;
-import frc.robot.subsystems.superstructure.arm.ArmIOSim;
 import frc.robot.subsystems.superstructure.dispenser.Dispenser;
 import frc.robot.subsystems.superstructure.dispenser.DispenserIOFalcon;
 import frc.robot.subsystems.superstructure.dispenser.DispenserIOSim;
@@ -78,7 +75,6 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    Arm arm = null;
     Elevator elevator = null;
     Dispenser dispenser = null;
     Slam slam = null;
@@ -97,7 +93,6 @@ public class RobotContainer {
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVision(camera0Name, robotToCamera0),
                 new VisionIOPhotonVision(camera1Name, robotToCamera1));
-        arm = new Arm(new ArmIOFalcon());
         elevator = new Elevator(new ElevatorIOFalcon());
         dispenser =
             new Dispenser(
@@ -121,7 +116,6 @@ public class RobotContainer {
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
                 new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
-        arm = new Arm(new ArmIOSim());
         elevator = new Elevator(new ElevatorIOSim());
         dispenser =
             new Dispenser(
@@ -142,11 +136,16 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {});
         vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
-        arm = new Arm(new ArmIO() {});
         elevator = new Elevator(new ElevatorIO() {});
         break;
     }
     superstructure = new Superstructure(elevator, dispenser, slam);
+    NamedCommands.registerCommand(
+        "CL4", superstructure.runGoal(SuperstructureState.State.L4_CORAL_EJECT.getValue()));
+    NamedCommands.registerCommand(
+        "AL3", superstructure.runGoal(SuperstructureState.State.ALGAE_L3_INTAKE.getValue()));
+    NamedCommands.registerCommand(
+        "STOW", superstructure.runGoal(SuperstructureState.State.STOW.getValue()));
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
@@ -226,7 +225,7 @@ public class RobotContainer {
                   Logger.recordOutput(
                       "RandomState", SuperstructureState.State.values()[randomInt.value]);
                   return superstructure.runGoal(
-                      SuperstructureState.State.values()[randomInt.value].getValue());
+                      SuperstructureState.State.L4_CORAL_EJECT.getValue());
                 },
                 Set.of(superstructure)));
     // .onTrue(new DriveController(drive, new Pose2d(3.7, 3, Rotation2d.fromDegrees(40)))); //

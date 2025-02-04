@@ -24,6 +24,12 @@
           "open": true
         },
         "open": true
+      },
+      "SmartDashboard": {
+        "Auto Choices": {
+          "open": true
+        },
+        "open": true
       }
     }
   },

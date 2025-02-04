@@ -137,6 +137,15 @@ public class RobotContainer {
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
 
+    controller
+        .leftTrigger() // .button(3) in sim
+        .whileTrue(
+            DriveCommands.joystickDrive(
+                drive,
+                () -> -controller.getLeftY() * .5,
+                () -> -controller.getLeftX() * .5,
+                () -> -controller.getRightX() * .5));
+
     // Lock to 0° when A button is held
     controller
         .a()
@@ -160,8 +169,8 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    controller.y().onTrue(new DriveController(true, drive));
-    controller.x().onTrue(new DriveController(false, drive));
+    controller.rightBumper().onTrue(new DriveController(true, drive));
+    controller.leftBumper().onTrue(new DriveController(false, drive));
   }
 
   /**

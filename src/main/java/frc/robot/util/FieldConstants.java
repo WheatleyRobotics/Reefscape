@@ -241,6 +241,11 @@ public class FieldConstants {
                 .get(zone.getFace() * 2 + 1)
                 .get(ReefHeight.L1)
                 .toPose2d();
-    return AllianceFlipUtil.getCorrected(FieldConstants.adjustPose(targetPose2D, 20));
+    return AllianceFlipUtil.getCorrected(
+        FieldConstants.adjustPose(
+            new Pose2d(
+                targetPose2D.getTranslation(),
+                targetPose2D.getRotation().plus(new Rotation2d(Math.PI))),
+            -20));
   }
 }

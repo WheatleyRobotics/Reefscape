@@ -19,7 +19,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Z5-Processor"
+            "pathName": "Z5-Source"
           }
         },
         {
@@ -31,7 +31,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Processor-Source"
+            "pathName": "Source-Z6"
           }
         }
       ]

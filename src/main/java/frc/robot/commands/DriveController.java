@@ -23,15 +23,15 @@ public class DriveController extends Command {
   static {
     switch (Constants.getRobotType()) {
       case COMPBOT, DEVBOT -> {
-        linearkP = 8.0;
+        linearkP = 2.0;
         linearkD = 0.0;
-        thetakP = 4.0;
+        thetakP = 2.0;
         thetakD = 0.0;
       }
       default -> {
-        linearkP = 4.0;
+        linearkP = 2.0;
         linearkD = 0.0;
-        thetakP = 4.0;
+        thetakP = 2.0;
         thetakD = 0.0;
       }
     }

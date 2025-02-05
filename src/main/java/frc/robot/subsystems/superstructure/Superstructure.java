@@ -9,18 +9,27 @@ package frc.robot.subsystems.superstructure;
 
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.*;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants;
+import frc.robot.Constants.RobotType;
 import frc.robot.subsystems.superstructure.SuperstructureState.State;
 import frc.robot.subsystems.superstructure.dispenser.Dispenser;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.superstructure.slam.Slam;
 import frc.robot.subsystems.superstructure.slam.Slam.Goal;
 import java.util.*;
+import java.util.function.BooleanSupplier;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Superstructure extends SubsystemBase {
@@ -37,6 +46,17 @@ public class Superstructure extends SubsystemBase {
   private SuperstructureState next = null;
   private SuperstructureState goal = State.START.getValue();
 
+  @AutoLogOutput(key = "Superstructure/EStopped")
+  private boolean isEStopped = false;
+
+  @Setter private BooleanSupplier disabledOverride = () -> false;
+  private final Alert driverDisableAlert =
+      new Alert("Superstructure disabled due to driver override.", Alert.AlertType.kWarning);
+  private final Alert emergencyDisableAlert =
+      new Alert(
+          "Superstructure emergency disabled due to high position error. Disable the superstructure manually and reenable to reset.",
+          Alert.AlertType.kError);
+
   private final SuperstructureVisualizer measuredVisualizer =
       new SuperstructureVisualizer("Measured");
   private final SuperstructureVisualizer setpointVisualizer =
@@ -47,6 +67,10 @@ public class Superstructure extends SubsystemBase {
     this.elevator = elevator;
     this.dispenser = dispenser;
     this.slam = slam;
+
+    // Updating E Stop based on disabled override
+    new Trigger(() -> disabledOverride.getAsBoolean())
+        .onFalse(Commands.runOnce(() -> isEStopped = false).ignoringDisable(true));
 
     // Add states as vertices
     for (var state : State.values()) {
@@ -239,7 +263,9 @@ public class Superstructure extends SubsystemBase {
     dispenser.periodic();
     slam.periodic();
 
-    if (edgeCommand == null || !edgeCommand.getCommand().isScheduled()) {
+    if (DriverStation.isDisabled()) {
+      next = null;
+    } else if (edgeCommand == null || !edgeCommand.getCommand().isScheduled()) {
       // Update edge to new state
       if (next != null) {
         state = next;
@@ -257,6 +283,17 @@ public class Superstructure extends SubsystemBase {
                 });
       }
     }
+
+    // E Stop Dispenser and Elevator if Necessary
+    isEStopped =
+        isEStopped
+            || elevator.isShouldEStop()
+            || (dispenser.isShouldEStop() && Constants.getRobotType() != RobotType.DEVBOT);
+    elevator.setEStopped(isEStopped);
+    dispenser.setEStopped(isEStopped);
+
+    driverDisableAlert.set(disabledOverride.getAsBoolean());
+    emergencyDisableAlert.set(isEStopped);
 
     // Log state
     Logger.recordOutput(
@@ -294,6 +331,11 @@ public class Superstructure extends SubsystemBase {
         true,
         slam.getGoal().isRetracted(),
         dispenser.hasAlgae());
+  }
+
+  @AutoLogOutput(key = "Superstructure/AtGoal")
+  public boolean atGoal() {
+    return state == goal;
   }
 
   private void setGoal(SuperstructureState goal) {
@@ -397,7 +439,27 @@ public class Superstructure extends SubsystemBase {
    * subsystems are complete with profiles.
    */
   private EdgeCommand getEdgeCommand(SuperstructureState from, SuperstructureState to) {
-    if ((from == State.ALGAE_STOW_FRONT.getValue() && to == State.PRE_PROCESSOR.getValue())
+    if ((from == State.ALGAE_STOW_FRONT.getValue() && to == State.THROWN.getValue())) {
+      // Algae Stow Front --> Thrown
+      return EdgeCommand.builder()
+          .command(
+              Commands.runOnce(
+                      () -> {
+                        elevator.setGoal(
+                            () ->
+                                new TrapezoidProfile.State(
+                                    SuperstructureConstants.throwHeight.get(),
+                                    SuperstructureConstants.throwVelocity.get()));
+                        dispenser.setGoal(to.getPose().pivotAngle());
+                      })
+                  .andThen(
+                      getSlamCommand(Goal.SLAM_DOWN),
+                      Commands.waitUntil(this::isAtGoal),
+                      runSuperstructurePose(to.getPose()),
+                      runSuperstructureExtras(to),
+                      Commands.waitUntil(this::isAtGoal)))
+          .build();
+    } else if ((from == State.ALGAE_STOW_FRONT.getValue() && to == State.PRE_PROCESSOR.getValue())
         || (from == State.PRE_PROCESSOR.getValue() && to == State.ALGAE_STOW_FRONT.getValue())) {
       // Algae Stow Front <--> Pre-Processor
       final boolean toProcessor = to == State.PRE_PROCESSOR.getValue();
@@ -503,7 +565,8 @@ public class Superstructure extends SubsystemBase {
   }
 
   private boolean isAtGoal() {
-    return elevator.isAtGoal() && dispenser.isAtGoal();
+    return elevator.isAtGoal()
+        && (dispenser.isAtGoal() || Constants.getRobotType() == RobotType.DEVBOT);
   }
 
   /** All edge commands should finish and exit properly. */

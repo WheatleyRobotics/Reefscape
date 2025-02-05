@@ -55,4 +55,10 @@ public final class Constants {
     DEVBOT,
     COMPBOT
   }
+
+  public static boolean disableHAL = false;
+
+  public static void disableHAL() {
+    disableHAL = true;
+  }
 }

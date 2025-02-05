@@ -225,7 +225,7 @@ public class RobotContainer {
                   Logger.recordOutput(
                       "RandomState", SuperstructureState.State.values()[randomInt.value]);
                   return superstructure.runGoal(
-                      SuperstructureState.State.L4_CORAL_EJECT.getValue());
+                      SuperstructureState.State.values()[randomInt.value].getValue());
                 },
                 Set.of(superstructure)));
     // .onTrue(new DriveController(drive, new Pose2d(3.7, 3, Rotation2d.fromDegrees(40)))); //

@@ -9,9 +9,9 @@ package frc.robot.subsystems.superstructure.elevator;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.math.trajectory.ExponentialProfile;
-import edu.wpi.first.math.trajectory.ExponentialProfile.Constraints;
-import edu.wpi.first.math.trajectory.ExponentialProfile.State;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -22,32 +22,54 @@ import frc.robot.Constants;
 import frc.robot.subsystems.superstructure.SuperstructureConstants;
 import frc.robot.util.EqualsUtil;
 import frc.robot.util.LoggedTunableNumber;
-import java.util.Arrays;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import lombok.Getter;
+import lombok.Setter;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Elevator {
-  public static final double drumRadiusMeters = Units.inchesToMeters(6.0);
+  public static final double sprocketRadius =
+      Units.inchesToMeters(1.0); // TODO find the sprocket radius that the chain rides on
 
   // Tunable numbers
-  private static final LoggedTunableNumber kP = new LoggedTunableNumber("Elevator/kP", 5000);
-  private static final LoggedTunableNumber kD = new LoggedTunableNumber("Elevator/kD", 2000);
-  private static final LoggedTunableNumber kS = new LoggedTunableNumber("Elevator/kS", 5);
-  private static final LoggedTunableNumber kG = new LoggedTunableNumber("Elevator/kG", 50);
-  private static final LoggedTunableNumber maxTorque =
-      new LoggedTunableNumber("Elevator/MaxTorqueNm", 20.0);
+  private static final LoggedTunableNumber kP = new LoggedTunableNumber("Elevator/kP");
+  private static final LoggedTunableNumber kD = new LoggedTunableNumber("Elevator/kD");
+  private static final LoggedTunableNumber kS = new LoggedTunableNumber("Elevator/kS");
+  private static final LoggedTunableNumber kG = new LoggedTunableNumber("Elevator/kG");
+  private static final LoggedTunableNumber maxVelocityMetersPerSec =
+      new LoggedTunableNumber("Elevator/MaxVelocityMetersPerSec", 3.5);
+  private static final LoggedTunableNumber maxAccelerationMetersPerSec2 =
+      new LoggedTunableNumber("Elevator/MaxAccelerationMetersPerSec2", 20);
   private static final LoggedTunableNumber homingVolts =
-      new LoggedTunableNumber("Elevator/HomingVolts", -3.0);
+      new LoggedTunableNumber("Elevator/HomingVolts", -2.0);
   private static final LoggedTunableNumber homingTimeSecs =
-      new LoggedTunableNumber("Elevator/HomingTimeSecs", 0.5);
+      new LoggedTunableNumber("Elevator/HomingTimeSecs", 0.25);
   private static final LoggedTunableNumber homingVelocityThresh =
-      new LoggedTunableNumber("Elevator/HomingCurrentLimitAmps", 0.05);
+      new LoggedTunableNumber("Elevator/HomingVelocityThresh", 5.0);
   private static final LoggedTunableNumber staticCharacterizationVelocityThresh =
       new LoggedTunableNumber("Elevator/StaticCharacterizationVelocityThresh", 0.1);
+  private static final LoggedTunableNumber tolerance =
+      new LoggedTunableNumber("Elevator/Tolerance", 0.2);
+
+  static {
+    switch (Constants.getRobotType()) {
+      case COMPBOT, DEVBOT -> {
+        kP.initDefault(1200);
+        kD.initDefault(30);
+        kS.initDefault(0);
+        kG.initDefault(5);
+      }
+      case SIMBOT -> {
+        kP.initDefault(5000);
+        kD.initDefault(2000);
+        kS.initDefault(5);
+        kG.initDefault(50);
+      }
+    }
+  }
 
   private final ElevatorIO io;
   private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
@@ -55,24 +77,25 @@ public class Elevator {
   private final Alert motorDisconnectedAlert =
       new Alert("Elevator motor disconnected!", Alert.AlertType.kWarning);
   private BooleanSupplier coastOverride = () -> false;
-  private BooleanSupplier disabledOverride = DriverStation::isDisabled;
+  private BooleanSupplier disabledOverride = () -> false;
 
-  @AutoLogOutput(key = "Elevator/BrakeModeEnabled")
-  private boolean brakeModeEnabled = true;
+  @AutoLogOutput private boolean brakeModeEnabled = true;
 
-  private ExponentialProfile profile;
+  private TrapezoidProfile profile;
   @Getter private State setpoint = new State();
   private Supplier<State> goal = State::new;
   private boolean stopProfile = false;
+  @Getter private boolean shouldEStop = false;
+  @Setter private boolean isEStopped = false;
 
   @AutoLogOutput(key = "Elevator/HomedPositionRad")
   private double homedPosition = 0.0;
 
-  @AutoLogOutput(key = "Elevator/Homed")
-  @Getter
-  private boolean homed = false;
+  @AutoLogOutput @Getter private boolean homed = false;
 
   private Debouncer homingDebouncer = new Debouncer(homingTimeSecs.get());
+
+  private Debouncer toleranceDebouncer = new Debouncer(0.25, DebounceType.kRising);
 
   @Getter
   @AutoLogOutput(key = "Elevator/Profile/AtGoal")
@@ -81,7 +104,10 @@ public class Elevator {
   public Elevator(ElevatorIO io) {
     this.io = io;
 
-    profile = new ExponentialProfile(fromMaxTorque(maxTorque.get()));
+    profile =
+        new TrapezoidProfile(
+            new TrapezoidProfile.Constraints(
+                maxVelocityMetersPerSec.get(), maxAccelerationMetersPerSec2.get()));
   }
 
   public void periodic() {
@@ -94,27 +120,45 @@ public class Elevator {
     if (kP.hasChanged(hashCode()) || kD.hasChanged(hashCode())) {
       io.setPID(kP.get(), 0.0, kD.get());
     }
-    if (maxTorque.hasChanged(hashCode())) {
-      profile = new ExponentialProfile(fromMaxTorque(maxTorque.get()));
+    if (maxVelocityMetersPerSec.hasChanged(hashCode())
+        || maxAccelerationMetersPerSec2.hasChanged(hashCode())) {
+      profile =
+          new TrapezoidProfile(
+              new TrapezoidProfile.Constraints(
+                  maxVelocityMetersPerSec.get(), maxAccelerationMetersPerSec2.get()));
     }
 
     // Set coast mode
     setBrakeMode(!coastOverride.getAsBoolean());
 
-    final boolean shouldRunProfile =
-        !stopProfile && !coastOverride.getAsBoolean() && !disabledOverride.getAsBoolean() && homed;
-    Logger.recordOutput("Elevator/RunningProfile", shouldRunProfile);
     // Run profile
+    final boolean shouldRunProfile =
+        !stopProfile
+            && !coastOverride.getAsBoolean()
+            && !disabledOverride.getAsBoolean()
+            && homed
+            && !isEStopped
+            && DriverStation.isEnabled();
+    Logger.recordOutput("Elevator/RunningProfile", shouldRunProfile);
+    // Check if out of tolerance
+    boolean outOfTolerance = Math.abs(getPositionMeters() - setpoint.position) > tolerance.get();
+    shouldEStop = toleranceDebouncer.calculate(outOfTolerance && shouldRunProfile);
     if (shouldRunProfile) {
       // Clamp goal
       var goalState =
           new State(
-              MathUtil.clamp(
-                  goal.get().position, 0.0, SuperstructureConstants.elevatorHeightMeters),
+              MathUtil.clamp(goal.get().position, 0.0, SuperstructureConstants.elevatorMaxTravel),
               goal.get().velocity);
       setpoint = profile.calculate(Constants.loopPeriodSecs, setpoint, goalState);
+      if (setpoint.position < 0.0
+          || setpoint.position > SuperstructureConstants.elevatorMaxTravel) {
+        setpoint =
+            new State(
+                MathUtil.clamp(setpoint.position, 0.0, SuperstructureConstants.elevatorMaxTravel),
+                0.0);
+      }
       io.runPosition(
-          setpoint.position / drumRadiusMeters,
+          setpoint.position / sprocketRadius + homedPosition,
           kS.get() * Math.signum(setpoint.velocity) // Magnitude irrelevant
               + kG.get() * SuperstructureConstants.elevatorAngle.getSin());
       // Check at goal
@@ -128,18 +172,24 @@ public class Elevator {
       Logger.recordOutput("Elevator/Profile/GoalPositionMeters", goalState.position);
       Logger.recordOutput("Elevator/Profile/GoalVelocityMetersPerSec", goalState.velocity);
     } else {
+      // Reset setpoint
+      setpoint = new State(getPositionMeters(), 0.0);
+
       // Clear logs
       Logger.recordOutput("Elevator/Profile/SetpointPositionMeters", 0.0);
       Logger.recordOutput("Elevator/Profile/SetpointVelocityMetersPerSec", 0.0);
       Logger.recordOutput("Elevator/Profile/GoalPositionMeters", 0.0);
       Logger.recordOutput("Elevator/Profile/GoalVelocityMetersPerSec", 0.0);
     }
+    if (isEStopped) {
+      io.stop();
+    }
 
     // Log state
     Logger.recordOutput("Elevator/CoastOverride", coastOverride.getAsBoolean());
     Logger.recordOutput("Elevator/DisabledOverride", disabledOverride.getAsBoolean());
     Logger.recordOutput(
-        "Elevator/MeasuredVelocityMetersPerSec", inputs.velocityRadPerSec * drumRadiusMeters);
+        "Elevator/MeasuredVelocityMetersPerSec", inputs.velocityRadPerSec * sprocketRadius);
   }
 
   public void setGoal(DoubleSupplier goal) {
@@ -153,8 +203,7 @@ public class Elevator {
 
   public void setOverrides(BooleanSupplier coastOverride, BooleanSupplier disabledOverride) {
     this.coastOverride = coastOverride;
-    this.disabledOverride =
-        () -> this.disabledOverride.getAsBoolean() && disabledOverride.getAsBoolean();
+    this.disabledOverride = disabledOverride;
   }
 
   private void setBrakeMode(boolean enabled) {
@@ -202,34 +251,25 @@ public class Elevator {
                       Math.abs(inputs.velocityRadPerSec) <= homingVelocityThresh.get());
             })
         .until(() -> homed)
+        .andThen(
+            () -> {
+              homedPosition = inputs.positionRad;
+              homed = true;
+            })
         .finallyDo(
             () -> {
               stopProfile = false;
-              homedPosition = inputs.positionRad;
-              homed = true;
             });
   }
 
   /** Get position of elevator in meters with 0 at home */
   @AutoLogOutput(key = "Elevator/MeasuredHeightMeters")
   public double getPositionMeters() {
-    return (inputs.positionRad - homedPosition) * drumRadiusMeters;
+    return (inputs.positionRad - homedPosition) * sprocketRadius;
   }
 
   public double getGoalMeters() {
     return goal.get().position;
-  }
-
-  @AutoLogOutput(key = "Elevator/AvgCurrent")
-  private double getCurrent() {
-    return Arrays.stream(inputs.currentAmps).average().getAsDouble();
-  }
-
-  private static Constraints fromMaxTorque(double maxTorque) {
-    return Constraints.fromStateSpace(
-        maxTorque / ElevatorIOSim.gearbox.KtNMPerAmp,
-        ElevatorIOSim.A.get(1, 1),
-        ElevatorIOSim.B.get(1));
   }
 
   private static class StaticCharacterizationState {

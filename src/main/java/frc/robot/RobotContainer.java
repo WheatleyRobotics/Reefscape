@@ -173,8 +173,24 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    controller.leftTrigger(0.8).onTrue(new DriveController(false, drive));
-    controller.rightTrigger(0.8).onTrue(new DriveController(true, drive));
+    controller
+        .y()
+        .onTrue(
+            new DriveController(false, drive)
+                .onlyWhile(
+                    () ->
+                        (controller.getLeftX() == 0)
+                            && (controller.getLeftY() == 0)
+                            && (controller.getRightX() == 0)));
+    controller
+        .rightTrigger(0.8)
+        .onTrue(
+            new DriveController(true, drive)
+                .onlyWhile(
+                    () ->
+                        (controller.getLeftX() == 0)
+                            && (controller.getLeftY() == 0)
+                            && (controller.getRightX() == 0)));
   }
 
   /**

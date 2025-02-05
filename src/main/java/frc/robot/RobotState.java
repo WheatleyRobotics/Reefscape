@@ -30,7 +30,7 @@ public class RobotState {
   private Zones currentZone = Zones.Z1;
 
   @AutoLogOutput(key = "RobotState/AutoAlign")
-  private boolean autoAlign = false;
+  private boolean autoAlign = true;
 
   @Getter
   public enum Zones {

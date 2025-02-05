@@ -127,16 +127,16 @@ public class Vision extends SubsystemBase {
         }
 
         // Calculate standard deviations
-        if(RobotState.getInstance().isAutoAlign()){
+        if (RobotState.getInstance().isAutoAlign()) {
           if (observation.type() == PoseObservationType.MEGATAG_2) {
             consumer.accept(
-                    observation.pose().toPose2d(),
-                    observation.timestamp(),
-                    VecBuilder.fill(0.0, Double.MAX_VALUE, 0.0));
+                observation.pose().toPose2d(),
+                observation.timestamp(),
+                VecBuilder.fill(0.0, Double.MAX_VALUE, 0.0));
           }
-        }else{
+        } else {
           double stdDevFactor =
-                  Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount();
+              Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount();
           double linearStdDev = linearStdDevBaseline * stdDevFactor;
           double angularStdDev = angularStdDevBaseline * stdDevFactor;
           if (observation.type() == PoseObservationType.MEGATAG_2) {
@@ -150,9 +150,9 @@ public class Vision extends SubsystemBase {
 
           // Send vision observation
           consumer.accept(
-                  observation.pose().toPose2d(),
-                  observation.timestamp(),
-                  VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev));
+              observation.pose().toPose2d(),
+              observation.timestamp(),
+              VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev));
         }
       }
 

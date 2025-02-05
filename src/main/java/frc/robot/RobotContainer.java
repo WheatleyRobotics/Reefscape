@@ -65,7 +65,8 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVision(camera0Name, robotToCamera0),
-                new VisionIOPhotonVision(camera1Name, robotToCamera1));
+                new VisionIOPhotonVision(camera1Name, robotToCamera1),
+                new VisionIOLimelight("limelight", drive::getRotation));
 
         break;
 
@@ -145,9 +146,9 @@ public class RobotContainer {
         .whileTrue(
             DriveCommands.joystickDrive(
                 drive,
-                () -> -controller.getLeftY() * .5,
-                () -> -controller.getLeftX() * .5,
-                () -> -controller.getRightX() * .5));
+                () -> -controller.getLeftY() * .3,
+                () -> -controller.getLeftX() * .3,
+                () -> -controller.getRightX() * .3));
 
     // Lock to 0° when A button is held
     controller

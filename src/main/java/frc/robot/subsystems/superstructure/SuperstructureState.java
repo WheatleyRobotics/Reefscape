@@ -108,8 +108,9 @@ public class SuperstructureState {
         State.PRE_PROCESSOR.getValue().toBuilder()
             .gripperCurrent(Dispenser.gripperDispenseCurrent)
             .intakeVolts(Slam.processorVolts)
-            .build()),
-    L3_CORAL_REVERSED(
+            .build());
+    /*
+    ,L3_CORAL_REVERSED(
         SuperstructureState.builder()
             .pose(SuperstructurePose.Preset.L3_CORAL_REVERSED.getPose())
             .gripperCurrent(Dispenser.gripperIntakeCurrent)
@@ -133,7 +134,7 @@ public class SuperstructureState {
         L3_CORAL_REVERSED.getValue().toBuilder().tunnelVolts(Dispenser.tunnelIntakeVolts).build()),
     L4_CORAL_REVERSED_EJECT(
         L4_CORAL_REVERSED.getValue().toBuilder().tunnelVolts(Dispenser.tunnelIntakeVolts).build());
-
+    */
     private final SuperstructureState value;
 
     State(SuperstructureState value) {

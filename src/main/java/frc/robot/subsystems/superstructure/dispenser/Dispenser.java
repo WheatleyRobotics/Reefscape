@@ -36,8 +36,8 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Dispenser {
-  public static final Rotation2d minAngle = Rotation2d.fromDegrees(-140.0);
-  public static final Rotation2d maxAngle = Rotation2d.fromDegrees(160.0);
+  public static final Rotation2d minAngle = Rotation2d.fromDegrees(-70.0);
+  public static final Rotation2d maxAngle = Rotation2d.fromDegrees(350);
   private static final double maxAngleRad = calculateFinalAngle(maxAngle).getRadians();
   private static final double minAngleRad = calculateFinalAngle(minAngle).getRadians();
 
@@ -63,12 +63,12 @@ public class Dispenser {
   public static final LoggedTunableNumber tunnelIntakeVolts =
       new LoggedTunableNumber("Dispenser/TunnelIntakeVolts", -6.0);
   public static final LoggedTunableNumber tolerance =
-      new LoggedTunableNumber("Dispenser/Tolerance", .1);
+      new LoggedTunableNumber("Dispenser/Tolerance", 10);
 
   static {
     switch (Constants.getRobotType()) {
       case SIMBOT -> {
-        kP.initDefault(4000);
+        kP.initDefault(7000);
         kD.initDefault(2000);
         kS.initDefault(1.2);
         kG.initDefault(0.0);

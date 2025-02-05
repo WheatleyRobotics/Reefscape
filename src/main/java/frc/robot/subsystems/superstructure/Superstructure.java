@@ -114,8 +114,8 @@ public class Superstructure extends SubsystemBase {
     final Set<SuperstructureState> freeAlgaeStates =
         Set.of(
             State.ALGAE_STOW_FRONT.getValue(),
-            State.L3_CORAL_UNREVERSED.getValue(),
-            State.L4_CORAL_UNREVERSED.getValue(),
+            // State.L3_CORAL_UNREVERSED.getValue(),
+            // State.L4_CORAL_UNREVERSED.getValue(),
             State.ALGAE_L2_INTAKE.getValue(),
             State.ALGAE_L3_INTAKE.getValue());
 
@@ -188,6 +188,7 @@ public class Superstructure extends SubsystemBase {
             new Pair<>(State.L2_CORAL.getValue(), State.L2_CORAL_EJECT.getValue()),
             new Pair<>(State.L3_CORAL.getValue(), State.L3_CORAL_EJECT.getValue()),
             new Pair<>(State.L4_CORAL.getValue(), State.L4_CORAL_EJECT.getValue()),
+            /*
             new Pair<>(
                 State.L3_CORAL_REVERSED.getValue(), State.L3_CORAL_REVERSED_EJECT.getValue()),
             new Pair<>(
@@ -195,6 +196,7 @@ public class Superstructure extends SubsystemBase {
             new Pair<>(State.L3_CORAL_REVERSED.getValue(), State.L3_CORAL_UNREVERSED.getValue()),
             new Pair<>(State.L4_CORAL_REVERSED.getValue(), State.L4_CORAL_UNREVERSED.getValue()),
             new Pair<>(State.L3_CORAL_REVERSED.getValue(), State.L4_CORAL_REVERSED.getValue()),
+            */
             new Pair<>(State.ALGAE_STOW.getValue(), State.ALGAE_STOW_FRONT.getValue()),
             new Pair<>(State.ALGAE_STOW_FRONT.getValue(), State.PRE_PROCESSOR.getValue()));
     for (var ejectPair : pairedStates) {
@@ -206,13 +208,15 @@ public class Superstructure extends SubsystemBase {
         Set.of(
             State.ALGAE_STOW.getValue(),
             State.PRE_PROCESSOR.getValue(),
-            State.ALGAE_STOW_FRONT.getValue(),
-            State.L3_CORAL_UNREVERSED.getValue(),
-            State.L4_CORAL_UNREVERSED.getValue(),
-            State.L3_CORAL_REVERSED.getValue(),
-            State.L4_CORAL_REVERSED.getValue(),
-            State.L3_CORAL_REVERSED_EJECT.getValue(),
-            State.L4_CORAL_REVERSED_EJECT.getValue())) {
+            State.ALGAE_STOW_FRONT.getValue()))
+    /*
+    ,State.L3_CORAL_UNREVERSED.getValue(),
+    State.L4_CORAL_UNREVERSED.getValue(),
+    State.L3_CORAL_REVERSED.getValue(),
+    State.L4_CORAL_REVERSED.getValue(),
+    State.L3_CORAL_REVERSED_EJECT.getValue(),
+    State.L4_CORAL_REVERSED_EJECT.getValue())) */
+    {
       for (var to : freeNoAlgaeStates) {
         graph.addEdge(
             from,

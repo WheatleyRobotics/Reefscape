@@ -20,16 +20,19 @@ import java.util.function.Supplier;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-public record SuperstructurePose(DoubleSupplier elevatorHeight, Supplier<Rotation2d> pivotAngle) {
-  private static final double algaeIntakeAngle = -105.0;
+public record SuperstructurePose(
+    DoubleSupplier elevatorHeight,
+    Supplier<Rotation2d> pivotAngle) { // TODO set all our setpoints and find the correct angles
+  private static final double algaeIntakeAngle = 240.0;
   private static final double groundToCarriageZero = dispenserOrigin2d.getY();
   private static final double tunnelEjectMeters = Units.inchesToMeters(12.0);
   private static final double tunnelEjectMetersReverse = Units.inchesToMeters(10.0);
-
+  // these angles are all measured as a circle with postive angles being CCW and negaitve angles
+  // being CW angles
   private static final double L2Angle = -ReefHeight.L2.pitch;
   private static final double L3Angle = -ReefHeight.L3.pitch;
   private static final double L4Angle = 90.0;
-  private static final double L3AngleAlgae = L3Angle + 180.0;
+  private static final double L3AngleAlgae = L3Angle - 180.0;
   private static final double L4AngleAlgae = L4Angle + 60.0 - 180.0;
 
   @RequiredArgsConstructor
@@ -102,13 +105,16 @@ public record SuperstructurePose(DoubleSupplier elevatorHeight, Supplier<Rotatio
             - groundToCarriageZero
             - (pivotToGripper / 2.0 * Rotation2d.fromDegrees(algaeIntakeAngle).getSin()),
         algaeIntakeAngle),
-    ALGAE_L2_INTAKE("AlgaeL2Intake", ReefHeight.L2.height - groundToCarriageZero, -30.0),
-    ALGAE_L3_INTAKE("AlgaeL3Intake", ReefHeight.L3.height - groundToCarriageZero, -30.0),
+    ALGAE_L2_INTAKE(
+        "AlgaeL2Intake", ReefHeight.L2.height - groundToCarriageZero, -ReefHeight.L2.pitch + 180),
+    ALGAE_L3_INTAKE(
+        "AlgaeL3Intake", ReefHeight.L3.height - groundToCarriageZero, -ReefHeight.L2.pitch + 180),
     THROW(() -> elevatorMaxTravel, () -> -40.0),
     PRE_PROCESSOR("Processing", 0.05, -80.0),
     ALGAE_STOW("AlgaeStow", 0.0, 25.0),
-    ALGAE_STOW_FRONT("AlgaeStowFront", 0.1, pivotSafeAngle.getDegrees()),
-    L3_CORAL_REVERSED(
+    ALGAE_STOW_FRONT("AlgaeStowFront", 0.1, pivotSafeAngle.getDegrees());
+    /*
+    ,L3_CORAL_REVERSED(
         "L3Reversed",
         DispenserPose.L3_ALGAE.getElevatorHeight(),
         DispenserPose.L3_ALGAE.getDispenserAngleDeg()),
@@ -118,7 +124,7 @@ public record SuperstructurePose(DoubleSupplier elevatorHeight, Supplier<Rotatio
         DispenserPose.L4_ALGAE.getDispenserAngleDeg()),
     L3_CORAL_UNREVERSED("L3Unreversed", DispenserPose.L3_ALGAE.getElevatorHeight(), -40.0),
     L4_CORAL_UNREVERSED("L4Unreversed", DispenserPose.L4_ALGAE.getElevatorHeight(), -40.0);
-
+    */
     private final SuperstructurePose pose;
 
     private Preset(DoubleSupplier elevatorHeight, DoubleSupplier pivotAngle) {

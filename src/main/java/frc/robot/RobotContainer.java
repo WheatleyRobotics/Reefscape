@@ -141,7 +141,7 @@ public class RobotContainer {
     }
     superstructure = new Superstructure(elevator, dispenser, slam);
     NamedCommands.registerCommand(
-        "CL4", superstructure.runGoal(SuperstructureState.State.L4_CORAL_EJECT.getValue()));
+        "CL4", superstructure.runGoal(SuperstructureState.State.L3_CORAL_EJECT.getValue()));
     NamedCommands.registerCommand(
         "AL3", superstructure.runGoal(SuperstructureState.State.ALGAE_L3_INTAKE.getValue()));
     NamedCommands.registerCommand(

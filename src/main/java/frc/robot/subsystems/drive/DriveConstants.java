@@ -22,7 +22,7 @@ import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
 
 public class DriveConstants {
-  public static final double maxSpeedMetersPerSec = Units.feetToMeters(17.6);
+  public static final double maxSpeedMetersPerSec = Units.feetToMeters(19.3);
   public static final double odometryFrequency = 100; // Hz
   public static final double trackWidth = Units.inchesToMeters(25);
   public static final double wheelBase = Units.inchesToMeters(25);
@@ -93,9 +93,9 @@ public class DriveConstants {
 
   // Drive motor configuration
   public static final int driveMotorCurrentLimit = 40;
-  public static final double wheelRadiusMeters = Units.inchesToMeters(1.98);
+  public static final double wheelRadiusMeters = Units.inchesToMeters(1.935);
   ;
-  public static final double driveMotorReduction = 6.75; // MK4i L2
+  public static final double driveMotorReduction = 6.12; // MK4i L3
   public static final DCMotor driveGearbox = DCMotor.getNeoVortex(1);
 
   // Drive encoder configuration
@@ -138,7 +138,7 @@ public class DriveConstants {
   // PathPlanner configuration
   public static final double robotMassKg = 22.5;
   public static final double robotMOI = 6.883;
-  public static final double wheelCOF = 1.2;
+  public static final double wheelCOF = 0.9;
   public static final RobotConfig ppConfig =
       new RobotConfig(
           robotMassKg,

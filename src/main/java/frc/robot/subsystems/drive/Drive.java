@@ -44,9 +44,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
+import frc.robot.RobotState;
 import frc.robot.util.LocalADStarAK;
-import frc.robot.util.RobotState;
-import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -54,6 +53,9 @@ import org.littletonrobotics.junction.Logger;
 
 public class Drive extends SubsystemBase {
   static final Lock odometryLock = new ReentrantLock();
+  // private final SwerveSetpointGenerator setpointGenerator; needs the max steering/rotation
+  // velocity of the modules to implement. Can be found by using Ascope and plotting
+  // private SwerveSetpoint previouSetpoint;
   private final GyroIO gyroIO;
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
   private final Module[] modules = new Module[4]; // FL, FR, BL, BR
@@ -165,13 +167,6 @@ public class Drive extends SubsystemBase {
                 modulePositions[moduleIndex].angle);
         lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
       }
-      RobotState.getInstance()
-          .addOdometryObservation(
-              new RobotState.OdometryObservation(
-                  modulePositions,
-                  Optional.ofNullable(
-                      gyroInputs.connected ? gyroInputs.odometryYawPositions[i] : null),
-                  sampleTimestamps[i]));
 
       // Update gyro angle
       if (gyroInputs.connected) {
@@ -189,6 +184,7 @@ public class Drive extends SubsystemBase {
 
     // Update gyro alert
     gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
+    RobotState.getInstance().setPose(poseEstimator.getEstimatedPosition());
   }
 
   /**

@@ -16,6 +16,7 @@ package frc.robot;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -25,14 +26,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
-import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.GyroIO;
-import frc.robot.subsystems.drive.GyroIOPigeon2;
-import frc.robot.subsystems.drive.ModuleIO;
-import frc.robot.subsystems.drive.ModuleIOSim;
-import frc.robot.subsystems.drive.ModuleIOSpark;
+import frc.robot.commands.DriveController;
+import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.vision.*;
-import frc.robot.util.RobotState;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -69,7 +65,8 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVision(camera0Name, robotToCamera0),
-                new VisionIOPhotonVision(camera1Name, robotToCamera1));
+                new VisionIOPhotonVision(camera1Name, robotToCamera1),
+                new VisionIOLimelight("limelight", drive::getRotation));
 
         break;
 
@@ -102,6 +99,9 @@ public class RobotContainer {
         vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         break;
     }
+
+    NamedCommands.registerCommand("ALIGN_LEFT", new DriveController(false, drive));
+    NamedCommands.registerCommand("ALIGN_RIGHT", new DriveController(true, drive));
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -141,6 +141,15 @@ public class RobotContainer {
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
 
+    controller
+        .leftBumper()
+        .whileTrue(
+            DriveCommands.joystickDrive(
+                drive,
+                () -> -controller.getLeftY() * .3,
+                () -> -controller.getLeftX() * .3,
+                () -> -controller.getRightX() * .3));
+
     // Lock to 0° when A button is held
     controller
         .a()
@@ -150,9 +159,6 @@ public class RobotContainer {
                 () -> -controller.getLeftY(),
                 () -> -controller.getLeftX(),
                 () -> new Rotation2d()));
-
-    // Switch to X pattern when X button is pressed
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
     // Reset gyro to 0° when B button is pressed
     controller
@@ -166,6 +172,25 @@ public class RobotContainer {
                     },
                     drive)
                 .ignoringDisable(true));
+
+    controller
+        .y()
+        .onTrue(
+            new DriveController(false, drive)
+                .onlyWhile(
+                    () ->
+                        (controller.getLeftX() == 0)
+                            && (controller.getLeftY() == 0)
+                            && (controller.getRightX() == 0)));
+    controller
+        .rightTrigger(0.8)
+        .onTrue(
+            new DriveController(true, drive)
+                .onlyWhile(
+                    () ->
+                        (controller.getLeftX() == 0)
+                            && (controller.getLeftY() == 0)
+                            && (controller.getRightX() == 0)));
   }
 
   /**

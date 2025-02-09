@@ -1,13 +1,30 @@
 {
+  "HALProvider": {
+    "Other Devices": {
+      "window": {
+        "visible": false
+      }
+    }
+  },
   "NTProvider": {
     "types": {
       "/AdvantageKit/RealOutputs/Alerts": "Alerts",
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Alerts": "Alerts",
-      "/SmartDashboard/Auto Choices": "String Chooser"
+      "/SmartDashboard/Auto Choices": "String Chooser",
+      "/SmartDashboard/VisionSystemSim-main/Sim Field": "Field2d"
     }
   },
   "NetworkTables Info": {
+    "Connections": {
+      "open": true
+    },
+    "Server": {
+      "Publishers": {
+        "open": true
+      },
+      "open": true
+    },
     "visible": true
   }
 }

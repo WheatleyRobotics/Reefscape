@@ -5,20 +5,22 @@
 // license that can be found in the LICENSE file at
 // the root directory of this project.
 
-package frc.robot.subsystems.rollers;
+package frc.robot.subsystems.superstructure.roller;
 
 import org.littletonrobotics.junction.AutoLog;
 
 public interface RollerSystemIO {
   @AutoLog
   static class RollerSystemIOInputs {
-    public boolean connected = false;
-    public double positionRads = 0.0;
-    public double velocityRadsPerSec = 0.0;
-    public double appliedVoltage = 0.0;
-    public double supplyCurrentAmps = 0.0;
-    public double torqueCurrentAmps = 0.0;
-    public double tempCelsius = 0.0;
+    public boolean talonConnected = false;
+    public boolean CANRangeConnected = false;
+    public boolean hasCoral = false;
+    public double talonPositionRads = 0.0;
+    public double talonVelocityRadsPerSec = 0.0;
+    public double talonAppliedVoltage = 0.0;
+    public double talonSupplyCurrentAmps = 0.0;
+    public double talonTorqueCurrentAmps = 0.0;
+    public double talonTempCelsius = 0.0;
   }
 
   default void updateInputs(RollerSystemIOInputs inputs) {}

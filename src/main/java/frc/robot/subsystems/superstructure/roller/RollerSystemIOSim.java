@@ -5,7 +5,7 @@
 // license that can be found in the LICENSE file at
 // the root directory of this project.
 
-package frc.robot.subsystems.rollers;
+package frc.robot.subsystems.superstructure.roller;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -31,13 +31,14 @@ public class RollerSystemIOSim implements RollerSystemIO {
       runVolts(0.0);
     }
 
-    inputs.connected = true;
+    inputs.talonConnected = true;
+    inputs.CANRangeConnected = true;
     sim.update(Constants.loopPeriodSecs);
-    inputs.positionRads = sim.getAngularPositionRad();
-    inputs.velocityRadsPerSec = sim.getAngularVelocityRadPerSec();
-    inputs.appliedVoltage = appliedVoltage;
-    inputs.supplyCurrentAmps = sim.getCurrentDrawAmps();
-    inputs.torqueCurrentAmps =
+    inputs.talonPositionRads = sim.getAngularPositionRad();
+    inputs.talonVelocityRadsPerSec = sim.getAngularVelocityRadPerSec();
+    inputs.talonAppliedVoltage = appliedVoltage;
+    inputs.talonSupplyCurrentAmps = sim.getCurrentDrawAmps();
+    inputs.talonTorqueCurrentAmps =
         gearbox.getCurrent(sim.getAngularVelocityRadPerSec(), appliedVoltage);
   }
 

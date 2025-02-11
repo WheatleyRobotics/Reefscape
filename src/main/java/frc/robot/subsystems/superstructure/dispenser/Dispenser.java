@@ -22,9 +22,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotType;
-import frc.robot.subsystems.rollers.RollerSystemIO;
-import frc.robot.subsystems.rollers.RollerSystemIOInputsAutoLogged;
 import frc.robot.subsystems.superstructure.SuperstructureConstants;
+import frc.robot.subsystems.superstructure.roller.RollerSystemIO;
+import frc.robot.subsystems.superstructure.roller.RollerSystemIOInputsAutoLogged;
 import frc.robot.util.EqualsUtil;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.BooleanSupplier;
@@ -36,8 +36,8 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Dispenser {
-  public static final Rotation2d minAngle = Rotation2d.fromDegrees(-70.0);
-  public static final Rotation2d maxAngle = Rotation2d.fromDegrees(350);
+  public static final Rotation2d minAngle = Rotation2d.fromDegrees(18);
+  public static final Rotation2d maxAngle = Rotation2d.fromDegrees(180 + 34);
   private static final double maxAngleRad = calculateFinalAngle(maxAngle).getRadians();
   private static final double minAngleRad = calculateFinalAngle(minAngle).getRadians();
 
@@ -59,9 +59,9 @@ public class Dispenser {
   public static final LoggedTunableNumber gripperDispenseCurrent =
       new LoggedTunableNumber("Dispenser/AlgaeDispenseCurrent", -30.0);
   public static final LoggedTunableNumber tunnelDispenseVolts =
-      new LoggedTunableNumber("Dispenser/TunnelDispenseVolts", 6.0);
+      new LoggedTunableNumber("Dispenser/TunnelDispenseVolts", -6.0);
   public static final LoggedTunableNumber tunnelIntakeVolts =
-      new LoggedTunableNumber("Dispenser/TunnelIntakeVolts", -6.0);
+      new LoggedTunableNumber("Dispenser/TunnelIntakeVolts", 6.0);
   public static final LoggedTunableNumber tolerance =
       new LoggedTunableNumber("Dispenser/Tolerance", 10);
 
@@ -85,10 +85,9 @@ public class Dispenser {
   // Hardware
   private final DispenserIO pivotIO;
   private final DispenserIOInputsAutoLogged pivotInputs = new DispenserIOInputsAutoLogged();
-  private final RollerSystemIO tunnelIO;
-  private final RollerSystemIOInputsAutoLogged tunnelInputs = new RollerSystemIOInputsAutoLogged();
-  private final RollerSystemIO gripperIO;
-  private final RollerSystemIOInputsAutoLogged gripperInputs = new RollerSystemIOInputsAutoLogged();
+  private final RollerSystemIO effectorIO;
+  private final RollerSystemIOInputsAutoLogged effectorInputs =
+      new RollerSystemIOInputsAutoLogged();
 
   // Overrides
   private BooleanSupplier coastOverride = () -> false;
@@ -113,10 +112,12 @@ public class Dispenser {
   @AutoLogOutput(key = "Dispenser/Profile/AtGoal")
   private boolean atGoal = false;
 
+  @Getter @AutoLogOutput private boolean hasAlgae = false;
+
+  @Getter @AutoLogOutput private boolean hasCoral = false;
+
   @Setter private double tunnelVolts = 0.0;
   @Setter private double gripperCurrent = 0.0;
-
-  @AutoLogOutput private boolean hasAlgae = false;
 
   private Debouncer algaeDebouncer = new Debouncer(0.1);
   private Debouncer toleranceDebouncer = new Debouncer(0.25, DebounceType.kRising);
@@ -126,15 +127,14 @@ public class Dispenser {
       new Alert("Dispenser pivot motor disconnected!", Alert.AlertType.kWarning);
   private final Alert pivotEncoderDisconnectedAlert =
       new Alert("Dispenser encoder disconnected!", Alert.AlertType.kWarning);
-  private final Alert tunnelDisconnectedAlert =
+  private final Alert talonDisconnectedAlert =
       new Alert("Dispenser tunnel disconnected!", Alert.AlertType.kWarning);
-  private final Alert gripperDisconnectedAlert =
-      new Alert("Dispenser gripper disconnected!", Alert.AlertType.kWarning);
+  private final Alert canRangeDisconnectedAlart =
+      new Alert("Dispenser CANRange disconnected!", Alert.AlertType.kWarning);
 
-  public Dispenser(DispenserIO pivotIO, RollerSystemIO tunnelIO, RollerSystemIO gripperIO) {
+  public Dispenser(DispenserIO pivotIO, RollerSystemIO effectorIO) {
     this.pivotIO = pivotIO;
-    this.tunnelIO = tunnelIO;
-    this.gripperIO = gripperIO;
+    this.effectorIO = effectorIO;
 
     profile =
         new TrapezoidProfile(
@@ -145,24 +145,27 @@ public class Dispenser {
     if (Constants.getRobotType() == Constants.RobotType.SIMBOT) {
       new Trigger(() -> DriverStation.getStickButtonPressed(2, 1))
           .onTrue(Commands.runOnce(() -> hasAlgae = !hasAlgae));
+      new Trigger(() -> DriverStation.getStickButtonPressed(2, 2))
+          .onTrue(Commands.runOnce(() -> hasCoral = !hasCoral));
     }
   }
 
   public void periodic() {
     pivotIO.updateInputs(pivotInputs);
     Logger.processInputs("Dispenser/Pivot", pivotInputs);
-    tunnelIO.updateInputs(tunnelInputs);
-    Logger.processInputs("Dispenser/Tunnel", tunnelInputs);
-    gripperIO.updateInputs(gripperInputs);
-    Logger.processInputs("Dispenser/Gripper", gripperInputs);
+    effectorIO.updateInputs(effectorInputs);
+    Logger.processInputs("Dispenser/Effector", effectorInputs);
 
     pivotMotorDisconnectedAlert.set(
         !pivotInputs.motorConnected && Constants.getRobotType() == RobotType.COMPBOT);
     pivotEncoderDisconnectedAlert.set(
         !pivotInputs.encoderConnected && Constants.getRobotType() == RobotType.COMPBOT);
-    tunnelDisconnectedAlert.set(!tunnelInputs.connected);
-    gripperDisconnectedAlert.set(
-        !gripperInputs.connected && Constants.getRobotType() == RobotType.COMPBOT);
+    talonDisconnectedAlert.set(!effectorInputs.talonConnected);
+    canRangeDisconnectedAlart.set(!effectorInputs.CANRangeConnected);
+
+    if (Constants.getRobotType() != RobotType.SIMBOT) {
+      hasCoral = effectorInputs.hasCoral;
+    }
 
     // Update tunable numbers
     if (kP.hasChanged(hashCode()) || kD.hasChanged(hashCode())) {
@@ -184,7 +187,7 @@ public class Dispenser {
     finalAngle = calculateFinalAngle(pivotInputs.internalPosition);
 
     // Run profile
-    final boolean shouldRunProfile =
+    boolean shouldRunProfile =
         !stopProfile
             && !coastOverride.getAsBoolean()
             && !disabledOverride.getAsBoolean()
@@ -199,6 +202,7 @@ public class Dispenser {
         toleranceDebouncer.calculate(outOfTolerance && shouldRunProfile)
             || finalAngle.getRadians() < minAngleRad
             || finalAngle.getRadians() > maxAngleRad;
+    shouldRunProfile = false;
     if (shouldRunProfile) {
       // Clamp goal
       var goalState = new State(MathUtil.clamp(goal.getAsDouble(), minAngleRad, maxAngleRad), 0.0);
@@ -213,10 +217,28 @@ public class Dispenser {
           EqualsUtil.epsilonEquals(setpoint.position, goalState.position)
               && EqualsUtil.epsilonEquals(setpoint.velocity, 0.0);
 
+      // Handle effector
+      /*
+           if (!effectorInputs.hasCoral && !hasAlgae) {
+             tunnelVolts = tunnelIntakeVolts.getAsDouble();
+             gripperCurrent = 0;
+           } else if (hasAlgae && !effectorInputs.hasCoral) {
+             gripperCurrent = gripperIntakeCurrent.getAsDouble();
+             tunnelVolts = 0;
+           } else {
+             tunnelVolts = 0;
+             gripperCurrent = 0;
+           }
+
+      */
+
       // Log state
       Logger.recordOutput("Dispenser/Profile/SetpointPositionRad", setpoint.position);
       Logger.recordOutput("Dispenser/Profile/SetpointVelocityRadPerSec", setpoint.velocity);
       Logger.recordOutput("Dispenser/Profile/GoalPositionRad", goalState.position);
+
+      Logger.recordOutput("Dispenser/Effector/tunnelVolts", tunnelVolts);
+      Logger.recordOutput("Dispenser/Effector/tunnelVolts", gripperCurrent);
     } else {
       // Reset setpoint
       setpoint = new State(finalAngle.getRadians(), 0.0);
@@ -225,23 +247,33 @@ public class Dispenser {
       Logger.recordOutput("Dispenser/Profile/SetpointPositionRad", 0.0);
       Logger.recordOutput("Dispenser/Profile/SetpointVelocityRadPerSec", 0.0);
       Logger.recordOutput("Dispenser/Profile/GoalPositionRad", 0.0);
+
+      Logger.recordOutput("Dispenser/Effector/tunnelVolts", 0.0);
+      Logger.recordOutput("Dispenser/Effector/tunnelVolts", 0.0);
     }
 
     // Run tunnel and gripper
     if (!isEStopped) {
-      tunnelIO.runVolts(tunnelVolts);
-      gripperIO.runTorqueCurrent(gripperCurrent);
+      /*
+      if (tunnelVolts == 0) {
+        effectorIO.runTorqueCurrent(gripperCurrent);
+      } else if (gripperCurrent == 0) {
+        effectorIO.runVolts(tunnelVolts);
+      } else {
+        effectorIO.stop();
+      }
+
+       */
     } else {
       pivotIO.stop();
-      tunnelIO.stop();
-      gripperIO.stop();
+      effectorIO.stop();
     }
 
     // Check algae
     if (Constants.getRobotType() != Constants.RobotType.SIMBOT) {
       hasAlgae =
           algaeDebouncer.calculate(
-              Math.abs(gripperInputs.supplyCurrentAmps) >= algaeIntakeCurrentThresh.get());
+              Math.abs(effectorInputs.talonSupplyCurrentAmps) >= algaeIntakeCurrentThresh.get());
     }
 
     // Log state
@@ -260,10 +292,6 @@ public class Dispenser {
 
   public double getGoal() {
     return goal.getAsDouble();
-  }
-
-  public boolean hasAlgae() {
-    return hasAlgae;
   }
 
   public void setOverrides(BooleanSupplier coastOverride, BooleanSupplier disabledOverride) {
@@ -307,5 +335,17 @@ public class Dispenser {
   public static Rotation2d calculateFinalAngle(Rotation2d pivotAngle) {
     return new Rotation2d(
         pivotAngle.getRadians() - SuperstructureConstants.elevatorAngle.getRadians());
+  }
+
+  public void runVoltsPivot(double volts) {
+    pivotIO.runVolts(volts);
+  }
+
+  public void runVoltsTunnel(double volts) {
+    effectorIO.runVolts(volts);
+  }
+
+  public void runCurrentGripper(double amp) {
+    effectorIO.runTorqueCurrent(amp);
   }
 }

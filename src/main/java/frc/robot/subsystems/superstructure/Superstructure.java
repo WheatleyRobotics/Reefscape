@@ -257,7 +257,7 @@ public class Superstructure extends SubsystemBase {
         run(
             () ->
                 setGoal(
-                    dispenser.hasAlgae() ? State.ALGAE_STOW.getValue() : State.STOW.getValue())));
+                    dispenser.isHasAlgae() ? State.ALGAE_STOW.getValue() : State.STOW.getValue())));
   }
 
   @Override
@@ -289,10 +289,8 @@ public class Superstructure extends SubsystemBase {
     }
 
     // E Stop Dispenser and Elevator if Necessary
-    isEStopped =
-        isEStopped
-            || elevator.isShouldEStop()
-            || (dispenser.isShouldEStop() && Constants.getRobotType() != RobotType.DEVBOT);
+    isEStopped = isEStopped || elevator.isShouldEStop() || (dispenser.isShouldEStop());
+    // && Constants.getRobotType() != RobotType.DEVBOT);
     elevator.setEStopped(isEStopped);
     dispenser.setEStopped(isEStopped);
 
@@ -322,19 +320,19 @@ public class Superstructure extends SubsystemBase {
         dispenser.getFinalAngle(),
         slam.isSlammed(),
         slam.isRetracting(),
-        dispenser.hasAlgae());
+        dispenser.isHasAlgae());
     setpointVisualizer.update(
         elevator.getSetpoint().position,
         Rotation2d.fromRadians(dispenser.getSetpoint().position),
         slam.isSlammed(),
         slam.isRetracting(),
-        dispenser.hasAlgae());
+        dispenser.isHasAlgae());
     goalVisualizer.update(
         elevator.getGoalMeters(),
         Rotation2d.fromRadians(dispenser.getGoal()),
         true,
         slam.getGoal().isRetracted(),
-        dispenser.hasAlgae());
+        dispenser.isHasAlgae());
   }
 
   @AutoLogOutput(key = "Superstructure/AtGoal")
@@ -565,12 +563,24 @@ public class Superstructure extends SubsystemBase {
   private boolean isEdgeAllowed(EdgeCommand edge, SuperstructureState goal) {
     return (!edge.isRestricted() || goal.equals(graph.getEdgeTarget(edge)))
         && (edge.getAlgaeEdgeType() == AlgaeEdge.NONE
-            || dispenser.hasAlgae() == (edge.getAlgaeEdgeType() == AlgaeEdge.ALGAE));
+            || dispenser.isHasCoral() == (edge.getAlgaeEdgeType() == AlgaeEdge.ALGAE));
   }
 
   private boolean isAtGoal() {
     return elevator.isAtGoal()
         && (dispenser.isAtGoal() || Constants.getRobotType() == RobotType.DEVBOT);
+  }
+
+  public void runVoltsElevator(double volts) {
+    elevator.runVolts(volts);
+  }
+
+  public void runVoltsPivot(double volts) {
+    dispenser.runVoltsPivot(volts);
+  }
+
+  public void runVoltsTunnel(double volts) {
+    dispenser.runVoltsTunnel(volts);
   }
 
   /** All edge commands should finish and exit properly. */

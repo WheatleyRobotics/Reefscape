@@ -12,7 +12,7 @@ import static frc.robot.subsystems.superstructure.SuperstructureConstants.*;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
-import frc.robot.FieldConstants.ReefHeight;
+import frc.robot.util.FieldConstants;
 import frc.robot.util.GeomUtil;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.DoubleSupplier;
@@ -29,8 +29,8 @@ public record SuperstructurePose(
   private static final double tunnelEjectMetersReverse = Units.inchesToMeters(10.0);
   // these angles are all measured as a circle with postive angles being CCW and negaitve angles
   // being CW angles
-  private static final double L2Angle = -ReefHeight.L2.pitch;
-  private static final double L3Angle = -ReefHeight.L3.pitch;
+  private static final double L2Angle = -FieldConstants.ReefHeight.L2.pitch;
+  private static final double L3Angle = -FieldConstants.ReefHeight.L3.pitch;
   private static final double L4Angle = 90.0;
   private static final double L3AngleAlgae = L3Angle - 180.0;
   private static final double L4AngleAlgae = L4Angle + 60.0 - 180.0;
@@ -47,25 +47,28 @@ public record SuperstructurePose(
             Units.inchesToMeters(15.0), dispenserOrigin2d.getY(), Rotation2d.fromDegrees(40.0))),
     L2(
         new Pose2d(
-            new Pose2d(0.0, ReefHeight.L2.height, Rotation2d.fromDegrees(L2Angle))
+            new Pose2d(0.0, FieldConstants.ReefHeight.L2.height, Rotation2d.fromDegrees(L2Angle))
                 .transformBy(GeomUtil.toTransform2d(tunnelEjectMeters, 0.0))
                 .getTranslation(),
             Rotation2d.fromDegrees(L2Angle))),
     L3(
         new Pose2d(
-            new Pose2d(0.0, ReefHeight.L3.height, Rotation2d.fromDegrees(L3Angle))
+            new Pose2d(0.0, FieldConstants.ReefHeight.L3.height, Rotation2d.fromDegrees(L3Angle))
                 .transformBy(GeomUtil.toTransform2d(tunnelEjectMeters, 0.0))
                 .getTranslation(),
             Rotation2d.fromDegrees(L3Angle))),
     L4(
         new Pose2d(
-            new Pose2d(0.0, ReefHeight.L4.height, Rotation2d.fromDegrees(L4Angle))
+            new Pose2d(0.0, FieldConstants.ReefHeight.L4.height, Rotation2d.fromDegrees(L4Angle))
                 .transformBy(GeomUtil.toTransform2d(tunnelEjectMeters, 0.0))
                 .getTranslation(),
             Rotation2d.fromDegrees(L4Angle))),
     L3_ALGAE(
         new Pose2d(
-            new Pose2d(0.0, ReefHeight.L3.height, Rotation2d.fromDegrees((L3Angle + 180.0)))
+            new Pose2d(
+                    0.0,
+                    FieldConstants.ReefHeight.L3.height,
+                    Rotation2d.fromDegrees((L3Angle + 180.0)))
                 .transformBy(GeomUtil.toTransform2d(tunnelEjectMetersReverse, 0.0))
                 .getTranslation(),
             Rotation2d.fromDegrees(L3AngleAlgae))),
@@ -73,7 +76,7 @@ public record SuperstructurePose(
         new Pose2d(
             new Pose2d(
                     0.0,
-                    ReefHeight.L4.height - Units.inchesToMeters(5),
+                    FieldConstants.ReefHeight.L4.height - Units.inchesToMeters(5),
                     Rotation2d.fromDegrees((L4AngleAlgae + 180.0)))
                 .transformBy(GeomUtil.toTransform2d(tunnelEjectMetersReverse, 0.0))
                 .getTranslation(),
@@ -106,9 +109,13 @@ public record SuperstructurePose(
             - (pivotToGripper / 2.0 * Rotation2d.fromDegrees(algaeIntakeAngle).getSin()),
         algaeIntakeAngle),
     ALGAE_L2_INTAKE(
-        "AlgaeL2Intake", ReefHeight.L2.height - groundToCarriageZero, -ReefHeight.L2.pitch + 180),
+        "AlgaeL2Intake",
+        FieldConstants.ReefHeight.L2.height - groundToCarriageZero,
+        -FieldConstants.ReefHeight.L2.pitch + 180),
     ALGAE_L3_INTAKE(
-        "AlgaeL3Intake", ReefHeight.L3.height - groundToCarriageZero, -ReefHeight.L2.pitch + 180),
+        "AlgaeL3Intake",
+        FieldConstants.ReefHeight.L3.height - groundToCarriageZero,
+        -FieldConstants.ReefHeight.L2.pitch + 180),
     THROW(() -> elevatorMaxTravel, () -> -40.0),
     PRE_PROCESSOR("Processing", 0.05, -80.0),
     ALGAE_STOW("AlgaeStow", 0.0, 25.0),

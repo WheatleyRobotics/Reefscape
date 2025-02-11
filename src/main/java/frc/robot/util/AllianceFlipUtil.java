@@ -39,4 +39,17 @@ public class AllianceFlipUtil {
     return DriverStation.getAlliance().isPresent()
         && DriverStation.getAlliance().get() == DriverStation.Alliance.Red;
   }
+
+  /**
+   * Returns the corrected X value for the given X value. If the robot is on the red alliance, the
+   * field is flipped.
+   *
+   * @param pose The pose to correct.
+   * @return The corrected X value.
+   */
+  public static Pose2d getCorrected(Pose2d pose) {
+    return shouldFlip()
+        ? new Pose2d(apply(pose.getTranslation()), apply(pose.getRotation()))
+        : pose;
+  }
 }

@@ -31,8 +31,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Elevator {
-  public static final double sprocketRadius =
-      Units.inchesToMeters(1.0); // TODO find the sprocket radius that the chain rides on
+  public static final double sprocketRadius = Units.inchesToMeters(1.888 / 2);
 
   // Tunable numbers
   private static final LoggedTunableNumber kP = new LoggedTunableNumber("Elevator/kP");
@@ -40,7 +39,7 @@ public class Elevator {
   private static final LoggedTunableNumber kS = new LoggedTunableNumber("Elevator/kS");
   private static final LoggedTunableNumber kG = new LoggedTunableNumber("Elevator/kG");
   private static final LoggedTunableNumber maxVelocityMetersPerSec =
-      new LoggedTunableNumber("Elevator/MaxVelocityMetersPerSec", 3.5);
+      new LoggedTunableNumber("Elevator/MaxVelocityMetersPerSec", 2);
   private static final LoggedTunableNumber maxAccelerationMetersPerSec2 =
       new LoggedTunableNumber("Elevator/MaxAccelerationMetersPerSec2", 20);
   private static final LoggedTunableNumber homingVolts =
@@ -132,7 +131,7 @@ public class Elevator {
     setBrakeMode(!coastOverride.getAsBoolean());
 
     // Run profile
-    final boolean shouldRunProfile =
+    boolean shouldRunProfile =
         !stopProfile
             && !coastOverride.getAsBoolean()
             && !disabledOverride.getAsBoolean()
@@ -143,6 +142,7 @@ public class Elevator {
     // Check if out of tolerance
     boolean outOfTolerance = Math.abs(getPositionMeters() - setpoint.position) > tolerance.get();
     shouldEStop = toleranceDebouncer.calculate(outOfTolerance && shouldRunProfile);
+    shouldRunProfile = false;
     if (shouldRunProfile) {
       // Clamp goal
       var goalState =
@@ -274,5 +274,9 @@ public class Elevator {
 
   private static class StaticCharacterizationState {
     public double characterizationOutput = 0.0;
+  }
+
+  public void runVolts(double volts) {
+    io.runVolts(volts);
   }
 }

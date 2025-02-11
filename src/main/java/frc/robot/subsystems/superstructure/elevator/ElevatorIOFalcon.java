@@ -26,8 +26,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 
 public class ElevatorIOFalcon implements ElevatorIO {
-  public static final double reduction =
-      4.0; // TODO Find this reduction from Mechanical team it should be the reducgtion of the gear
+  public static final double reduction = 7.5;
   // box not including the sproket
 
   // Hardware
@@ -58,9 +57,9 @@ public class ElevatorIOFalcon implements ElevatorIO {
   private final VoltageOut voltageRequest = new VoltageOut(0.0).withUpdateFreqHz(0.0);
 
   public ElevatorIOFalcon() {
-    talon = new TalonFX(13, "*");
-    followerTalon = new TalonFX(14, "*");
-    followerTalon.setControl(new Follower(talon.getDeviceID(), true));
+    talon = new TalonFX(11);
+    followerTalon = new TalonFX(12);
+    followerTalon.setControl(new Follower(talon.getDeviceID(), false));
 
     // Configure motor
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -70,7 +69,7 @@ public class ElevatorIOFalcon implements ElevatorIO {
     config.TorqueCurrent.PeakReverseTorqueCurrent = -80.0;
     config.CurrentLimits.StatorCurrentLimit = 80.0;
     config.CurrentLimits.StatorCurrentLimitEnable = true;
-    config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     tryUntilOk(5, () -> talon.getConfigurator().apply(config, 0.25));
 
     position = talon.getPosition();

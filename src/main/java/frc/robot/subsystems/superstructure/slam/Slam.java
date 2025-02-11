@@ -9,8 +9,8 @@ package frc.robot.subsystems.superstructure.slam;
 
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
-import frc.robot.subsystems.rollers.RollerSystemIO;
-import frc.robot.subsystems.rollers.RollerSystemIOInputsAutoLogged;
+import frc.robot.subsystems.superstructure.roller.RollerSystemIO;
+import frc.robot.subsystems.superstructure.roller.RollerSystemIOInputsAutoLogged;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;

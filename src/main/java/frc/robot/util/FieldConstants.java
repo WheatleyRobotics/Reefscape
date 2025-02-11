@@ -12,6 +12,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
+import frc.robot.RobotState;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -72,6 +73,14 @@ public class FieldConstants {
         new Pose2d[6]; // Starting facing the driver station in clockwise order
     public static final List<Map<ReefHeight, Pose3d>> branchPositions =
         new ArrayList<>(); // Starting at the right branch facing the driver station in clockwise
+
+    // face, left, right
+    // 0: 11, 0
+    // 1: 1, 2
+    // 2: 3, 4
+    // 3: 5, 6
+    // 4: 7, 8
+    // 5: 9, 10
 
     static {
       // Initialize faces
@@ -198,5 +207,46 @@ public class FieldConstants {
 
     private final AprilTagFieldLayout layout;
     private final String layoutString;
+  }
+
+  /**
+   * Adjusts a pose by a given offset in inches.
+   *
+   * @param pose The pose to adjust.
+   * @param offsetInches The offset in inches.
+   * @return The adjusted pose.
+   */
+  public static Pose2d adjustPose(Pose2d pose, double offsetInches) {
+    double adjustedX =
+        pose.getX()
+            + Units.inchesToMeters((offsetInches)) * Math.cos(pose.getRotation().getRadians());
+    double adjustedY =
+        pose.getY()
+            + Units.inchesToMeters((offsetInches)) * Math.sin(pose.getRotation().getRadians());
+
+    return new Pose2d(adjustedX, adjustedY, pose.getRotation());
+  }
+
+  /**
+   * @return The nearest adjusted branch pose
+   */
+  public static Pose2d getNearestBranch(boolean left) {
+    RobotState.Zones zone = RobotState.getInstance().getCurrentZone();
+    Pose2d targetPose2D =
+        left
+            ? FieldConstants.Reef.branchPositions
+                .get(zone.getFace() * 2)
+                .get(ReefHeight.L1)
+                .toPose2d()
+            : FieldConstants.Reef.branchPositions
+                .get(zone.getFace() * 2 + 1)
+                .get(ReefHeight.L1)
+                .toPose2d();
+    return AllianceFlipUtil.getCorrected(
+        FieldConstants.adjustPose(
+            new Pose2d(
+                targetPose2D.getTranslation(),
+                targetPose2D.getRotation().plus(new Rotation2d(Math.PI))),
+            -20));
   }
 }

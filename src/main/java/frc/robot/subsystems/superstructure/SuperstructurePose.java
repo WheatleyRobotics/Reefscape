@@ -9,20 +9,16 @@ package frc.robot.subsystems.superstructure;
 
 import static frc.robot.subsystems.superstructure.SuperstructureConstants.*;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.util.FieldConstants;
-import frc.robot.util.GeomUtil;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-public record SuperstructurePose(
-    DoubleSupplier elevatorHeight,
-    Supplier<Rotation2d> pivotAngle) { // TODO set all our setpoints and find the correct angles
+public record SuperstructurePose(DoubleSupplier elevatorHeight, Supplier<Rotation2d> pivotAngle) {
   private static final double algaeIntakeAngle = 240.0;
   private static final double groundToCarriageZero = dispenserOrigin2d.getY();
   private static final double tunnelEjectMeters = Units.inchesToMeters(12.0);
@@ -35,80 +31,16 @@ public record SuperstructurePose(
   private static final double L3AngleAlgae = L3Angle - 180.0;
   private static final double L4AngleAlgae = L4Angle + 60.0 - 180.0;
 
-  @RequiredArgsConstructor
-  @Getter
-  /**
-   * Dispenser pose relative to branch on ground (looking at the robot from the left side) Rotation
-   * is just the rotation of dispenser when scoring. Funnel side is 0
-   */
-  public enum DispenserPose {
-    L1(
-        new Pose2d(
-            Units.inchesToMeters(15.0), dispenserOrigin2d.getY(), Rotation2d.fromDegrees(40.0))),
-    L2(
-        new Pose2d(
-            new Pose2d(0.0, FieldConstants.ReefHeight.L2.height, Rotation2d.fromDegrees(L2Angle))
-                .transformBy(GeomUtil.toTransform2d(tunnelEjectMeters, 0.0))
-                .getTranslation(),
-            Rotation2d.fromDegrees(L2Angle))),
-    L3(
-        new Pose2d(
-            new Pose2d(0.0, FieldConstants.ReefHeight.L3.height, Rotation2d.fromDegrees(L3Angle))
-                .transformBy(GeomUtil.toTransform2d(tunnelEjectMeters, 0.0))
-                .getTranslation(),
-            Rotation2d.fromDegrees(L3Angle))),
-    L4(
-        new Pose2d(
-            new Pose2d(0.0, FieldConstants.ReefHeight.L4.height, Rotation2d.fromDegrees(L4Angle))
-                .transformBy(GeomUtil.toTransform2d(tunnelEjectMeters, 0.0))
-                .getTranslation(),
-            Rotation2d.fromDegrees(L4Angle))),
-    L3_ALGAE(
-        new Pose2d(
-            new Pose2d(
-                    0.0,
-                    FieldConstants.ReefHeight.L3.height,
-                    Rotation2d.fromDegrees((L3Angle + 180.0)))
-                .transformBy(GeomUtil.toTransform2d(tunnelEjectMetersReverse, 0.0))
-                .getTranslation(),
-            Rotation2d.fromDegrees(L3AngleAlgae))),
-    L4_ALGAE(
-        new Pose2d(
-            new Pose2d(
-                    0.0,
-                    FieldConstants.ReefHeight.L4.height - Units.inchesToMeters(5),
-                    Rotation2d.fromDegrees((L4AngleAlgae + 180.0)))
-                .transformBy(GeomUtil.toTransform2d(tunnelEjectMetersReverse, 0.0))
-                .getTranslation(),
-            Rotation2d.fromDegrees(L4AngleAlgae)));
-
-    private final Pose2d pose;
-
-    public double getElevatorHeight() {
-      return (pose.getY() - dispenserOrigin2d.getY()) / elevatorAngle.getSin();
-    }
-
-    public double getDispenserAngleDeg() {
-      return pose.getRotation().getDegrees();
-    }
-  }
-
   // Read distance to branch from robot state to calculate positions
   @RequiredArgsConstructor
   @Getter
   enum Preset {
     START("Start", 0.0, 18.0),
     STOW("Stow", 0.0, 35.0),
-    L1("L1", 0.15, DispenserPose.L1.getDispenserAngleDeg()),
-    L2(
-        "L2",
-        (DispenserPose.L2.getElevatorHeight() - Units.inchesToMeters(20)) / 2,
-        DispenserPose.L2.getDispenserAngleDeg()),
-    L3(
-        "L3",
-        (DispenserPose.L3.getElevatorHeight() - Units.inchesToMeters(20)) / 2,
-        DispenserPose.L3.getDispenserAngleDeg()),
-    L4("L4", DispenserPose.L4.getElevatorHeight(), DispenserPose.L4.getDispenserAngleDeg()),
+    L1("L1", Units.inchesToMeters(1), L2Angle),
+    L2("L2", Units.inchesToMeters(4.5), L2Angle),
+    L3("L3", Units.inchesToMeters(9.5), L3Angle),
+    L4("L4", Units.inchesToMeters(12), L4Angle),
     ALGAE_FLOOR_INTAKE(
         "AlgaeFloorIntake",
         Units.inchesToMeters(16.5)

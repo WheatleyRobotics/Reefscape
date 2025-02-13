@@ -26,7 +26,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.DriveController;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.superstructure.Superstructure;
 import frc.robot.subsystems.superstructure.SuperstructureState;
@@ -212,6 +211,7 @@ public class RobotContainer {
                     },
                     drive)
                 .ignoringDisable(true));
+    /*
 
     driveController
         .y()
@@ -273,7 +273,7 @@ public class RobotContainer {
                 },
                 superstructure));
     */
-    /*
+
     operatorController
         .y()
         .whileTrue(
@@ -297,7 +297,7 @@ public class RobotContainer {
         .whileTrue(
             Commands.run(
                 () -> {
-                  superstructure.runVoltsTunnel(-4);
+                  superstructure.runVoltsTunnel(-2);
                 },
                 superstructure));
 
@@ -311,16 +311,14 @@ public class RobotContainer {
                 superstructure));
 
     operatorController
-        .rightBumper()
+        .leftBumper()
         .whileTrue(
             superstructure
                 .runGoal(SuperstructureState.State.L3_CORAL.getValue())
                 .withName("Scoring L3 Coral"));
 
-     */
-
     operatorController
-        .y()
+        .rightBumper()
         .whileTrue(
             superstructure
                 .runGoal(SuperstructureState.State.L2_CORAL.getValue())

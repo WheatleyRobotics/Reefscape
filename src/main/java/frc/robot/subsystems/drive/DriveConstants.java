@@ -39,13 +39,13 @@ public class DriveConstants {
   public static final Rotation2d frontLeftZeroRotation =
       switch (Constants.getRobotType()) {
         case SIMBOT -> new Rotation2d();
-        case DEVBOT -> Rotation2d.fromRotations(0);
+        case DEVBOT -> Rotation2d.fromRotations(0.31); // 0.31
         case COMPBOT -> Rotation2d.fromRotations(0.290527); // 0.290527
       };
   public static final Rotation2d frontRightZeroRotation =
       switch (Constants.getRobotType()) {
         case SIMBOT -> new Rotation2d();
-        case DEVBOT -> Rotation2d.fromRotations(0);
+        case DEVBOT -> Rotation2d.fromRotations(0.22); // 0.22
         case COMPBOT -> Rotation2d.fromRotations(0.095215)
             .plus(Rotation2d.fromRadians(0.17))
             .minus(Rotation2d.fromRadians(0.151)); // 0.095215
@@ -53,7 +53,7 @@ public class DriveConstants {
   public static final Rotation2d backLeftZeroRotation =
       switch (Constants.getRobotType()) {
         case SIMBOT -> new Rotation2d();
-        case DEVBOT -> Rotation2d.fromRotations(0);
+        case DEVBOT -> Rotation2d.fromRotations(-0.11); // -0.094
         case COMPBOT -> Rotation2d.fromRotations(0.360352 + 0.25)
             .plus(Rotation2d.fromRadians(0.16)); // 0.360352
       };
@@ -61,7 +61,7 @@ public class DriveConstants {
   public static final Rotation2d backRightZeroRotation =
       switch (Constants.getRobotType()) {
         case SIMBOT -> new Rotation2d();
-        case DEVBOT -> Rotation2d.fromRotations(0);
+        case DEVBOT -> Rotation2d.fromRotations(-0.096); // 0.096
         case COMPBOT -> Rotation2d.fromRotations(-0.5 + 0.41254)
             .minus(Rotation2d.fromRadians(0.14))
             .plus(Rotation2d.fromRadians(0.076))
@@ -71,96 +71,33 @@ public class DriveConstants {
   // Device CAN IDs
   public static final int pigeonCanId = 0;
 
-  // COMP
-  // Front left 1
   // Front right 2
+  // Front left 1
   // Back left 3
   // Back right 4
-  // DEV
-  // Front left 2
-  // Front right 4
-  // Back left 1
-  // Back right 3
 
-  // Drive CAN IDs
-  public static final int frontLeftDriveCanId =
-      switch (Constants.getRobotType()) {
-        case SIMBOT, COMPBOT -> 41;
-        case DEVBOT -> 42; // DEV front left is module 2: 4+2
-      };
+  // rev
+  public static final int frontLeftDriveCanId = 41;
+  public static final int frontRightDriveCanId = 42;
+  public static final int backLeftDriveCanId = 43;
+  public static final int backRightDriveCanId = 44;
 
-  public static final int frontRightDriveCanId =
-      switch (Constants.getRobotType()) {
-        case SIMBOT, COMPBOT -> 42;
-        case DEVBOT -> 44; // DEV front right is module 4: 4+4
-      };
+  // rev Turn
+  public static final int frontLeftTurnCanId = 51;
+  public static final int frontRightTurnCanId = 52;
+  public static final int backLeftTurnCanId = 53;
+  public static final int backRightTurnCanId = 54;
 
-  public static final int backLeftDriveCanId =
-      switch (Constants.getRobotType()) {
-        case SIMBOT, COMPBOT -> 43;
-        case DEVBOT -> 41; // DEV back left is module 1: 4+1
-      };
-
-  public static final int backRightDriveCanId =
-      switch (Constants.getRobotType()) {
-        case SIMBOT, COMPBOT -> 44;
-        case DEVBOT -> 43; // DEV back right is module 3: 4+3
-      };
-
-  // Turn CAN IDs
-  public static final int frontLeftTurnCanId =
-      switch (Constants.getRobotType()) {
-        case SIMBOT, COMPBOT -> 51;
-        case DEVBOT -> 52; // DEV front left becomes module 2: 5+2
-      };
-
-  public static final int frontRightTurnCanId =
-      switch (Constants.getRobotType()) {
-        case SIMBOT, COMPBOT -> 52;
-        case DEVBOT -> 54; // DEV front right becomes module 4: 5+4
-      };
-
-  public static final int backLeftTurnCanId =
-      switch (Constants.getRobotType()) {
-        case SIMBOT, COMPBOT -> 53;
-        case DEVBOT -> 51; // DEV back left becomes module 1: 5+1
-      };
-
-  public static final int backRightTurnCanId =
-      switch (Constants.getRobotType()) {
-        case SIMBOT, COMPBOT -> 54;
-        case DEVBOT -> 53; // DEV back right becomes module 3: 5+3
-      };
-
-  // Cancoder IDs
-  public static final int frontLeftTurnCancoderId =
-      switch (Constants.getRobotType()) {
-        case SIMBOT, COMPBOT -> 31;
-        case DEVBOT -> 32; // DEV front left is module 2: 3+2
-      };
-
-  public static final int frontRightTurnCancoderId =
-      switch (Constants.getRobotType()) {
-        case SIMBOT, COMPBOT -> 32;
-        case DEVBOT -> 34; // DEV front right is module 4: 3+4
-      };
-
-  public static final int backLeftTurnCancoderId =
-      switch (Constants.getRobotType()) {
-        case SIMBOT, COMPBOT -> 33;
-        case DEVBOT -> 31; // DEV back left is module 1: 3+1
-      };
-
-  public static final int backRightTurnCancoderId =
-      switch (Constants.getRobotType()) {
-        case SIMBOT, COMPBOT -> 34;
-        case DEVBOT -> 33; // DEV back right is module 3: 3+3
-      };
+  // Ctre
+  public static final int frontLeftTurnCancoderId = 31;
+  public static final int frontRightTurnCancoderId = 32;
+  public static final int backLeftTurnCancoderId = 33;
+  public static final int backRightTurnCancoderId = 34;
 
   // Drive motor configuration
   public static final int driveMotorCurrentLimit = 40;
   public static final double wheelRadiusMeters = Units.inchesToMeters(1.935);
-  ;
+
   public static final double driveMotorReduction = 6.12; // MK4i L3
   public static final DCMotor driveGearbox = DCMotor.getNeoVortex(1);
 
@@ -184,7 +121,7 @@ public class DriveConstants {
   public static final boolean turnInverted = false;
   public static final int turnMotorCurrentLimit = 20;
   public static final double turnMotorReduction = 150.0 / 7;
-  public static final DCMotor turnGearbox = DCMotor.getNEO(1);
+  public static final DCMotor turnGearbox = DCMotor.getNeo550(1);
 
   // Turn encoder configuration
   public static final boolean turnEncoderInverted = true;

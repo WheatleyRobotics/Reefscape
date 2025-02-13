@@ -19,8 +19,7 @@ public class SuperstructureConstants {
   public static final double pivotToGripper = 0.207;
   public static final double G = 9.807;
   // From inside face to inside face, measured from CAD
-  public static final double stageHeight =
-      Units.inchesToMeters(39); // TODO find all of these elvator dimesions
+  public static final double stageHeight = Units.inchesToMeters(39);
   public static final double stageToStageOffset = Units.inchesToMeters(0.175);
   public static final double stageThickness = Units.inchesToMeters(1.0);
   public static final double dispenserToCarriage = Units.inchesToMeters(4.0);

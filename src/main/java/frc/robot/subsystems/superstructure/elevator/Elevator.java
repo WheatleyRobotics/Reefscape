@@ -35,11 +35,12 @@ public class Elevator {
 
   // Tunable numbers
   private static final LoggedTunableNumber kP = new LoggedTunableNumber("Elevator/kP");
+  private static final LoggedTunableNumber kI = new LoggedTunableNumber("Elevator/kI");
   private static final LoggedTunableNumber kD = new LoggedTunableNumber("Elevator/kD");
   private static final LoggedTunableNumber kS = new LoggedTunableNumber("Elevator/kS");
   private static final LoggedTunableNumber kG = new LoggedTunableNumber("Elevator/kG");
   private static final LoggedTunableNumber maxVelocityMetersPerSec =
-      new LoggedTunableNumber("Elevator/MaxVelocityMetersPerSec", 0.2);
+      new LoggedTunableNumber("Elevator/MaxVelocityMetersPerSec", 0.3);
   private static final LoggedTunableNumber maxAccelerationMetersPerSec2 =
       new LoggedTunableNumber("Elevator/MaxAccelerationMetersPerSec2", 2);
   private static final LoggedTunableNumber homingVolts =
@@ -56,13 +57,15 @@ public class Elevator {
   static {
     switch (Constants.getRobotType()) {
       case COMPBOT, DEVBOT -> {
-        kP.initDefault(50);
-        kD.initDefault(5);
+        kP.initDefault(1500);
+        kI.initDefault(1);
+        kD.initDefault(30);
         kS.initDefault(0.75);
         kG.initDefault(5);
       }
       case SIMBOT -> {
         kP.initDefault(5000);
+        kI.initDefault(0);
         kD.initDefault(2000);
         kS.initDefault(5);
         kG.initDefault(50);
@@ -100,6 +103,8 @@ public class Elevator {
   @AutoLogOutput(key = "Elevator/Profile/AtGoal")
   private boolean atGoal = false;
 
+  @Setter private boolean stowed = false;
+
   public Elevator(ElevatorIO io) {
     this.io = io;
 
@@ -116,8 +121,8 @@ public class Elevator {
     motorDisconnectedAlert.set(!inputs.motorConnected);
 
     // Update tunable numbers
-    if (kP.hasChanged(hashCode()) || kD.hasChanged(hashCode())) {
-      io.setPID(kP.get(), 0.0, kD.get());
+    if (kP.hasChanged(hashCode()) || kD.hasChanged(hashCode()) || kI.hasChanged(hashCode())) {
+      io.setPID(kP.get(), kI.get(), kD.get());
     }
     if (maxVelocityMetersPerSec.hasChanged(hashCode())
         || maxAccelerationMetersPerSec2.hasChanged(hashCode())) {
@@ -131,7 +136,7 @@ public class Elevator {
     setBrakeMode(!coastOverride.getAsBoolean());
 
     // Run profile
-    boolean shouldRunProfile =
+    final boolean shouldRunProfile =
         !stopProfile
             && !coastOverride.getAsBoolean()
             && !disabledOverride.getAsBoolean()
@@ -164,6 +169,11 @@ public class Elevator {
       atGoal =
           EqualsUtil.epsilonEquals(setpoint.position, goalState.position)
               && EqualsUtil.epsilonEquals(setpoint.velocity, goalState.velocity);
+
+      // Stop running elevator down when in stow
+      if (stowed && atGoal) {
+        io.stop();
+      }
 
       // Log state
       Logger.recordOutput("Elevator/Profile/SetpointPositionMeters", setpoint.position);

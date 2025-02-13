@@ -233,34 +233,34 @@ public class RobotContainer {
                             && (driveController.getRightX() == 0)));
     /*
 
-    var random = new Random();
-    Container<Integer> randomInt = new Container<>();
-    randomInt.value = 1;
-    operatorController
-        .x()
-        .onTrue(
-            Commands.runOnce(
-                () -> randomInt.value = random.nextInt(SuperstructureState.State.values().length)));
-    operatorController
-        .y()
-        .whileTrue(
-            Commands.defer(
-                () -> {
-                  Logger.recordOutput(
-                      "RandomState", SuperstructureState.State.values()[randomInt.value]);
-                  return superstructure.runGoal(
-                      SuperstructureState.State.values()[randomInt.value].getValue());
-                },
-                Set.of(superstructure)));
+        var random = new Random();
+        Container<Integer> randomInt = new Container<>();
+        randomInt.value = 1;
+        operatorController
+            .x()
+            .onTrue(
+                Commands.runOnce(
+                    () -> randomInt.value = random.nextInt(SuperstructureState.State.values().length)));
+        operatorController
+            .y()
+            .whileTrue(
+                Commands.defer(
+                    () -> {
+                      Logger.recordOutput(
+                          "RandomState", SuperstructureState.State.values()[randomInt.value]);
+                      return superstructure.runGoal(
+                          SuperstructureState.State.values()[randomInt.value].getValue());
+                    },
+                    Set.of(superstructure)));
 
-     */
-
+    */
+    /*
     operatorController
         .rightBumper()
         .whileTrue(
             Commands.run(
                 () -> {
-                  superstructure.runVoltsElevator(3);
+                  superstructure.runOpenLoop(40);
                 },
                 superstructure));
 
@@ -269,16 +269,16 @@ public class RobotContainer {
         .whileTrue(
             Commands.run(
                 () -> {
-                  superstructure.runVoltsElevator(-3);
+                  superstructure.runOpenLoop(-40);
                 },
                 superstructure));
-
+    */
     operatorController
         .y()
         .whileTrue(
             Commands.run(
                 () -> {
-                  superstructure.runVoltsPivot(-5);
+                  superstructure.runVoltsPivot(-2);
                 },
                 superstructure));
 
@@ -287,7 +287,7 @@ public class RobotContainer {
         .whileTrue(
             Commands.run(
                 () -> {
-                  superstructure.runVoltsPivot(5);
+                  superstructure.runVoltsPivot(2);
                 },
                 superstructure));
 
@@ -305,19 +305,27 @@ public class RobotContainer {
         .whileTrue(
             Commands.run(
                 () -> {
-                  superstructure.runVoltsTunnel(6);
+                  superstructure.runVoltsTunnel(2);
                 },
                 superstructure));
 
+    operatorController
+        .rightBumper()
+        .whileTrue(
+            superstructure
+                .runGoal(SuperstructureState.State.L3_CORAL.getValue())
+                .withName("Scoring L3 Coral"));
     /*
        operatorController
-           .x()
+           .y()
            .whileTrue(
                superstructure
                    .runGoal(SuperstructureState.State.L2_CORAL.getValue())
                    .withName("Scoring L2 Coral"));
 
     */
+
+    // operatorController.x().whileTrue(dispenser.staticCharacterization(2.0));
   }
 
   /**

@@ -39,7 +39,7 @@ public record SuperstructurePose(
   @Getter
   /**
    * Dispenser pose relative to branch on ground (looking at the robot from the left side) Rotation
-   * is just the rotation of dispenser when scoring.
+   * is just the rotation of dispenser when scoring. Funnel side is 0
    */
   public enum DispenserPose {
     L1(
@@ -97,10 +97,17 @@ public record SuperstructurePose(
   @RequiredArgsConstructor
   @Getter
   enum Preset {
-    STOW("Stow", 0.0, 0.0),
+    START("Start", 0.0, 18.0),
+    STOW("Stow", 0.0, 35.0),
     L1("L1", 0.15, DispenserPose.L1.getDispenserAngleDeg()),
-    L2("L2", DispenserPose.L2.getElevatorHeight(), DispenserPose.L2.getDispenserAngleDeg()),
-    L3("L3", DispenserPose.L3.getElevatorHeight(), DispenserPose.L3.getDispenserAngleDeg()),
+    L2(
+        "L2",
+        (DispenserPose.L2.getElevatorHeight() - Units.inchesToMeters(20)) / 2,
+        DispenserPose.L2.getDispenserAngleDeg()),
+    L3(
+        "L3",
+        (DispenserPose.L3.getElevatorHeight() - Units.inchesToMeters(20)) / 2,
+        DispenserPose.L3.getDispenserAngleDeg()),
     L4("L4", DispenserPose.L4.getElevatorHeight(), DispenserPose.L4.getDispenserAngleDeg()),
     ALGAE_FLOOR_INTAKE(
         "AlgaeFloorIntake",

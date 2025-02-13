@@ -27,7 +27,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.*;
 
 public class DispenserIOFalconIntegrated implements DispenserIO {
-  public static final double reduction = 1.0;
   private static final Rotation2d offset = new Rotation2d();
 
   // Hardware
@@ -61,15 +60,13 @@ public class DispenserIOFalconIntegrated implements DispenserIO {
     // Configure  motor
     Config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     Config.Slot0 = new Slot0Configs().withKP(0).withKI(0).withKD(0);
-    Config.Feedback.RotorToSensorRatio = reduction;
-    Config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     Config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
-    Config.Feedback.SensorToMechanismRatio = 12.0833;
+    Config.Feedback.SensorToMechanismRatio = 33.373;
     Config.TorqueCurrent.PeakForwardTorqueCurrent = 40.0;
     Config.TorqueCurrent.PeakReverseTorqueCurrent = -40.0;
     Config.CurrentLimits.StatorCurrentLimit = 40.0;
     Config.CurrentLimits.StatorCurrentLimitEnable = true;
-    Config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    Config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     tryUntilOk(5, () -> talon.getConfigurator().apply(Config, 0.25));
 
     talon.setPosition(Degree.of(18));
@@ -106,7 +103,7 @@ public class DispenserIOFalconIntegrated implements DispenserIO {
     inputs.motorConnected = motorConnectedDebouncer.calculate(motorConnected);
     inputs.encoderConnected = encoderConnectedDebouncer.calculate(encoderConnected);
     // Pivot inputs
-    inputs.internalPosition = Rotation2d.fromRotations(internalPosition.getValueAsDouble());
+    inputs.internalPosition = Rotation2d.fromRadians(internalPosition.getValue().in(Radian));
     inputs.encoderAbsolutePosition =
         Rotation2d.fromRotations(encoderAbsolutePosition.getValueAsDouble()).minus(offset);
     inputs.encoderRelativePosition =
@@ -119,7 +116,7 @@ public class DispenserIOFalconIntegrated implements DispenserIO {
 
   @Override
   public void runOpenLoop(double output) {
-    talon.setControl(torqueCurrentFOC.withOutput(output));
+    // talon.setControl(torqueCurrentFOC.withOutput(output));
   }
 
   @Override
@@ -134,10 +131,13 @@ public class DispenserIOFalconIntegrated implements DispenserIO {
 
   @Override
   public void runPosition(Rotation2d position, double feedforward) {
+    /*
     talon.setControl(
         positionTorqueCurrentFOC
             .withPosition(position.getRotations())
             .withFeedForward(feedforward));
+
+     */
   }
 
   @Override

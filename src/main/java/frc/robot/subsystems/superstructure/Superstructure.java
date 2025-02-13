@@ -289,8 +289,10 @@ public class Superstructure extends SubsystemBase {
     }
 
     // E Stop Dispenser and Elevator if Necessary
-    isEStopped = isEStopped || elevator.isShouldEStop() || (dispenser.isShouldEStop());
-    // && Constants.getRobotType() != RobotType.DEVBOT);
+    isEStopped =
+        isEStopped
+            || elevator.isShouldEStop()
+            || (dispenser.isShouldEStop()) && Constants.getRobotType() != RobotType.DEVBOT;
     elevator.setEStopped(isEStopped);
     dispenser.setEStopped(isEStopped);
 
@@ -573,6 +575,10 @@ public class Superstructure extends SubsystemBase {
 
   public void runVoltsElevator(double volts) {
     elevator.runVolts(volts);
+  }
+
+  public void runOpenLoop(double amps) {
+    elevator.runOpenLoop(amps);
   }
 
   public void runVoltsPivot(double volts) {

@@ -29,7 +29,7 @@ public class SuperstructureState {
 
   @Getter
   public enum State {
-    START(SuperstructureState.builder().build()),
+    START(SuperstructureState.builder().pose(SuperstructurePose.Preset.START.getPose()).build()),
     STOW(SuperstructureState.builder().pose(SuperstructurePose.Preset.STOW.getPose()).build()),
     INTAKE(SuperstructureState.builder().tunnelVolts(Dispenser.tunnelIntakeVolts).build()),
     L1_CORAL(SuperstructureState.builder().pose(SuperstructurePose.Preset.L1.getPose()).build()),

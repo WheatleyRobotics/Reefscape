@@ -47,9 +47,9 @@ public class Dispenser {
   private static final LoggedTunableNumber kS = new LoggedTunableNumber("Dispenser/kS");
   private static final LoggedTunableNumber kG = new LoggedTunableNumber("Dispenser/kG");
   private static final LoggedTunableNumber maxVelocityDegPerSec =
-      new LoggedTunableNumber("Dispenser/MaxVelocityDegreesPerSec", 500);
+      new LoggedTunableNumber("Dispenser/MaxVelocityDegreesPerSec", 15);
   private static final LoggedTunableNumber maxAccelerationDegPerSec2 =
-      new LoggedTunableNumber("Dispenser/MaxAccelerationDegreesPerSec2", 3000);
+      new LoggedTunableNumber("Dispenser/MaxAccelerationDegreesPerSec2", 60);
   private static final LoggedTunableNumber staticCharacterizationVelocityThresh =
       new LoggedTunableNumber("Dispenser/StaticCharacterizationVelocityThresh", 0.1);
   private static final LoggedTunableNumber algaeIntakeCurrentThresh =
@@ -63,7 +63,7 @@ public class Dispenser {
   public static final LoggedTunableNumber tunnelIntakeVolts =
       new LoggedTunableNumber("Dispenser/TunnelIntakeVolts", 6.0);
   public static final LoggedTunableNumber tolerance =
-      new LoggedTunableNumber("Dispenser/Tolerance", 10);
+      new LoggedTunableNumber("Dispenser/Tolerance", 0.2);
 
   static {
     switch (Constants.getRobotType()) {
@@ -76,7 +76,7 @@ public class Dispenser {
       default -> {
         kP.initDefault(0);
         kD.initDefault(0);
-        kS.initDefault(0);
+        kS.initDefault(27.163);
         kG.initDefault(0);
       }
     }
@@ -198,10 +198,13 @@ public class Dispenser {
     // Check if out of tolerance
     boolean outOfTolerance =
         Math.abs(finalAngle.getRadians() - setpoint.position) > tolerance.get();
-    shouldEStop =
-        toleranceDebouncer.calculate(outOfTolerance && shouldRunProfile)
-            || finalAngle.getRadians() < minAngleRad
-            || finalAngle.getRadians() > maxAngleRad;
+    shouldEStop = false;
+    /*
+       toleranceDebouncer.calculate(outOfTolerance && shouldRunProfile)
+           || finalAngle.getRadians() < minAngleRad
+           || finalAngle.getRadians() > maxAngleRad;
+
+    */
     shouldRunProfile = false;
     if (shouldRunProfile) {
       // Clamp goal
@@ -254,16 +257,7 @@ public class Dispenser {
 
     // Run tunnel and gripper
     if (!isEStopped) {
-      /*
-      if (tunnelVolts == 0) {
-        effectorIO.runTorqueCurrent(gripperCurrent);
-      } else if (gripperCurrent == 0) {
-        effectorIO.runVolts(tunnelVolts);
-      } else {
-        effectorIO.stop();
-      }
 
-       */
     } else {
       pivotIO.stop();
       effectorIO.stop();
@@ -334,7 +328,7 @@ public class Dispenser {
 
   public static Rotation2d calculateFinalAngle(Rotation2d pivotAngle) {
     return new Rotation2d(
-        pivotAngle.getRadians() - SuperstructureConstants.elevatorAngle.getRadians());
+        pivotAngle.getRadians()); // - SuperstructureConstants.elevatorAngle.getRadians());
   }
 
   public void runVoltsPivot(double volts) {

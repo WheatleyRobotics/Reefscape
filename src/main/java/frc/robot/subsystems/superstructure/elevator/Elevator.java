@@ -39,9 +39,9 @@ public class Elevator {
   private static final LoggedTunableNumber kS = new LoggedTunableNumber("Elevator/kS");
   private static final LoggedTunableNumber kG = new LoggedTunableNumber("Elevator/kG");
   private static final LoggedTunableNumber maxVelocityMetersPerSec =
-      new LoggedTunableNumber("Elevator/MaxVelocityMetersPerSec", 2);
+      new LoggedTunableNumber("Elevator/MaxVelocityMetersPerSec", 0.2);
   private static final LoggedTunableNumber maxAccelerationMetersPerSec2 =
-      new LoggedTunableNumber("Elevator/MaxAccelerationMetersPerSec2", 20);
+      new LoggedTunableNumber("Elevator/MaxAccelerationMetersPerSec2", 2);
   private static final LoggedTunableNumber homingVolts =
       new LoggedTunableNumber("Elevator/HomingVolts", -2.0);
   private static final LoggedTunableNumber homingTimeSecs =
@@ -56,9 +56,9 @@ public class Elevator {
   static {
     switch (Constants.getRobotType()) {
       case COMPBOT, DEVBOT -> {
-        kP.initDefault(1200);
-        kD.initDefault(30);
-        kS.initDefault(0);
+        kP.initDefault(50);
+        kD.initDefault(5);
+        kS.initDefault(0.75);
         kG.initDefault(5);
       }
       case SIMBOT -> {
@@ -142,7 +142,6 @@ public class Elevator {
     // Check if out of tolerance
     boolean outOfTolerance = Math.abs(getPositionMeters() - setpoint.position) > tolerance.get();
     shouldEStop = toleranceDebouncer.calculate(outOfTolerance && shouldRunProfile);
-    shouldRunProfile = false;
     if (shouldRunProfile) {
       // Clamp goal
       var goalState =
@@ -278,5 +277,9 @@ public class Elevator {
 
   public void runVolts(double volts) {
     io.runVolts(volts);
+  }
+
+  public void runOpenLoop(double amps) {
+    io.runOpenLoop(amps);
   }
 }

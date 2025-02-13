@@ -22,7 +22,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotType;
-import frc.robot.subsystems.superstructure.SuperstructureConstants;
 import frc.robot.subsystems.superstructure.roller.RollerSystemIO;
 import frc.robot.subsystems.superstructure.roller.RollerSystemIOInputsAutoLogged;
 import frc.robot.util.EqualsUtil;
@@ -37,7 +36,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class Dispenser {
   public static final Rotation2d minAngle = Rotation2d.fromDegrees(18);
-  public static final Rotation2d maxAngle = Rotation2d.fromDegrees(180 + 34);
+  public static final Rotation2d maxAngle = Rotation2d.fromDegrees(180 + 24);
   private static final double maxAngleRad = calculateFinalAngle(maxAngle).getRadians();
   private static final double minAngleRad = calculateFinalAngle(minAngle).getRadians();
 
@@ -74,9 +73,9 @@ public class Dispenser {
         kG.initDefault(0.0);
       }
       default -> {
-        kP.initDefault(0);
+        kP.initDefault(10);
         kD.initDefault(0);
-        kS.initDefault(27.163);
+        kS.initDefault(0); // 27.163
         kG.initDefault(0);
       }
     }
@@ -187,7 +186,7 @@ public class Dispenser {
     finalAngle = calculateFinalAngle(pivotInputs.internalPosition);
 
     // Run profile
-    boolean shouldRunProfile =
+    final boolean shouldRunProfile =
         !stopProfile
             && !coastOverride.getAsBoolean()
             && !disabledOverride.getAsBoolean()
@@ -198,21 +197,17 @@ public class Dispenser {
     // Check if out of tolerance
     boolean outOfTolerance =
         Math.abs(finalAngle.getRadians() - setpoint.position) > tolerance.get();
-    shouldEStop = false;
-    /*
-       toleranceDebouncer.calculate(outOfTolerance && shouldRunProfile)
-           || finalAngle.getRadians() < minAngleRad
-           || finalAngle.getRadians() > maxAngleRad;
 
-    */
-    shouldRunProfile = false;
+    shouldEStop =
+        toleranceDebouncer.calculate(outOfTolerance && shouldRunProfile)
+            || finalAngle.getRadians() < minAngleRad
+            || finalAngle.getRadians() > maxAngleRad;
     if (shouldRunProfile) {
       // Clamp goal
       var goalState = new State(MathUtil.clamp(goal.getAsDouble(), minAngleRad, maxAngleRad), 0.0);
       setpoint = profile.calculate(Constants.loopPeriodSecs, setpoint, goalState);
       pivotIO.runPosition(
-          Rotation2d.fromRadians(
-              setpoint.position + SuperstructureConstants.elevatorAngle.getRadians()),
+          Rotation2d.fromRadians(setpoint.position),
           kS.get() * Math.signum(setpoint.velocity) // Magnitude irrelevant
               + kG.get() * finalAngle.getCos());
       // Check at goal
@@ -339,7 +334,7 @@ public class Dispenser {
     effectorIO.runVolts(volts);
   }
 
-  public void runCurrentGripper(double amp) {
-    effectorIO.runTorqueCurrent(amp);
+  public void runOpenLoopPivot(double amps) {
+    pivotIO.runOpenLoop(amps);
   }
 }

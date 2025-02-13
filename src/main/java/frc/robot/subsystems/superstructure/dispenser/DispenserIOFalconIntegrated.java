@@ -116,7 +116,7 @@ public class DispenserIOFalconIntegrated implements DispenserIO {
 
   @Override
   public void runOpenLoop(double output) {
-    // talon.setControl(torqueCurrentFOC.withOutput(output));
+    talon.setControl(torqueCurrentFOC.withOutput(output));
   }
 
   @Override
@@ -131,13 +131,10 @@ public class DispenserIOFalconIntegrated implements DispenserIO {
 
   @Override
   public void runPosition(Rotation2d position, double feedforward) {
-    /*
     talon.setControl(
         positionTorqueCurrentFOC
             .withPosition(position.getRotations())
             .withFeedForward(feedforward));
-
-     */
   }
 
   @Override

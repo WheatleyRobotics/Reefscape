@@ -273,6 +273,7 @@ public class RobotContainer {
                 },
                 superstructure));
     */
+    /*
     operatorController
         .y()
         .whileTrue(
@@ -315,15 +316,15 @@ public class RobotContainer {
             superstructure
                 .runGoal(SuperstructureState.State.L3_CORAL.getValue())
                 .withName("Scoring L3 Coral"));
-    /*
-       operatorController
-           .y()
-           .whileTrue(
-               superstructure
-                   .runGoal(SuperstructureState.State.L2_CORAL.getValue())
-                   .withName("Scoring L2 Coral"));
 
-    */
+     */
+
+    operatorController
+        .y()
+        .whileTrue(
+            superstructure
+                .runGoal(SuperstructureState.State.L2_CORAL.getValue())
+                .withName("Scoring L2 Coral"));
 
     // operatorController.x().whileTrue(dispenser.staticCharacterization(2.0));
   }

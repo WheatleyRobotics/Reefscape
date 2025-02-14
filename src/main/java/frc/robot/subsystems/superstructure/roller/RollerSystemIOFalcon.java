@@ -17,7 +17,6 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
-import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -29,7 +28,7 @@ import edu.wpi.first.units.measure.*;
 /** Generic roller IO implementation for a roller or series of rollers using a Kraken. */
 public class RollerSystemIOFalcon implements RollerSystemIO {
   private final TalonFX talon;
-  private final CANrange canRange;
+  // private final CANrange canRange;
 
   private final StatusSignal<Angle> position;
   private final StatusSignal<AngularVelocity> velocity;
@@ -38,8 +37,8 @@ public class RollerSystemIOFalcon implements RollerSystemIO {
   private final StatusSignal<Current> torqueCurrent;
   private final StatusSignal<Temperature> tempCelsius;
 
-  private final StatusSignal<Distance> distance;
-  private final StatusSignal<Boolean> isDetected;
+  // private final StatusSignal<Distance> distance;
+  // private final StatusSignal<Boolean> isDetected;
 
   // Single shot for voltage mode, robot loop will call continuously
   private final TorqueCurrentFOC torqueCurrentFOC = new TorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
@@ -52,7 +51,7 @@ public class RollerSystemIOFalcon implements RollerSystemIO {
 
   public RollerSystemIOFalcon() {
     talon = new TalonFX(5);
-    canRange = new CANrange(4);
+    // canRange = new CANrange(4);
 
     TalonFXConfiguration talonConfig = new TalonFXConfiguration();
     talonConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
@@ -73,10 +72,13 @@ public class RollerSystemIOFalcon implements RollerSystemIO {
     proximityParamsConfigs.withProximityHysteresis(2);
     proximityParamsConfigs.withProximityThreshold(10);
     canRangeConfig.withProximityParams(proximityParamsConfigs);
+    /*
     tryUntilOk(5, () -> canRange.getConfigurator().apply(canRangeConfig));
 
     distance = canRange.getDistance();
     isDetected = canRange.getIsDetected();
+
+     */
 
     tryUntilOk(
         5,
@@ -88,10 +90,10 @@ public class RollerSystemIOFalcon implements RollerSystemIO {
                 appliedVoltage,
                 supplyCurrent,
                 torqueCurrent,
-                tempCelsius,
-                distance,
-                isDetected));
-    ParentDevice.optimizeBusUtilizationForAll(canRange, talon);
+                tempCelsius // ,distance,isDetected
+                ));
+    ParentDevice.optimizeBusUtilizationForAll( // canRange,
+        talon);
   }
 
   @Override
@@ -101,9 +103,9 @@ public class RollerSystemIOFalcon implements RollerSystemIO {
             BaseStatusSignal.refreshAll(
                     position, velocity, appliedVoltage, supplyCurrent, torqueCurrent, tempCelsius)
                 .isOK());
-    inputs.CANRangeConnected =
-        connectedDebouncer.calculate(BaseStatusSignal.refreshAll(distance, isDetected).isOK());
-    inputs.hasCoral = isDetected.getValue();
+    inputs.CANRangeConnected = false;
+    // connectedDebouncer.calculate(BaseStatusSignal.refreshAll(distance, isDetected).isOK());
+    inputs.hasCoral = false; // isDetected.getValue();
     inputs.talonPositionRads = Units.rotationsToRadians(position.getValueAsDouble()) / reduction;
     inputs.talonVelocityRadsPerSec =
         Units.rotationsToRadians(velocity.getValueAsDouble()) / reduction;

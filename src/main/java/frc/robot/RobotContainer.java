@@ -186,6 +186,15 @@ public class RobotContainer {
             () -> -driveController.getLeftX(),
             () -> -driveController.getRightX()));
 
+    driveController
+        .leftBumper()
+        .whileTrue(
+            DriveCommands.joystickDrive(
+                drive,
+                () -> -driveController.getLeftY() * 0.3,
+                () -> -driveController.getLeftX() * 0.3,
+                () -> -driveController.getRightX() * 0.3));
+
     // Lock to 0° when A button is held
     driveController
         .a()
@@ -275,7 +284,7 @@ public class RobotContainer {
     */
 
     operatorController
-        .y()
+        .a()
         .whileTrue(
             Commands.run(
                 () -> {
@@ -284,7 +293,7 @@ public class RobotContainer {
                 superstructure));
 
     operatorController
-        .a()
+        .y()
         .whileTrue(
             Commands.run(
                 () -> {
@@ -293,7 +302,7 @@ public class RobotContainer {
                 superstructure));
 
     operatorController
-        .x()
+        .b()
         .whileTrue(
             Commands.run(
                 () -> {
@@ -302,7 +311,7 @@ public class RobotContainer {
                 superstructure));
 
     operatorController
-        .b()
+        .x()
         .whileTrue(
             Commands.run(
                 () -> {
@@ -314,8 +323,8 @@ public class RobotContainer {
         .leftBumper()
         .whileTrue(
             superstructure
-                .runGoal(SuperstructureState.State.L3_CORAL.getValue())
-                .withName("Scoring L3 Coral"));
+                .runGoal(SuperstructureState.State.L1_CORAL.getValue())
+                .withName("Scoring L1 Coral"));
 
     operatorController
         .rightBumper()
@@ -323,6 +332,20 @@ public class RobotContainer {
             superstructure
                 .runGoal(SuperstructureState.State.L2_CORAL.getValue())
                 .withName("Scoring L2 Coral"));
+
+    operatorController
+        .leftTrigger(0.8)
+        .whileTrue(
+            superstructure
+                .runGoal(SuperstructureState.State.L3_CORAL.getValue())
+                .withName("Scoring L3 Coral"));
+
+    operatorController
+        .rightTrigger(0.8)
+        .whileTrue(
+            superstructure
+                .runGoal(SuperstructureState.State.L4_CORAL.getValue())
+                .withName("Scoring L4 Coral"));
 
     // operatorController.x().whileTrue(dispenser.staticCharacterization(2.0));
   }

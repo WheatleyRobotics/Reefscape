@@ -46,11 +46,11 @@ public class Dispenser {
   private static final LoggedTunableNumber kS = new LoggedTunableNumber("Dispenser/kS");
   private static final LoggedTunableNumber kG = new LoggedTunableNumber("Dispenser/kG");
   private static final LoggedTunableNumber maxVelocityDegPerSec =
-      new LoggedTunableNumber("Dispenser/MaxVelocityDegreesPerSec", 45);
+      new LoggedTunableNumber("Dispenser/MaxVelocityDegreesPerSec", 20);
   private static final LoggedTunableNumber maxAccelerationDegPerSec2 =
-      new LoggedTunableNumber("Dispenser/MaxAccelerationDegreesPerSec2", 60);
-  private static final LoggedTunableNumber staticCharacterizationVelocityThresh =
-      new LoggedTunableNumber("Dispenser/StaticCharacterizationVelocityThresh", 0.1);
+      new LoggedTunableNumber("Dispenser/MaxAccelerationDegreesPerSec2", 80);
+  private static final LoggedTunableNumber staticVelocityThresh =
+      new LoggedTunableNumber("Dispenser/staticVelocityThresh", 0.1);
   private static final LoggedTunableNumber algaeIntakeCurrentThresh =
       new LoggedTunableNumber("Dispenser/AlgaeIntakeCurrentThreshold", 40.0);
   public static final LoggedTunableNumber gripperIntakeCurrent =
@@ -73,10 +73,10 @@ public class Dispenser {
         kG.initDefault(0.0);
       }
       default -> {
-        kP.initDefault(80); // 80
-        kD.initDefault(0); //
-        kS.initDefault(5); // 27.163 | 17
-        kG.initDefault(0);
+        kP.initDefault(300); // 55
+        kD.initDefault(16.5);
+        kS.initDefault(4); // 20
+        kG.initDefault(0); // 1
       }
     }
   }
@@ -97,7 +97,7 @@ public class Dispenser {
   // Control
   @Getter
   @AutoLogOutput(key = "Dispenser/MeasuredAngle")
-  private Rotation2d finalAngle = new Rotation2d();
+  private Rotation2d pivotAngle = new Rotation2d();
 
   private TrapezoidProfile profile;
   @Getter private State setpoint = new State();
@@ -182,7 +182,7 @@ public class Dispenser {
     setBrakeMode(!coastOverride.getAsBoolean());
 
     // Calculate combined angle
-    finalAngle = pivotInputs.internalPosition;
+    pivotAngle = pivotInputs.internalPosition;
 
     // Run profile
     final boolean shouldRunProfile =
@@ -195,12 +195,12 @@ public class Dispenser {
 
     // Check if out of tolerance
     boolean outOfTolerance =
-        Math.abs(finalAngle.getRadians() - setpoint.position) > tolerance.get();
+        Math.abs(pivotAngle.getRadians() - setpoint.position) > tolerance.get();
 
     shouldEStop =
         toleranceDebouncer.calculate(outOfTolerance && shouldRunProfile)
-            || finalAngle.getRadians() < minAngleRad
-            || finalAngle.getRadians() > maxAngleRad;
+            || pivotAngle.getRadians() < minAngleRad
+            || pivotAngle.getRadians() > maxAngleRad;
     if (shouldRunProfile) {
       // Clamp goal
       var goalState = new State(MathUtil.clamp(goal.getAsDouble(), minAngleRad, maxAngleRad), 0.0);
@@ -208,7 +208,7 @@ public class Dispenser {
       pivotIO.runPosition(
           Rotation2d.fromRadians(setpoint.position),
           kS.get() * Math.signum(setpoint.velocity) // Magnitude irrelevant
-              + kG.get() * finalAngle.getCos());
+              + kG.get() * pivotAngle.getCos());
       // Check at goal
       atGoal =
           EqualsUtil.epsilonEquals(setpoint.position, goalState.position)
@@ -223,7 +223,7 @@ public class Dispenser {
       Logger.recordOutput("Dispenser/Effector/tunnelVolts", gripperCurrent);
     } else {
       // Reset setpoint
-      setpoint = new State(finalAngle.getRadians(), 0.0);
+      setpoint = new State(pivotAngle.getRadians(), 0.0);
 
       // Clear logs
       Logger.recordOutput("Dispenser/Profile/SetpointPositionRad", 0.0);
@@ -292,7 +292,7 @@ public class Dispenser {
               Logger.recordOutput(
                   "Dispenser/StaticCharacterizationOutput", state.characterizationOutput);
             })
-        .until(() -> pivotInputs.velocityRadPerSec >= staticCharacterizationVelocityThresh.get())
+        .until(() -> pivotInputs.velocityRadPerSec >= staticVelocityThresh.get())
         .finallyDo(
             () -> {
               stopProfile = false;
@@ -304,6 +304,17 @@ public class Dispenser {
   private static class StaticCharacterizationState {
     public double characterizationOutput = 0.0;
   }
+
+  /*
+  @AutoLogOutput(key = "Dispenser/StaticFF")
+  public double calculateStaticFF() {
+    if ((Math.abs(pivotInputs.velocityRadPerSec) < staticVelocityThresh.get())) {
+      return kS.get();
+    }
+    return 0.0;
+  }
+
+   */
 
   public void runVoltsPivot(double volts) {
     pivotIO.runVolts(volts);

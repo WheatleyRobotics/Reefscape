@@ -191,8 +191,8 @@ public class RobotContainer {
         .whileTrue(
             DriveCommands.joystickDrive(
                 drive,
-                () -> -driveController.getLeftY() * 0.3,
-                () -> -driveController.getLeftX() * 0.3,
+                () -> -driveController.getLeftY() * 0.4,
+                () -> -driveController.getLeftX() * 0.4,
                 () -> -driveController.getRightX() * 0.3));
 
     // Lock to 0° when A button is held
@@ -220,10 +220,14 @@ public class RobotContainer {
                     },
                     drive)
                 .ignoringDisable(true));
+    driveController.rightBumper().onTrue(
+            superstructure.runGoal(superstructure.getGoal())
+    );
+
     /*
 
     driveController
-        .y()
+        .rightTrigger(0.8)
         .onTrue(
             new DriveController(false, drive)
                 .onlyWhile(
@@ -240,84 +244,7 @@ public class RobotContainer {
                         (driveController.getLeftX() == 0)
                             && (driveController.getLeftY() == 0)
                             && (driveController.getRightX() == 0)));
-    /*
-
-        var random = new Random();
-        Container<Integer> randomInt = new Container<>();
-        randomInt.value = 1;
-        operatorController
-            .x()
-            .onTrue(
-                Commands.runOnce(
-                    () -> randomInt.value = random.nextInt(SuperstructureState.State.values().length)));
-        operatorController
-            .y()
-            .whileTrue(
-                Commands.defer(
-                    () -> {
-                      Logger.recordOutput(
-                          "RandomState", SuperstructureState.State.values()[randomInt.value]);
-                      return superstructure.runGoal(
-                          SuperstructureState.State.values()[randomInt.value].getValue());
-                    },
-                    Set.of(superstructure)));
-
-    */
-    /*
-    operatorController
-        .rightBumper()
-        .whileTrue(
-            Commands.run(
-                () -> {
-                  superstructure.runOpenLoop(40);
-                },
-                superstructure));
-
-    operatorController
-        .leftBumper()
-        .whileTrue(
-            Commands.run(
-                () -> {
-                  superstructure.runOpenLoop(-40);
-                },
-                superstructure));
-    */
-
-    operatorController
-        .a()
-        .whileTrue(
-            Commands.run(
-                () -> {
-                  superstructure.runVoltsPivot(-2);
-                },
-                superstructure));
-
-    operatorController
-        .y()
-        .whileTrue(
-            Commands.run(
-                () -> {
-                  superstructure.runVoltsPivot(2);
-                },
-                superstructure));
-
-    operatorController
-        .b()
-        .whileTrue(
-            Commands.run(
-                () -> {
-                  superstructure.runVoltsTunnel(-2);
-                },
-                superstructure));
-
-    operatorController
-        .x()
-        .whileTrue(
-            Commands.run(
-                () -> {
-                  superstructure.runVoltsTunnel(2);
-                },
-                superstructure));
+  */
 
     operatorController
         .leftBumper()

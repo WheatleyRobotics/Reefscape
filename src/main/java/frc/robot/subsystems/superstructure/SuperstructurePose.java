@@ -36,11 +36,11 @@ public record SuperstructurePose(DoubleSupplier elevatorHeight, Supplier<Rotatio
   @Getter
   enum Preset {
     START("Start", 0.0, 18.0),
-    STOW("Stow", 0.0, 35.0),
-    L1("L1", Units.inchesToMeters(0), L2Angle),
-    L2("L2", Units.inchesToMeters(4.2), L2Angle),
+    STOW("Stow", 0.0, 40.0),
+    L1("L1", Units.inchesToMeters(0), L2Angle + 5),
+    L2("L2", Units.inchesToMeters(4.2), L2Angle + 5),
     L3("L3", Units.inchesToMeters(9.6), L3Angle),
-    L4("L4", Units.inchesToMeters(18.5), L4Angle),
+    L4("L4", Units.inchesToMeters(18.5), L4Angle - 10),
     ALGAE_FLOOR_INTAKE(
         "AlgaeFloorIntake",
         Units.inchesToMeters(16.5)

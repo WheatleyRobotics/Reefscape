@@ -61,7 +61,7 @@ public class DispenserIOFalconIntegrated implements DispenserIO {
     Config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     Config.Slot0 = new Slot0Configs().withKP(0).withKI(0).withKD(0);
     Config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
-    Config.Feedback.SensorToMechanismRatio = 33.373;
+    Config.Feedback.SensorToMechanismRatio = 46.722;
     Config.TorqueCurrent.PeakForwardTorqueCurrent = 40.0;
     Config.TorqueCurrent.PeakReverseTorqueCurrent = -40.0;
     Config.CurrentLimits.StatorCurrentLimit = 40.0;

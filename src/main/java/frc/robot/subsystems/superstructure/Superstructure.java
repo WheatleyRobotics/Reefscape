@@ -41,10 +41,9 @@ public class Superstructure extends SubsystemBase {
       new DefaultDirectedGraph<>(EdgeCommand.class);
 
   private EdgeCommand edgeCommand;
-
-  private SuperstructureState state = State.START.getValue();
-  private SuperstructureState next = null;
-  private SuperstructureState goal = State.START.getValue();
+  @Getter private SuperstructureState state = State.START.getValue();
+  @Getter private SuperstructureState next = null;
+  @Getter private SuperstructureState goal = State.START.getValue();
 
   @AutoLogOutput(key = "Superstructure/EStopped")
   private boolean isEStopped = false;
@@ -319,7 +318,7 @@ public class Superstructure extends SubsystemBase {
     // Update visualizer
     measuredVisualizer.update(
         elevator.getPositionMeters(),
-        dispenser.getFinalAngle(),
+        dispenser.getPivotAngle(),
         slam.isSlammed(),
         slam.isRetracting(),
         dispenser.isHasAlgae());

@@ -46,9 +46,9 @@ public class Dispenser {
   private static final LoggedTunableNumber kS = new LoggedTunableNumber("Dispenser/kS");
   private static final LoggedTunableNumber kG = new LoggedTunableNumber("Dispenser/kG");
   private static final LoggedTunableNumber maxVelocityDegPerSec =
-      new LoggedTunableNumber("Dispenser/MaxVelocityDegreesPerSec", 20);
+      new LoggedTunableNumber("Dispenser/MaxVelocityDegreesPerSec", 45);
   private static final LoggedTunableNumber maxAccelerationDegPerSec2 =
-      new LoggedTunableNumber("Dispenser/MaxAccelerationDegreesPerSec2", 80);
+      new LoggedTunableNumber("Dispenser/MaxAccelerationDegreesPerSec2", 180);
   private static final LoggedTunableNumber staticVelocityThresh =
       new LoggedTunableNumber("Dispenser/staticVelocityThresh", 0.1);
   private static final LoggedTunableNumber algaeIntakeCurrentThresh =
@@ -58,9 +58,9 @@ public class Dispenser {
   public static final LoggedTunableNumber gripperDispenseCurrent =
       new LoggedTunableNumber("Dispenser/AlgaeDispenseCurrent", -30.0);
   public static final LoggedTunableNumber tunnelDispenseVolts =
-      new LoggedTunableNumber("Dispenser/TunnelDispenseVolts", -6.0);
+      new LoggedTunableNumber("Dispenser/TunnelDispenseVolts", 2.0);
   public static final LoggedTunableNumber tunnelIntakeVolts =
-      new LoggedTunableNumber("Dispenser/TunnelIntakeVolts", 6.0);
+      new LoggedTunableNumber("Dispenser/TunnelIntakeVolts", 2.0);
   public static final LoggedTunableNumber tolerance =
       new LoggedTunableNumber("Dispenser/Tolerance", 0.2);
 

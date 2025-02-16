@@ -40,6 +40,7 @@ import frc.robot.subsystems.superstructure.roller.RollerSystemIOSim;
 import frc.robot.subsystems.superstructure.slam.Slam;
 import frc.robot.subsystems.superstructure.slam.SlamIO;
 import frc.robot.subsystems.vision.*;
+import java.util.Optional;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -220,38 +221,60 @@ public class RobotContainer {
                     },
                     drive)
                 .ignoringDisable(true));
-    driveController.rightBumper().onTrue(
-            superstructure.runGoal(superstructure.getGoal())
-    );
+
+    driveController
+            .rightBumper()
+            .whileTrue(
+                    Commands.run(
+                            () -> {
+                              Optional<SuperstructureState.State> currentPreset =
+                                      SuperstructureState.State.getPreset(superstructure.getGoal());
+                              currentPreset.ifPresent(state -> {
+                                SuperstructureState.State ejectState = state.getEject();
+                                if (!state.equals(ejectState)) {
+                                  superstructure.runGoal(ejectState.getValue()).schedule();
+                                }
+                              });
+                            },
+                            superstructure));
 
     /*
 
-    driveController
-        .rightTrigger(0.8)
-        .onTrue(
-            new DriveController(false, drive)
-                .onlyWhile(
-                    () ->
-                        (driveController.getLeftX() == 0)
-                            && (driveController.getLeftY() == 0)
-                            && (driveController.getRightX() == 0)));
-    driveController
-        .rightTrigger(0.8)
-        .onTrue(
-            new DriveController(true, drive)
-                .onlyWhile(
-                    () ->
-                        (driveController.getLeftX() == 0)
-                            && (driveController.getLeftY() == 0)
-                            && (driveController.getRightX() == 0)));
-  */
+      driveController
+          .rightTrigger(0.8)
+          .onTrue(
+              new DriveController(false, drive)
+                  .onlyWhile(
+                      () ->
+                          (driveController.getLeftX() == 0)
+                              && (driveController.getLeftY() == 0)
+                              && (driveController.getRightX() == 0)));
+      driveController
+          .rightTrigger(0.8)
+          .onTrue(
+              new DriveController(true, drive)
+                  .onlyWhile(
+                      () ->
+                          (driveController.getLeftX() == 0)
+                              && (driveController.getLeftY() == 0)
+                              && (driveController.getRightX() == 0)));
+    */
 
     operatorController
-        .leftBumper()
+        .x()
         .whileTrue(
             superstructure
-                .runGoal(SuperstructureState.State.L1_CORAL.getValue())
-                .withName("Scoring L1 Coral"));
+                .runGoal(SuperstructureState.State.INTAKE.getValue())
+                .withName("Running Intake"));
+
+    operatorController
+        .b()
+        .whileTrue(
+            Commands.run(
+                () -> {
+                  superstructure.runVoltsTunnel(-2);
+                },
+                superstructure));
 
     operatorController
         .rightBumper()

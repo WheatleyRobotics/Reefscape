@@ -31,7 +31,11 @@ public class SuperstructureState {
   public enum State {
     START(SuperstructureState.builder().pose(SuperstructurePose.Preset.START.getPose()).build()),
     STOW(SuperstructureState.builder().pose(SuperstructurePose.Preset.STOW.getPose()).build()),
-    INTAKE(SuperstructureState.builder().tunnelVolts(Dispenser.tunnelIntakeVolts).build()),
+    INTAKE(
+        SuperstructureState.builder()
+            .pose(SuperstructurePose.Preset.START.getPose())
+            .tunnelVolts(Dispenser.tunnelIntakeVolts)
+            .build()),
     L1_CORAL(SuperstructureState.builder().pose(SuperstructurePose.Preset.L1.getPose()).build()),
     L2_CORAL(
         SuperstructureState.builder()
@@ -147,6 +151,17 @@ public class SuperstructureState {
           .toList()
           .stream()
           .findFirst();
+    }
+
+    public State getEject() {
+      try {
+        if (this.name().equals("STOW")) {
+          return State.L1_CORAL_EJECT;
+        }
+        return State.valueOf(this.name() + "_EJECT");
+      } catch (IllegalArgumentException e) {
+        return this; // Return itself if no eject version exists
+      }
     }
   }
 

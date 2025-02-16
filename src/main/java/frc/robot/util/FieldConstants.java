@@ -15,10 +15,7 @@ import edu.wpi.first.wpilibj.Filesystem;
 import frc.robot.RobotState;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import lombok.Getter;
 
 /**
@@ -64,62 +61,32 @@ public class FieldConstants {
   }
 
   public static class Reef {
+    public static final double faceLength = Units.inchesToMeters(36.792600);
     public static final Translation2d center =
-        new Translation2d(Units.inchesToMeters(176.746), Units.inchesToMeters(158.501));
+        new Translation2d(Units.inchesToMeters(176.746), fieldWidth / 2.0);
     public static final double faceToZoneLine =
         Units.inchesToMeters(12); // Side of the reef to the inside of the reef zone line
 
     public static final Pose2d[] centerFaces =
         new Pose2d[6]; // Starting facing the driver station in clockwise order
-    public static final List<Map<ReefHeight, Pose3d>> branchPositions =
+    public static final List<Map<ReefLevel, Pose3d>> branchPositions =
         new ArrayList<>(); // Starting at the right branch facing the driver station in clockwise
-
-    // face, left, right
-    // 0: 11, 0
-    // 1: 1, 2
-    // 2: 3, 4
-    // 3: 5, 6
-    // 4: 7, 8
-    // 5: 9, 10
 
     static {
       // Initialize faces
-      centerFaces[0] =
-          new Pose2d(
-              Units.inchesToMeters(144.003),
-              Units.inchesToMeters(158.500),
-              Rotation2d.fromDegrees(180));
-      centerFaces[1] =
-          new Pose2d(
-              Units.inchesToMeters(160.373),
-              Units.inchesToMeters(186.857),
-              Rotation2d.fromDegrees(120));
-      centerFaces[2] =
-          new Pose2d(
-              Units.inchesToMeters(193.116),
-              Units.inchesToMeters(186.858),
-              Rotation2d.fromDegrees(60));
-      centerFaces[3] =
-          new Pose2d(
-              Units.inchesToMeters(209.489),
-              Units.inchesToMeters(158.502),
-              Rotation2d.fromDegrees(0));
-      centerFaces[4] =
-          new Pose2d(
-              Units.inchesToMeters(193.118),
-              Units.inchesToMeters(130.145),
-              Rotation2d.fromDegrees(-60));
-      centerFaces[5] =
-          new Pose2d(
-              Units.inchesToMeters(160.375),
-              Units.inchesToMeters(130.144),
-              Rotation2d.fromDegrees(-120));
+      var aprilTagLayout = AprilTagLayoutType.OFFICIAL.getLayout();
+      centerFaces[0] = aprilTagLayout.getTagPose(18).get().toPose2d();
+      centerFaces[1] = aprilTagLayout.getTagPose(19).get().toPose2d();
+      centerFaces[2] = aprilTagLayout.getTagPose(20).get().toPose2d();
+      centerFaces[3] = aprilTagLayout.getTagPose(21).get().toPose2d();
+      centerFaces[4] = aprilTagLayout.getTagPose(22).get().toPose2d();
+      centerFaces[5] = aprilTagLayout.getTagPose(17).get().toPose2d();
 
       // Initialize branch positions
       for (int face = 0; face < 6; face++) {
-        Map<ReefHeight, Pose3d> fillRight = new HashMap<>();
-        Map<ReefHeight, Pose3d> fillLeft = new HashMap<>();
-        for (var level : ReefHeight.values()) {
+        Map<ReefLevel, Pose3d> fillRight = new HashMap<>();
+        Map<ReefLevel, Pose3d> fillLeft = new HashMap<>();
+        for (var level : ReefLevel.values()) {
           Pose2d poseDirection = new Pose2d(center, Rotation2d.fromDegrees(180 - (60 * face)));
           double adjustX = Units.inchesToMeters(30.738);
           double adjustY = Units.inchesToMeters(6.469);
@@ -171,15 +138,22 @@ public class FieldConstants {
         new Pose2d(Units.inchesToMeters(48), Units.inchesToMeters(86.5), new Rotation2d());
   }
 
-  public enum ReefHeight {
-    L4(Units.inchesToMeters(72), -90),
-    L3(Units.inchesToMeters(47.625), -35),
-    L2(Units.inchesToMeters(31.875), -35),
-    L1(Units.inchesToMeters(18), 0);
+  public enum ReefLevel {
+    L1(Units.inchesToMeters(25.0), 0),
+    L2(Units.inchesToMeters(31.875 - Math.cos(Math.toRadians(35.0)) * 0.625), -35),
+    L3(Units.inchesToMeters(47.625 - Math.cos(Math.toRadians(35.0)) * 0.625), -35),
+    L4(Units.inchesToMeters(72), -90);
 
-    ReefHeight(double height, double pitch) {
+    ReefLevel(double height, double pitch) {
       this.height = height;
-      this.pitch = pitch; // in degrees
+      this.pitch = pitch; // Degrees
+    }
+
+    public static ReefLevel fromLevel(int level) {
+      return Arrays.stream(values())
+          .filter(height -> height.ordinal() == level)
+          .findFirst()
+          .orElse(L4);
     }
 
     public final double height;
@@ -209,20 +183,18 @@ public class FieldConstants {
     private final String layoutString;
   }
 
+  public record CoralObjective(int branchId, ReefLevel reefLevel) {}
+
   /**
    * Adjusts a pose by a given offset in inches.
    *
    * @param pose The pose to adjust.
-   * @param offsetInches The offset in inches.
+   * @param offsetMeters The offset in meters.
    * @return The adjusted pose.
    */
-  public static Pose2d adjustPose(Pose2d pose, double offsetInches) {
-    double adjustedX =
-        pose.getX()
-            + Units.inchesToMeters((offsetInches)) * Math.cos(pose.getRotation().getRadians());
-    double adjustedY =
-        pose.getY()
-            + Units.inchesToMeters((offsetInches)) * Math.sin(pose.getRotation().getRadians());
+  public static Pose2d addOffset(Pose2d pose, double offsetMeters) {
+    double adjustedX = pose.getX() + offsetMeters * Math.cos(pose.getRotation().getRadians());
+    double adjustedY = pose.getY() + offsetMeters * Math.sin(pose.getRotation().getRadians());
 
     return new Pose2d(adjustedX, adjustedY, pose.getRotation());
   }
@@ -230,23 +202,23 @@ public class FieldConstants {
   /**
    * @return The nearest adjusted branch pose
    */
-  public static Pose2d getNearestBranch(boolean left) {
+  public static Pose2d getNearestBranch(boolean left, double offsetMeters) {
     RobotState.Zones zone = RobotState.getInstance().getCurrentZone();
     Pose2d targetPose2D =
         left
             ? FieldConstants.Reef.branchPositions
                 .get(zone.getFace() * 2)
-                .get(ReefHeight.L1)
+                .get(ReefLevel.L1)
                 .toPose2d()
             : FieldConstants.Reef.branchPositions
                 .get(zone.getFace() * 2 + 1)
-                .get(ReefHeight.L1)
+                .get(ReefLevel.L1)
                 .toPose2d();
     return AllianceFlipUtil.getCorrected(
-        FieldConstants.adjustPose(
+        FieldConstants.addOffset(
             new Pose2d(
                 targetPose2D.getTranslation(),
                 targetPose2D.getRotation().plus(new Rotation2d(Math.PI))),
-            -20));
+            offsetMeters));
   }
 }

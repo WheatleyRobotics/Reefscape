@@ -9,6 +9,7 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
 import lombok.Data;
@@ -30,8 +31,18 @@ public class RobotState {
   @AutoLogOutput(key = "RobotState/Zone")
   private Zones currentZone = Zones.Z1;
 
-  @AutoLogOutput(key = "RobotState/AutoAlign")
-  private boolean autoAlign = true;
+  @Getter
+  @AutoLogOutput(key = "RobotState/RobotVelocity")
+  private ChassisSpeeds robotVelocity = new ChassisSpeeds();
+
+  @AutoLogOutput(key = "RobotState/FieldVelocity")
+  public ChassisSpeeds getFieldVelocity() {
+    return ChassisSpeeds.fromRobotRelativeSpeeds(robotVelocity, pose.getRotation());
+  }
+
+  public void addDriveSpeeds(ChassisSpeeds speeds) {
+    robotVelocity = speeds;
+  }
 
   @Getter
   public enum Zones {

@@ -22,11 +22,12 @@ import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
 
 public class DriveConstants {
-  public static final double maxSpeedMetersPerSec = Units.feetToMeters(19.3);
   public static final double odometryFrequency = 100; // Hz
   public static final double trackWidth = Units.inchesToMeters(25);
   public static final double wheelBase = Units.inchesToMeters(25);
   public static final double driveBaseRadius = Math.hypot(trackWidth / 2.0, wheelBase / 2.0);
+  public static final double maxSpeedMetersPerSec = Units.feetToMeters(19.3);
+  public static final double maxAngularSpeed = Units.feetToMeters(19.3) / driveBaseRadius;
   public static final Translation2d[] moduleTranslations =
       new Translation2d[] {
         new Translation2d(trackWidth / 2.0, wheelBase / 2.0),

@@ -8,7 +8,6 @@
 package frc.robot.subsystems.superstructure.slam;
 
 import static edu.wpi.first.units.Units.*;
-import static edu.wpi.first.units.Units.Celsius;
 import static frc.robot.util.PhoenixUtil.tryUntilOk;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -22,7 +21,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.measure.*;
 
-public class SlamIOFalcon implements SlamIO {
+public class SlamIOTalonFX implements SlamIO {
   static double reduction = 21.0;
 
   // Hardware
@@ -32,7 +31,8 @@ public class SlamIOFalcon implements SlamIO {
   private final StatusSignal<Angle> position;
   private final StatusSignal<AngularVelocity> velocity;
   private final StatusSignal<Voltage> appliedVolts;
-  private final StatusSignal<Current> current;
+  private final StatusSignal<Current> supplyCurrentAmps;
+  private final StatusSignal<Current> torqueCurrentAmps;
   private final StatusSignal<Temperature> temp;
 
   // Control Requests
@@ -42,7 +42,7 @@ public class SlamIOFalcon implements SlamIO {
   // Connected debouncers
   private final Debouncer motorConnectedDebouncer = new Debouncer(0.5);
 
-  public SlamIOFalcon() {
+  public SlamIOTalonFX() {
     talon = new TalonFX(0, "*");
 
     var slamConfig = new TalonFXConfiguration();
@@ -58,10 +58,12 @@ public class SlamIOFalcon implements SlamIO {
     position = talon.getPosition();
     velocity = talon.getVelocity();
     appliedVolts = talon.getMotorVoltage();
-    current = talon.getStatorCurrent();
+    supplyCurrentAmps = talon.getSupplyCurrent();
+    torqueCurrentAmps = talon.getTorqueCurrent();
     temp = talon.getDeviceTemp();
 
-    BaseStatusSignal.setUpdateFrequencyForAll(50.0, position, velocity, appliedVolts, current);
+    BaseStatusSignal.setUpdateFrequencyForAll(
+        50.0, position, velocity, appliedVolts, supplyCurrentAmps, torqueCurrentAmps);
     ParentDevice.optimizeBusUtilizationForAll(talon);
   }
 
@@ -69,12 +71,15 @@ public class SlamIOFalcon implements SlamIO {
   public void updateInputs(SlamIOInputs inputs) {
     // Refresh status signals and check if hardware connected
     boolean slamMotorConnected =
-        BaseStatusSignal.refreshAll(position, velocity, appliedVolts, current, temp).isOK();
+        BaseStatusSignal.refreshAll(
+                position, velocity, appliedVolts, supplyCurrentAmps, torqueCurrentAmps, temp)
+            .isOK();
     inputs.connected = motorConnectedDebouncer.calculate(slamMotorConnected);
     inputs.positionRad = position.getValue().in(Radians);
     inputs.velocityRadPerSec = velocity.getValue().in(RadiansPerSecond);
     inputs.appliedVolts = appliedVolts.getValue().in(Volts);
-    inputs.currentAmps = current.getValue().in(Amps);
+    inputs.supplyCurrentAmps = supplyCurrentAmps.getValue().in(Amps);
+    inputs.torqueCurrentAmps = torqueCurrentAmps.getValue().in(Amps);
     inputs.tempCelsius = temp.getValue().in(Celsius);
   }
 

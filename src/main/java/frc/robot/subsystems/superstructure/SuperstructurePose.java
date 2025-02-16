@@ -25,9 +25,9 @@ public record SuperstructurePose(DoubleSupplier elevatorHeight, Supplier<Rotatio
   private static final double tunnelEjectMetersReverse = Units.inchesToMeters(10.0);
   // these angles are all measured as a circle with postive angles being CCW and negaitve angles
   // being CW angles
-  private static final double L2Angle = -FieldConstants.ReefHeight.L2.pitch;
-  private static final double L3Angle = -FieldConstants.ReefHeight.L3.pitch;
-  private static final double L4Angle = 90.0;
+  private static final double L2Angle = 30;
+  private static final double L3Angle = 40;
+  private static final double L4Angle = 80;
   private static final double L3AngleAlgae = L3Angle - 180.0;
   private static final double L4AngleAlgae = L4Angle + 60.0 - 180.0;
 
@@ -38,9 +38,9 @@ public record SuperstructurePose(DoubleSupplier elevatorHeight, Supplier<Rotatio
     START("Start", 0.0, 18.0),
     STOW("Stow", 0.02, 40.0),
     L1("L1", Units.inchesToMeters(0), 18.0),
-    L2("L2", Units.inchesToMeters(4), L2Angle + 5),
-    L3("L3", Units.inchesToMeters(9.5), L3Angle + 10),
-    L4("L4", Units.inchesToMeters(20.5), L4Angle - 10),
+    L2("L2", Units.inchesToMeters(4), L2Angle),
+    L3("L3", Units.inchesToMeters(9.5), L3Angle),
+    L4("L4", Units.inchesToMeters(20.5), L4Angle),
     ALGAE_FLOOR_INTAKE(
         "AlgaeFloorIntake",
         Units.inchesToMeters(16.5)
@@ -49,12 +49,12 @@ public record SuperstructurePose(DoubleSupplier elevatorHeight, Supplier<Rotatio
         algaeIntakeAngle),
     ALGAE_L2_INTAKE(
         "AlgaeL2Intake",
-        FieldConstants.ReefHeight.L2.height - groundToCarriageZero,
-        -FieldConstants.ReefHeight.L2.pitch + 180),
+        FieldConstants.ReefLevel.L2.height - groundToCarriageZero,
+        -FieldConstants.ReefLevel.L2.pitch + 180),
     ALGAE_L3_INTAKE(
         "AlgaeL3Intake",
-        FieldConstants.ReefHeight.L3.height - groundToCarriageZero,
-        -FieldConstants.ReefHeight.L2.pitch + 180),
+        FieldConstants.ReefLevel.L3.height - groundToCarriageZero,
+        -FieldConstants.ReefLevel.L2.pitch + 180),
     THROW(() -> elevatorMaxTravel, () -> -40.0),
     PRE_PROCESSOR("Processing", 0.05, -80.0),
     ALGAE_STOW("AlgaeStow", 0.0, 25.0),

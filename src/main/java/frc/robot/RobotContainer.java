@@ -16,8 +16,6 @@ package frc.robot;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -25,6 +23,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.commands.AutoScore;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.superstructure.Superstructure;
@@ -40,7 +39,13 @@ import frc.robot.subsystems.superstructure.roller.RollerSystemIOSim;
 import frc.robot.subsystems.superstructure.slam.Slam;
 import frc.robot.subsystems.superstructure.slam.SlamIO;
 import frc.robot.subsystems.vision.*;
-import java.util.Optional;
+import frc.robot.util.AllianceFlipUtil;
+import frc.robot.util.Container;
+import frc.robot.util.FieldConstants;
+import java.util.Random;
+import java.util.Set;
+import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -138,13 +143,6 @@ public class RobotContainer {
       slam = new Slam(new SlamIO() {}, new RollerSystemIO() {});
     }
     superstructure = new Superstructure(elevator, dispenser, slam);
-
-    NamedCommands.registerCommand(
-        "CL4", superstructure.runGoal(SuperstructureState.State.L3_CORAL_EJECT.getValue()));
-    NamedCommands.registerCommand(
-        "AL3", superstructure.runGoal(SuperstructureState.State.ALGAE_L3_INTAKE.getValue()));
-    NamedCommands.registerCommand(
-        "STOW", superstructure.runGoal(SuperstructureState.State.STOW.getValue()));
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
@@ -204,69 +202,54 @@ public class RobotContainer {
                 drive,
                 () -> -driveController.getLeftY(),
                 () -> -driveController.getLeftX(),
-                () -> new Rotation2d().fromDegrees(60)));
+                () -> Rotation2d.fromDegrees(60)));
 
-    // Switch to X pattern when X button is pressed
-    driveController.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    Supplier<Command> superstructureGetBackCommandFactory =
+        () ->
+            superstructure
+                .runGoal(superstructure::getState)
+                .until(
+                    () -> {
+                      var robot = AllianceFlipUtil.apply(RobotState.getInstance().getPose());
+                      return robot.getTranslation().getDistance(FieldConstants.Reef.center)
+                          >= FieldConstants.Reef.faceLength
+                              + DriveConstants.trackWidth / 2.0
+                              + AutoScore.readySuperstructureOffset.get();
+                    })
+                .withName("Superstructure Get Back!");
 
-    // Reset gyro to 0° when B button is pressed
+    /*
+
     driveController
         .b()
         .onTrue(
             Commands.runOnce(
-                    () -> {
-                      drive.setPose(new Pose2d(drive.getPose().getTranslation(), new Rotation2d()));
-                      drive.setYaw(new Rotation2d());
-                      RobotState.getInstance().resetPose(drive.getPose());
-                    },
+                    () ->
+                        RobotState.getInstance()
+                            .resetPose(
+                                new Pose2d(
+                                    RobotState.getInstance().getPose().getTranslation(),
+                                    AllianceFlipUtil.apply(new Rotation2d()))),
                     drive)
                 .ignoringDisable(true));
 
     driveController
         .rightBumper()
         .whileTrue(
-            Commands.run(
+            Commands.runOnce(
                 () -> {
-                  Optional<SuperstructureState.State> currentPreset =
-                      SuperstructureState.State.getPreset(superstructure.getGoal());
-                  currentPreset.ifPresent(
-                      state -> {
-                        SuperstructureState.State ejectState = state.getEject();
-                        if (!state.equals(ejectState)) {
-                          superstructure.runGoal(ejectState.getValue()).schedule();
-                        }
-                      });
+                  SuperstructureState currentState = superstructure.getState();
+                  SuperstructureState ejectState = SuperstructureState.getEject(currentState);
+                  if (!currentState.equals(ejectState)) {
+                    superstructure.runGoal(ejectState).schedule();
+                  }
                 },
-                superstructure));
-
-    /*
-
-      driveController
-          .rightTrigger(0.8)
-          .onTrue(
-              new DriveController(false, drive)
-                  .onlyWhile(
-                      () ->
-                          (driveController.getLeftX() == 0)
-                              && (driveController.getLeftY() == 0)
-                              && (driveController.getRightX() == 0)));
-      driveController
-          .rightTrigger(0.8)
-          .onTrue(
-              new DriveController(true, drive)
-                  .onlyWhile(
-                      () ->
-                          (driveController.getLeftX() == 0)
-                              && (driveController.getLeftY() == 0)
-                              && (driveController.getRightX() == 0)));
-    */
+                superstructure))
+        .onFalse(superstructure.runGoal(SuperstructureState.STOW));
 
     operatorController
         .x()
-        .whileTrue(
-            superstructure
-                .runGoal(SuperstructureState.State.INTAKE.getValue())
-                .withName("Running Intake"));
+        .whileTrue(superstructure.runGoal(SuperstructureState.INTAKE).withName("Running Intake"));
 
     operatorController
         .b()
@@ -280,25 +263,37 @@ public class RobotContainer {
     operatorController
         .rightBumper()
         .whileTrue(
-            superstructure
-                .runGoal(SuperstructureState.State.L2_CORAL.getValue())
-                .withName("Scoring L2 Coral"));
+            superstructure.runGoal(SuperstructureState.L2_CORAL).withName("Scoring L2 Coral"));
 
     operatorController
         .leftTrigger(0.8)
         .whileTrue(
-            superstructure
-                .runGoal(SuperstructureState.State.L3_CORAL.getValue())
-                .withName("Scoring L3 Coral"));
+            superstructure.runGoal(SuperstructureState.L3_CORAL).withName("Scoring L3 Coral"));
 
     operatorController
         .rightTrigger(0.8)
         .whileTrue(
-            superstructure
-                .runGoal(SuperstructureState.State.L4_CORAL.getValue())
-                .withName("Scoring L4 Coral"));
+            superstructure.runGoal(SuperstructureState.L4_CORAL).withName("Scoring L4 Coral"));
 
-    // operatorController.x().whileTrue(dispenser.staticCharacterization(2.0));
+     */
+
+    var random = new Random();
+    Container<Integer> randomInt = new Container<>();
+    randomInt.value = 1;
+    operatorController
+        .x()
+        .onTrue(
+            Commands.runOnce(
+                () -> randomInt.value = random.nextInt(SuperstructureState.values().length)));
+    operatorController
+        .y()
+        .whileTrue(
+            Commands.defer(
+                () -> {
+                  Logger.recordOutput("RandomState", SuperstructureState.values()[randomInt.value]);
+                  return superstructure.runGoal(SuperstructureState.values()[randomInt.value]);
+                },
+                Set.of(superstructure)));
   }
 
   /**

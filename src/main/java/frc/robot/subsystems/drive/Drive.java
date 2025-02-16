@@ -185,6 +185,7 @@ public class Drive extends SubsystemBase {
     // Update gyro alert
     gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
     RobotState.getInstance().setPose(poseEstimator.getEstimatedPosition());
+    RobotState.getInstance().addDriveSpeeds(getChassisSpeeds());
   }
 
   /**

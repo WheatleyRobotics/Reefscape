@@ -11,19 +11,7 @@
       "/SmartDashboard/VisionSystemSim-main/Sim Field": "Field2d"
     }
   },
-  "NetworkTables": {
-    "transitory": {
-      "AdvantageKit": {
-        "Arm": {
-          "open": false
-        }
-      }
-    }
-  },
   "NetworkTables Info": {
-    "shuffleboard@2": {
-      "open": false
-    },
     "visible": true
   }
 }

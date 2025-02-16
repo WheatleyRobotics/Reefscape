@@ -21,7 +21,7 @@ public class SlamIOSim implements SlamIO {
   private static final double moi = 1.0;
   private static final double cgRadius = 0.2;
   private static final DCMotor gearbox =
-      DCMotor.getKrakenX60Foc(1).withReduction(SlamIOFalcon.reduction);
+      DCMotor.getKrakenX60Foc(1).withReduction(SlamIOTalonFX.reduction);
   private static final Matrix<N2, N2> A =
       MatBuilder.fill(
           Nat.N2(),
@@ -48,7 +48,7 @@ public class SlamIOSim implements SlamIO {
     inputs.positionRad = simState.get(0);
     inputs.velocityRadPerSec = simState.get(1);
     inputs.appliedVolts = appliedVolts;
-    inputs.currentAmps = inputTorqueCurrent;
+    inputs.torqueCurrentAmps = inputTorqueCurrent;
   }
 
   @Override

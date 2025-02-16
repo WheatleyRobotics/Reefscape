@@ -19,16 +19,28 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.DriveController;
 import frc.robot.subsystems.drive.*;
+import frc.robot.subsystems.superstructure.Superstructure;
+import frc.robot.subsystems.superstructure.SuperstructureState;
+import frc.robot.subsystems.superstructure.dispenser.*;
+import frc.robot.subsystems.superstructure.elevator.Elevator;
+import frc.robot.subsystems.superstructure.elevator.ElevatorIO;
+import frc.robot.subsystems.superstructure.elevator.ElevatorIOFalcon;
+import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
+import frc.robot.subsystems.superstructure.roller.RollerSystemIO;
+import frc.robot.subsystems.superstructure.roller.RollerSystemIOFalcon;
+import frc.robot.subsystems.superstructure.roller.RollerSystemIOSim;
+import frc.robot.subsystems.superstructure.slam.Slam;
+import frc.robot.subsystems.superstructure.slam.SlamIO;
 import frc.robot.subsystems.vision.*;
+import java.util.Optional;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -40,11 +52,15 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   RobotState robotState = RobotState.getInstance();
   // Subsystems
-  private final Drive drive;
-  private final Vision vision;
-
+  private Drive drive;
+  private Vision vision;
+  Elevator elevator;
+  Dispenser dispenser;
+  Slam slam;
+  private final Superstructure superstructure;
   // Controller
-  private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandXboxController driveController = new CommandXboxController(0);
+  private final CommandXboxController operatorController = new CommandXboxController(1);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -54,6 +70,7 @@ public class RobotContainer {
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
+
         drive =
             new Drive(
                 new GyroIOPigeon2(),
@@ -61,12 +78,20 @@ public class RobotContainer {
                 new ModuleIOSpark(1),
                 new ModuleIOSpark(2),
                 new ModuleIOSpark(3));
+        /*
+
         vision =
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVision(camera0Name, robotToCamera0),
-                new VisionIOPhotonVision(camera1Name, robotToCamera1),
-                new VisionIOLimelight("limelight", drive::getRotation));
+                new VisionIOPhotonVision(camera1Name, robotToCamera1));
+
+         */
+        // vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+        elevator = new Elevator(new ElevatorIOFalcon());
+
+        dispenser = new Dispenser(new DispenserIOFalconIntegrated(), new RollerSystemIOFalcon());
+        slam = new Slam(new SlamIO() {}, new RollerSystemIO() {});
 
         break;
 
@@ -84,7 +109,10 @@ public class RobotContainer {
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
                 new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
-
+        elevator = new Elevator(new ElevatorIOSim());
+        dispenser =
+            new Dispenser(
+                new DispenserIOSim(), new RollerSystemIOSim(DCMotor.getKrakenX60Foc(1), 1.0, 0.2));
         break;
 
       default:
@@ -97,12 +125,26 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {});
         vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+        elevator = new Elevator(new ElevatorIO() {});
         break;
     }
+    if (elevator == null) {
+      elevator = new Elevator(new ElevatorIO() {});
+    }
+    if (dispenser == null) {
+      dispenser = new Dispenser(new DispenserIO() {}, new RollerSystemIO() {});
+    }
+    if (slam == null) {
+      slam = new Slam(new SlamIO() {}, new RollerSystemIO() {});
+    }
+    superstructure = new Superstructure(elevator, dispenser, slam);
 
-    NamedCommands.registerCommand("ALIGN_LEFT", new DriveController(false, drive));
-    NamedCommands.registerCommand("ALIGN_RIGHT", new DriveController(true, drive));
-
+    NamedCommands.registerCommand(
+        "CL4", superstructure.runGoal(SuperstructureState.State.L3_CORAL_EJECT.getValue()));
+    NamedCommands.registerCommand(
+        "AL3", superstructure.runGoal(SuperstructureState.State.ALGAE_L3_INTAKE.getValue()));
+    NamedCommands.registerCommand(
+        "STOW", superstructure.runGoal(SuperstructureState.State.STOW.getValue()));
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
@@ -111,6 +153,7 @@ public class RobotContainer {
         "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
     autoChooser.addOption(
         "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
+    /*
     autoChooser.addOption(
         "Drive SysId (Quasistatic Forward)",
         drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
@@ -122,6 +165,9 @@ public class RobotContainer {
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
+     */
+    autoChooser.addOption("Elevator static", elevator.staticCharacterization(2.0));
+    autoChooser.addOption("Pivot static", dispenser.staticCharacterization(2.0));
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -137,31 +183,34 @@ public class RobotContainer {
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
+            () -> -driveController.getLeftY(),
+            () -> -driveController.getLeftX(),
+            () -> -driveController.getRightX()));
 
-    controller
+    driveController
         .leftBumper()
         .whileTrue(
             DriveCommands.joystickDrive(
                 drive,
-                () -> -controller.getLeftY() * .3,
-                () -> -controller.getLeftX() * .3,
-                () -> -controller.getRightX() * .3));
+                () -> -driveController.getLeftY() * 0.4,
+                () -> -driveController.getLeftX() * 0.4,
+                () -> -driveController.getRightX() * 0.3));
 
     // Lock to 0° when A button is held
-    controller
+    driveController
         .a()
         .whileTrue(
             DriveCommands.joystickDriveAtAngle(
                 drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
-                () -> new Rotation2d()));
+                () -> -driveController.getLeftY(),
+                () -> -driveController.getLeftX(),
+                () -> new Rotation2d().fromDegrees(60)));
+
+    // Switch to X pattern when X button is pressed
+    driveController.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
     // Reset gyro to 0° when B button is pressed
-    controller
+    driveController
         .b()
         .onTrue(
             Commands.runOnce(
@@ -173,24 +222,82 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    controller
-        .y()
-        .onTrue(
-            new DriveController(false, drive)
-                .onlyWhile(
-                    () ->
-                        (controller.getLeftX() == 0)
-                            && (controller.getLeftY() == 0)
-                            && (controller.getRightX() == 0)));
-    controller
+    driveController
+            .rightBumper()
+            .whileTrue(
+                    Commands.run(
+                            () -> {
+                              Optional<SuperstructureState.State> currentPreset =
+                                      SuperstructureState.State.getPreset(superstructure.getGoal());
+                              currentPreset.ifPresent(state -> {
+                                SuperstructureState.State ejectState = state.getEject();
+                                if (!state.equals(ejectState)) {
+                                  superstructure.runGoal(ejectState.getValue()).schedule();
+                                }
+                              });
+                            },
+                            superstructure));
+
+    /*
+
+      driveController
+          .rightTrigger(0.8)
+          .onTrue(
+              new DriveController(false, drive)
+                  .onlyWhile(
+                      () ->
+                          (driveController.getLeftX() == 0)
+                              && (driveController.getLeftY() == 0)
+                              && (driveController.getRightX() == 0)));
+      driveController
+          .rightTrigger(0.8)
+          .onTrue(
+              new DriveController(true, drive)
+                  .onlyWhile(
+                      () ->
+                          (driveController.getLeftX() == 0)
+                              && (driveController.getLeftY() == 0)
+                              && (driveController.getRightX() == 0)));
+    */
+
+    operatorController
+        .x()
+        .whileTrue(
+            superstructure
+                .runGoal(SuperstructureState.State.INTAKE.getValue())
+                .withName("Running Intake"));
+
+    operatorController
+        .b()
+        .whileTrue(
+            Commands.run(
+                () -> {
+                  superstructure.runVoltsTunnel(-2);
+                },
+                superstructure));
+
+    operatorController
+        .rightBumper()
+        .whileTrue(
+            superstructure
+                .runGoal(SuperstructureState.State.L2_CORAL.getValue())
+                .withName("Scoring L2 Coral"));
+
+    operatorController
+        .leftTrigger(0.8)
+        .whileTrue(
+            superstructure
+                .runGoal(SuperstructureState.State.L3_CORAL.getValue())
+                .withName("Scoring L3 Coral"));
+
+    operatorController
         .rightTrigger(0.8)
-        .onTrue(
-            new DriveController(true, drive)
-                .onlyWhile(
-                    () ->
-                        (controller.getLeftX() == 0)
-                            && (controller.getLeftY() == 0)
-                            && (controller.getRightX() == 0)));
+        .whileTrue(
+            superstructure
+                .runGoal(SuperstructureState.State.L4_CORAL.getValue())
+                .withName("Scoring L4 Coral"));
+
+    // operatorController.x().whileTrue(dispenser.staticCharacterization(2.0));
   }
 
   /**

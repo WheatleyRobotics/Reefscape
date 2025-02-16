@@ -1,29 +1,28 @@
 {
-  "HALProvider": {
-    "Other Devices": {
-      "window": {
-        "visible": false
-      }
-    }
-  },
   "NTProvider": {
     "types": {
       "/AdvantageKit/RealOutputs/Alerts": "Alerts",
+      "/AdvantageKit/RealOutputs/Mechanism2d/Goal": "Mechanism2d",
+      "/AdvantageKit/RealOutputs/Mechanism2d/Measured": "Mechanism2d",
+      "/AdvantageKit/RealOutputs/Mechanism2d/Setpoint": "Mechanism2d",
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Alerts": "Alerts",
       "/SmartDashboard/Auto Choices": "String Chooser",
       "/SmartDashboard/VisionSystemSim-main/Sim Field": "Field2d"
     }
   },
+  "NetworkTables": {
+    "transitory": {
+      "AdvantageKit": {
+        "Arm": {
+          "open": false
+        }
+      }
+    }
+  },
   "NetworkTables Info": {
-    "Connections": {
-      "open": true
-    },
-    "Server": {
-      "Publishers": {
-        "open": true
-      },
-      "open": true
+    "shuffleboard@2": {
+      "open": false
     },
     "visible": true
   }

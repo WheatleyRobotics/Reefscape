@@ -1,3 +1,10 @@
+// Copyright (c) 2025 FRC 6328
+// http://github.com/Mechanical-Advantage
+//
+// Use of this source code is governed by an MIT-style
+// license that can be found in the LICENSE file at
+// the root directory of this project.
+
 package frc.robot.subsystems.superstructure.elevator;
 
 import org.littletonrobotics.junction.AutoLog;
@@ -5,37 +12,28 @@ import org.littletonrobotics.junction.AutoLog;
 public interface ElevatorIO {
   @AutoLog
   class ElevatorIOInputs {
-    public boolean leaderMotorConnected = true;
-    public boolean followerMotorConnected = true;
-
-    public double positionRads = 0.0;
-    public double absoluteEncoderPositionMeters = 0.0;
-    public double relativeEncoderPositionMeters = 0.0;
-    public double velocityMetersPerSec = 0.0;
+    public boolean motorConnected = true;
+    public boolean followerConnected = true;
+    public double positionRad = 0.0;
+    public double velocityRadPerSec = 0.0;
     public double[] appliedVolts = new double[] {};
-    public double[] supplyCurrentAmps = new double[] {};
     public double[] torqueCurrentAmps = new double[] {};
-    public double[] tempCelcius = new double[] {};
-    public boolean absoluteEncoderConnected = true;
+    public double[] supplyCurrentAmps = new double[] {};
+    public double[] tempCelsius = new double[] {};
   }
 
   default void updateInputs(ElevatorIOInputs inputs) {}
 
-  /** Run to setpoint angle in radians */
-  default void runSetpoint(double setpointRads, double feedforward) {}
+  default void runOpenLoop(double output) {}
 
-  /** Run motors at volts */
   default void runVolts(double volts) {}
 
-  /** Run motors at current */
-  default void runCurrent(double amps) {}
-
-  /** Set brake mode enabled */
-  default void setBrakeMode(boolean enabled) {}
-
-  /** Set PID values */
-  default void setPID(double p, double i, double d) {}
-
-  /** Stops motors */
   default void stop() {}
+
+  /** Run elevator output shaft to positionRad with additional feedforward output */
+  default void runPosition(double positionRad, double feedforward) {}
+
+  default void setPID(double kP, double kI, double kD) {}
+
+  default void setBrakeMode(boolean enabled) {}
 }

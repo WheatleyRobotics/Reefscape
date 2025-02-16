@@ -13,9 +13,9 @@ import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
+import frc.robot.RobotState;
 import frc.robot.subsystems.superstructure.slam.Slam;
 import frc.robot.util.EqualsUtil;
-import frc.robot.util.RobotState;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
@@ -124,7 +124,7 @@ public class SuperstructureVisualizer {
     if (hasAlgae) {
       Logger.recordOutput(
           "Mechanism3d/" + name + "/Algae",
-          new Pose3d(RobotState.getInstance().getEstimatedPose())
+          new Pose3d(RobotState.getInstance().getPose())
               .transformBy(new Transform3d(Pose3d.kZero, pivotPose3d))
               .transformBy(
                   new Transform3d(

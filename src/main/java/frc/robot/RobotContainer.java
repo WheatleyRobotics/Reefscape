@@ -223,20 +223,21 @@ public class RobotContainer {
                 .ignoringDisable(true));
 
     driveController
-            .rightBumper()
-            .whileTrue(
-                    Commands.run(
-                            () -> {
-                              Optional<SuperstructureState.State> currentPreset =
-                                      SuperstructureState.State.getPreset(superstructure.getGoal());
-                              currentPreset.ifPresent(state -> {
-                                SuperstructureState.State ejectState = state.getEject();
-                                if (!state.equals(ejectState)) {
-                                  superstructure.runGoal(ejectState.getValue()).schedule();
-                                }
-                              });
-                            },
-                            superstructure));
+        .rightBumper()
+        .whileTrue(
+            Commands.run(
+                () -> {
+                  Optional<SuperstructureState.State> currentPreset =
+                      SuperstructureState.State.getPreset(superstructure.getGoal());
+                  currentPreset.ifPresent(
+                      state -> {
+                        SuperstructureState.State ejectState = state.getEject();
+                        if (!state.equals(ejectState)) {
+                          superstructure.runGoal(ejectState.getValue()).schedule();
+                        }
+                      });
+                },
+                superstructure));
 
     /*
 

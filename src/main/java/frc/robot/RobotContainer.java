@@ -16,15 +16,17 @@ package frc.robot;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.commands.AutoScore;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.DriveToPose;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.superstructure.Superstructure;
 import frc.robot.subsystems.superstructure.SuperstructureState;
@@ -40,12 +42,7 @@ import frc.robot.subsystems.superstructure.slam.Slam;
 import frc.robot.subsystems.superstructure.slam.SlamIO;
 import frc.robot.subsystems.vision.*;
 import frc.robot.util.AllianceFlipUtil;
-import frc.robot.util.Container;
 import frc.robot.util.FieldConstants;
-import java.util.Random;
-import java.util.Set;
-import java.util.function.Supplier;
-import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -204,22 +201,6 @@ public class RobotContainer {
                 () -> -driveController.getLeftX(),
                 () -> Rotation2d.fromDegrees(60)));
 
-    Supplier<Command> superstructureGetBackCommandFactory =
-        () ->
-            superstructure
-                .runGoal(superstructure::getState)
-                .until(
-                    () -> {
-                      var robot = AllianceFlipUtil.apply(RobotState.getInstance().getPose());
-                      return robot.getTranslation().getDistance(FieldConstants.Reef.center)
-                          >= FieldConstants.Reef.faceLength
-                              + DriveConstants.trackWidth / 2.0
-                              + AutoScore.readySuperstructureOffset.get();
-                    })
-                .withName("Superstructure Get Back!");
-
-    /*
-
     driveController
         .b()
         .onTrue(
@@ -234,18 +215,52 @@ public class RobotContainer {
                 .ignoringDisable(true));
 
     driveController
-        .rightBumper()
+        .x()
         .whileTrue(
-            Commands.runOnce(
-                () -> {
-                  SuperstructureState currentState = superstructure.getState();
-                  SuperstructureState ejectState = SuperstructureState.getEject(currentState);
-                  if (!currentState.equals(ejectState)) {
-                    superstructure.runGoal(ejectState).schedule();
-                  }
-                },
-                superstructure))
-        .onFalse(superstructure.runGoal(SuperstructureState.STOW));
+            Commands.sequence(
+                new DriveToPose(drive, () -> FieldConstants.getNearestBranch(false, -0.4)),
+                Commands.runOnce(
+                    () -> {
+                      SuperstructureState currentState = superstructure.getState();
+                      SuperstructureState ejectState = SuperstructureState.getEject(currentState);
+                      if (!currentState.equals(ejectState)) {
+                        superstructure.runGoal(SuperstructureState.L4_CORAL_EJECT).schedule();
+                      }
+                    },
+                    superstructure)))
+        .onFalse(
+            Commands.sequence(
+                Commands.run(
+                        () -> {
+                          drive.runVelocity(new ChassisSpeeds(-1, 0, 0));
+                        })
+                    .withTimeout(0.5),
+                Commands.runOnce(() -> drive.runVelocity(new ChassisSpeeds(0, 0, 0))),
+                superstructure.runGoal(SuperstructureState.STOW)));
+
+    driveController
+        .y()
+        .whileTrue(
+            Commands.sequence(
+                new DriveToPose(drive, () -> FieldConstants.getNearestBranch(true, -0.4)),
+                Commands.runOnce(
+                    () -> {
+                      SuperstructureState currentState = superstructure.getState();
+                      SuperstructureState ejectState = SuperstructureState.getEject(currentState);
+                      if (!currentState.equals(ejectState)) {
+                        superstructure.runGoal(SuperstructureState.L4_CORAL_EJECT).schedule();
+                      }
+                    },
+                    superstructure)))
+        .onFalse(
+            Commands.sequence(
+                Commands.run(
+                        () -> {
+                          drive.runVelocity(new ChassisSpeeds(-1, 0, 0));
+                        })
+                    .withTimeout(0.5),
+                Commands.runOnce(() -> drive.runVelocity(new ChassisSpeeds(0, 0, 0))),
+                superstructure.runGoal(SuperstructureState.STOW)));
 
     operatorController
         .x()
@@ -275,25 +290,26 @@ public class RobotContainer {
         .whileTrue(
             superstructure.runGoal(SuperstructureState.L4_CORAL).withName("Scoring L4 Coral"));
 
-     */
+    /*
+       var random = new Random();
+       Container<Integer> randomInt = new Container<>();
+       randomInt.value = 1;
+       operatorController
+           .x()
+           .onTrue(
+               Commands.runOnce(
+                   () -> randomInt.value = random.nextInt(SuperstructureState.values().length)));
+       operatorController
+           .y()
+           .whileTrue(
+               Commands.defer(
+                   () -> {
+                     Logger.recordOutput("RandomState", SuperstructureState.values()[randomInt.value]);
+                     return superstructure.runGoal(SuperstructureState.values()[randomInt.value]);
+                   },
+                   Set.of(superstructure)));
 
-    var random = new Random();
-    Container<Integer> randomInt = new Container<>();
-    randomInt.value = 1;
-    operatorController
-        .x()
-        .onTrue(
-            Commands.runOnce(
-                () -> randomInt.value = random.nextInt(SuperstructureState.values().length)));
-    operatorController
-        .y()
-        .whileTrue(
-            Commands.defer(
-                () -> {
-                  Logger.recordOutput("RandomState", SuperstructureState.values()[randomInt.value]);
-                  return superstructure.runGoal(SuperstructureState.values()[randomInt.value]);
-                },
-                Set.of(superstructure)));
+    */
   }
 
   /**

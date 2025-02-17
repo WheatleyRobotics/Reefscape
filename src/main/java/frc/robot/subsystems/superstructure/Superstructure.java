@@ -367,6 +367,7 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command runGoal(SuperstructureState goal) {
+    System.out.println("runGoal: " + goal.toString());
     return runOnce(() -> setGoal(goal)).andThen(Commands.idle(this));
   }
 

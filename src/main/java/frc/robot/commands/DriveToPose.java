@@ -49,7 +49,7 @@ public class DriveToPose extends Command {
   private static final LoggedTunableNumber ffMinRadius =
       new LoggedTunableNumber("DriveToPose/FFMinRadius");
   private static final LoggedTunableNumber ffMaxRadius =
-      new LoggedTunableNumber("DriveToPose/FFMinRadius");
+      new LoggedTunableNumber("DriveToPose/FFMaxRadius");
 
   static {
     drivekP.initDefault(2.0);
@@ -80,7 +80,6 @@ public class DriveToPose extends Command {
   private double driveErrorAbs = 0.0;
   private double thetaErrorAbs = 0.0;
   @Getter private boolean running = false;
-  private Supplier<Pose2d> robot = RobotState.getInstance()::getPose;
 
   private Supplier<Translation2d> linearFF = () -> Translation2d.kZero;
   private DoubleSupplier omegaFF = () -> 0.0;
@@ -95,25 +94,20 @@ public class DriveToPose extends Command {
     addRequirements(drive);
   }
 
-  public DriveToPose(Drive drive, Supplier<Pose2d> target, Supplier<Pose2d> robot) {
-    this(drive, target);
-    this.robot = robot;
-  }
-
   public DriveToPose(
       Drive drive,
       Supplier<Pose2d> target,
-      Supplier<Pose2d> robot,
       Supplier<Translation2d> linearFF,
       DoubleSupplier omegaFF) {
-    this(drive, target, robot);
+    this(drive, target);
     this.linearFF = linearFF;
     this.omegaFF = omegaFF;
   }
 
   @Override
   public void initialize() {
-    Pose2d currentPose = robot.get();
+    Logger.recordOutput("DriveToPose/Target", target.get());
+    Pose2d currentPose = RobotState.getInstance().getPose();
     ChassisSpeeds fieldVelocity = RobotState.getInstance().getFieldVelocity();
     Translation2d linearFieldVelocity =
         new Translation2d(fieldVelocity.vxMetersPerSecond, fieldVelocity.vyMetersPerSecond);
@@ -164,7 +158,7 @@ public class DriveToPose extends Command {
     }
 
     // Get current pose and target pose
-    Pose2d currentPose = robot.get();
+    Pose2d currentPose = RobotState.getInstance().getPose();
     Pose2d targetPose = target.get();
 
     // Calculate drive speed
@@ -238,19 +232,17 @@ public class DriveToPose extends Command {
     drive.stop();
     running = false;
     // Clear logs
-    Logger.recordOutput("DriveToPose/Setpoint", new Pose2d[] {});
-    Logger.recordOutput("DriveToPose/Goal", new Pose2d[] {});
+    Logger.recordOutput("DriveToPose/Setpoint", new Pose2d());
+    Logger.recordOutput("DriveToPose/Goal", new Pose2d());
+  }
+
+  @Override
+  public boolean isFinished() {
+    return atGoal();
   }
 
   /** Checks if the robot is stopped at the final pose. */
   public boolean atGoal() {
     return running && driveController.atGoal() && thetaController.atGoal();
-  }
-
-  /** Checks if the robot pose is within the allowed drive and theta tolerances. */
-  public boolean withinTolerance(double driveTolerance, Rotation2d thetaTolerance) {
-    return running
-        && Math.abs(driveErrorAbs) < driveTolerance
-        && Math.abs(thetaErrorAbs) < thetaTolerance.getRadians();
   }
 }

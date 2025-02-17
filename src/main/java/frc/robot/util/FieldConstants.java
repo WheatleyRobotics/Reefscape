@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
 import lombok.Getter;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * Contains various field dimensions and useful reference points. All units are in meters and poses
@@ -183,8 +184,6 @@ public class FieldConstants {
     private final String layoutString;
   }
 
-  public record CoralObjective(int branchId, ReefLevel reefLevel) {}
-
   /**
    * Adjusts a pose by a given offset in inches.
    *
@@ -195,17 +194,18 @@ public class FieldConstants {
   public static Pose2d addOffset(Pose2d pose, double offsetMeters) {
     double adjustedX = pose.getX() + offsetMeters * Math.cos(pose.getRotation().getRadians());
     double adjustedY = pose.getY() + offsetMeters * Math.sin(pose.getRotation().getRadians());
-
-    return new Pose2d(adjustedX, adjustedY, pose.getRotation());
+    Pose2d adjusted = new Pose2d(adjustedX, adjustedY, pose.getRotation());
+    Logger.recordOutput("FieldConstants/AdjustedPose", adjusted);
+    return adjusted;
   }
 
   /**
    * @return The nearest adjusted branch pose
    */
-  public static Pose2d getNearestBranch(boolean left, double offsetMeters) {
+  public static Pose2d getNearestBranch(boolean right, double offsetMeters) {
     RobotState.Zones zone = RobotState.getInstance().getCurrentZone();
     Pose2d targetPose2D =
-        left
+        right
             ? FieldConstants.Reef.branchPositions
                 .get(zone.getFace() * 2)
                 .get(ReefLevel.L1)
@@ -214,6 +214,7 @@ public class FieldConstants {
                 .get(zone.getFace() * 2 + 1)
                 .get(ReefLevel.L1)
                 .toPose2d();
+    Logger.recordOutput("FieldConstants/NearestBranch", targetPose2D);
     return AllianceFlipUtil.getCorrected(
         FieldConstants.addOffset(
             new Pose2d(

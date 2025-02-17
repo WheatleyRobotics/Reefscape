@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Unit;
 import edu.wpi.first.wpilibj.Filesystem;
 import frc.robot.RobotState;
 import java.io.IOException;
@@ -219,7 +220,7 @@ public class FieldConstants {
         FieldConstants.addOffset(
             new Pose2d(
                 targetPose2D.getTranslation(),
-                targetPose2D.getRotation().plus(new Rotation2d(Math.PI))),
+                targetPose2D.getRotation().plus(new Rotation2d(Units.degreesToRadians(0)))),
             offsetMeters));
   }
 }

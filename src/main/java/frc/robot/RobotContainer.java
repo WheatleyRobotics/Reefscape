@@ -16,6 +16,7 @@ package frc.robot;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -163,6 +164,45 @@ public class RobotContainer {
      */
     autoChooser.addOption("Elevator static", elevator.staticCharacterization(2.0));
     autoChooser.addOption("Pivot static", dispenser.staticCharacterization(2.0));
+
+    NamedCommands.registerCommand(
+        "CL4",
+        superstructure
+            .runGoal(SuperstructureState.L4_CORAL_EJECT)
+            .until(() -> superstructure.atGoal()));
+    NamedCommands.registerCommand(
+        "AL3", superstructure.runGoal(SuperstructureState.ALGAE_L3_INTAKE));
+    NamedCommands.registerCommand("STOW", superstructure.runGoal(SuperstructureState.STOW));
+    NamedCommands.registerCommand(
+        "ALIGN_LEFT",
+        Commands.sequence(
+                new DriveToPose(drive, () -> FieldConstants.getNearestBranch(false, -0.4)),
+                Commands.runOnce(
+                    () -> {
+                      SuperstructureState currentState = superstructure.getState();
+                      SuperstructureState ejectState = SuperstructureState.getEject(currentState);
+                      if (!currentState.equals(ejectState)) {
+                        superstructure.runGoal(SuperstructureState.L4_CORAL_EJECT).schedule();
+                      }
+                    },
+                    superstructure))
+            .until(
+                () ->
+                    new DriveToPose(drive, () -> FieldConstants.getNearestBranch(false, -0.4))
+                        .atGoal()));
+    NamedCommands.registerCommand(
+        "ALIGNR",
+        Commands.sequence(
+            new DriveToPose(drive, () -> FieldConstants.getNearestBranch(true, -0.4)),
+            Commands.runOnce(
+                () -> {
+                  SuperstructureState currentState = superstructure.getState();
+                  SuperstructureState ejectState = SuperstructureState.getEject(currentState);
+                  if (!currentState.equals(ejectState)) {
+                    superstructure.runGoal(SuperstructureState.L4_CORAL_EJECT).schedule();
+                  }
+                },
+                superstructure)));
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -218,7 +258,7 @@ public class RobotContainer {
         .x()
         .whileTrue(
             Commands.sequence(
-                new DriveToPose(drive, () -> FieldConstants.getNearestBranch(false, -0.4)),
+                new DriveToPose(drive, () -> FieldConstants.getNearestBranch(false, 0.4)),
                 Commands.runOnce(
                     () -> {
                       SuperstructureState currentState = superstructure.getState();
@@ -242,7 +282,7 @@ public class RobotContainer {
         .y()
         .whileTrue(
             Commands.sequence(
-                new DriveToPose(drive, () -> FieldConstants.getNearestBranch(true, -0.4)),
+                new DriveToPose(drive, () -> FieldConstants.getNearestBranch(true, 0.4)),
                 Commands.runOnce(
                     () -> {
                       SuperstructureState currentState = superstructure.getState();

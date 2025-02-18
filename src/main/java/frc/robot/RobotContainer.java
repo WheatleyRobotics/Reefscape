@@ -19,15 +19,14 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.commands.AutoScore;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.DriveToPose;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.superstructure.Superstructure;
 import frc.robot.subsystems.superstructure.SuperstructureState;
@@ -42,7 +41,6 @@ import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
 import frc.robot.subsystems.superstructure.slam.Slam;
 import frc.robot.subsystems.superstructure.slam.SlamIO;
 import frc.robot.subsystems.vision.*;
-import frc.robot.util.FieldConstants;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -136,26 +134,38 @@ public class RobotContainer {
       slam = new Slam(new SlamIO() {}, new TunnelIO() {});
     }
     superstructure = new Superstructure(elevator, dispenser, slam);
+    /*
+       NamedCommands.registerCommand(
+           "READY_L4",
+           superstructure.runGoal(SuperstructureState.L4_CORAL).until(superstructure::atGoal));
 
-    NamedCommands.registerCommand(
-        "READY_L4",
-        superstructure.runGoal(SuperstructureState.L4_CORAL).until(superstructure::atGoal));
+       NamedCommands.registerCommand(
+           "SCORE_L4",
+           superstructure.runGoal(SuperstructureState.L4_CORAL_EJECT).until(superstructure::atGoal));
 
-    NamedCommands.registerCommand(
-        "SCORE_L4",
-        superstructure.runGoal(SuperstructureState.L4_CORAL_EJECT).until(superstructure::atGoal));
+       NamedCommands.registerCommand(
+           "INTAKE", superstructure.runGoal(SuperstructureState.INTAKE).withTimeout(1));
+
+       NamedCommands.registerCommand(
+           "STOW", superstructure.runGoal(SuperstructureState.STOW).until(superstructure::atGoal));
+
+       NamedCommands.registerCommand(
+           "ALIGN_RIGHT", new DriveToPose(drive, () -> FieldConstants.getNearestBranch(true, -0.5)));
+
+       NamedCommands.registerCommand(
+           "ALIGN_LEFT", new DriveToPose(drive, () -> FieldConstants.getNearestBranch(false, -0.5)));
+
+    */
 
     NamedCommands.registerCommand(
         "INTAKE", superstructure.runGoal(SuperstructureState.INTAKE).withTimeout(1));
 
     NamedCommands.registerCommand(
-        "STOW", superstructure.runGoal(SuperstructureState.STOW).until(superstructure::atGoal));
-
+        "SCORE_L4_RIGHT",
+        AutoScore.getAutoScore(SuperstructureState.L4_CORAL, true, drive, superstructure));
     NamedCommands.registerCommand(
-        "ALIGN_RIGHT", new DriveToPose(drive, () -> FieldConstants.getNearestBranch(true, -0.5)));
-
-    NamedCommands.registerCommand(
-        "ALIGN_LEFT", new DriveToPose(drive, () -> FieldConstants.getNearestBranch(false, -0.5)));
+        "SCORE_L4_LEFT",
+        AutoScore.getAutoScore(SuperstructureState.L4_CORAL, false, drive, superstructure));
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -230,30 +240,37 @@ public class RobotContainer {
                     },
                     drive)
                 .ignoringDisable(true));
+    /*
+       driveController
+           .x()
+           .whileTrue(
+               Commands.sequence(
+                   new DriveToPose(drive, () -> FieldConstants.getNearestBranch(false, -0.4)),
+                   Commands.runOnce(
+                       () -> {
+                         SuperstructureState currentState = superstructure.getState();
+                         SuperstructureState ejectState = SuperstructureState.getEject(currentState);
+                         if (!currentState.equals(ejectState)) {
+                           superstructure.runGoal(SuperstructureState.L4_CORAL_EJECT).schedule();
+                         }
+                       },
+                       superstructure)))
+           .onFalse(
+               Commands.sequence(
+                   Commands.run(
+                           () -> {
+                             drive.runVelocity(new ChassisSpeeds(-1, 0, 0));
+                           })
+                       .withTimeout(0.5),
+                   Commands.runOnce(() -> drive.runVelocity(new ChassisSpeeds(0, 0, 0))),
+                   superstructure.runGoal(SuperstructureState.STOW)));
+
+    */
 
     driveController
         .x()
         .whileTrue(
-            Commands.sequence(
-                new DriveToPose(drive, () -> FieldConstants.getNearestBranch(false, -0.4)),
-                Commands.runOnce(
-                    () -> {
-                      SuperstructureState currentState = superstructure.getState();
-                      SuperstructureState ejectState = SuperstructureState.getEject(currentState);
-                      if (!currentState.equals(ejectState)) {
-                        superstructure.runGoal(SuperstructureState.L4_CORAL_EJECT).schedule();
-                      }
-                    },
-                    superstructure)))
-        .onFalse(
-            Commands.sequence(
-                Commands.run(
-                        () -> {
-                          drive.runVelocity(new ChassisSpeeds(-1, 0, 0));
-                        })
-                    .withTimeout(0.5),
-                Commands.runOnce(() -> drive.runVelocity(new ChassisSpeeds(0, 0, 0))),
-                superstructure.runGoal(SuperstructureState.STOW)));
+            AutoScore.getAutoScore(SuperstructureState.L4_CORAL, true, drive, superstructure));
 
     driveController
         .rightBumper()

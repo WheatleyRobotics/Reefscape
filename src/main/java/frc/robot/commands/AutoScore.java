@@ -1,6 +1,5 @@
 package frc.robot.commands;
 
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.drive.Drive;
@@ -10,28 +9,15 @@ import frc.robot.util.FieldConstants;
 
 public class AutoScore {
 
-  public static Command getAutoScore(boolean right, Drive drive, Superstructure superstructure) {
+  public static Command getAutoScore(
+      SuperstructureState state, boolean right, Drive drive, Superstructure superstructure) {
     return Commands.sequence(
+        Commands.parallel(
+            new DriveToPose(drive, () -> FieldConstants.getNearestBranch(right, -0.6)),
+            superstructure.runGoal(state).until(superstructure::atGoal)),
+        new DriveToPose(drive, () -> FieldConstants.getNearestBranch(right, -0.4)),
+        superstructure.runGoal(SuperstructureState.getEject(state)).withTimeout(0.5),
         new DriveToPose(drive, () -> FieldConstants.getNearestBranch(right, -0.6)),
-        Commands.runOnce(
-            () -> {
-              SuperstructureState currentState = superstructure.getState();
-              SuperstructureState ejectState = SuperstructureState.getEject(currentState);
-              if (!currentState.equals(ejectState)) {
-                superstructure.runGoal(ejectState).schedule();
-              }
-            },
-            superstructure));
-  }
-
-  public static Command getBackOut(Drive drive, Superstructure superstructure) {
-    return Commands.sequence(
-        Commands.run(
-                () -> {
-                  drive.runVelocity(new ChassisSpeeds(-1, 0, 0));
-                })
-            .withTimeout(0.5),
-        Commands.runOnce(() -> drive.runVelocity(new ChassisSpeeds(0, 0, 0))),
-        superstructure.runGoal(SuperstructureState.STOW));
+        superstructure.runGoal(SuperstructureState.STOW).until(superstructure::atGoal));
   }
 }

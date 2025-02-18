@@ -5,66 +5,21 @@
     "data": {
       "commands": [
         {
-          "type": "parallel",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "Start-Z5"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "READY_L4"
-                }
-              }
-            ]
+            "pathName": "Start-Z5"
           }
         },
         {
-          "type": "sequential",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "ALIGN_LEFT"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "SCORE_L4"
-                }
-              }
-            ]
+            "name": "SCORE_L4_LEFT"
           }
         },
         {
-          "type": "wait",
+          "type": "path",
           "data": {
-            "waitTime": 0.5
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "Z5-Source"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "STOW"
-                }
-              }
-            ]
+            "pathName": "Z5-Source"
           }
         },
         {
@@ -74,66 +29,21 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "Source-Z6"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "READY_L4"
-                }
-              }
-            ]
+            "pathName": "Source-Z6"
           }
         },
         {
-          "type": "sequential",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "ALIGN_LEFT"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "SCORE_L4"
-                }
-              }
-            ]
+            "name": "SCORE_L4_RIGHT"
           }
         },
         {
-          "type": "wait",
+          "type": "path",
           "data": {
-            "waitTime": 0.5
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "Z6-Source"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "STOW"
-                }
-              }
-            ]
+            "pathName": "Z6-Source"
           }
         },
         {
@@ -143,47 +53,9 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "Source-Z6"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "READY_L4"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "sequential",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "ALIGN_RIGHT"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "SCORE_L4"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.5
+            "name": "SCORE_L4_LEFT"
           }
         }
       ]

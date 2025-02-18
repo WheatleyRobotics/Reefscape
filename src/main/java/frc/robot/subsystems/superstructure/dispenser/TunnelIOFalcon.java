@@ -5,7 +5,7 @@
 // license that can be found in the LICENSE file at
 // the root directory of this project.
 
-package frc.robot.subsystems.superstructure.roller;
+package frc.robot.subsystems.superstructure.dispenser;
 
 import static frc.robot.util.PhoenixUtil.tryUntilOk;
 
@@ -26,7 +26,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 
 /** Generic roller IO implementation for a roller or series of rollers using a Kraken. */
-public class RollerSystemIOFalcon implements RollerSystemIO {
+public class TunnelIOFalcon implements TunnelIO {
   private final TalonFX talon;
   // private final CANrange canRange;
 
@@ -49,7 +49,7 @@ public class RollerSystemIOFalcon implements RollerSystemIO {
 
   private final Debouncer connectedDebouncer = new Debouncer(0.5);
 
-  public RollerSystemIOFalcon() {
+  public TunnelIOFalcon() {
     talon = new TalonFX(5);
     // canRange = new CANrange(4);
 
@@ -97,7 +97,7 @@ public class RollerSystemIOFalcon implements RollerSystemIO {
   }
 
   @Override
-  public void updateInputs(RollerSystemIOInputs inputs) {
+  public void updateInputs(TunnelIOInputs inputs) {
     inputs.talonConnected =
         connectedDebouncer.calculate(
             BaseStatusSignal.refreshAll(

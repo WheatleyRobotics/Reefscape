@@ -19,12 +19,12 @@ import frc.robot.Constants;
 import frc.robot.subsystems.superstructure.SuperstructureConstants;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
 
-public class DispenserIOSim implements DispenserIO {
+public class PivotIOSim implements PivotIO {
   public static final double moi =
       (0.5) * (ElevatorIOSim.carriageMassKg) * Math.pow(SuperstructureConstants.pivotLength, 2.0);
   private static final double cgRadius = Units.inchesToMeters(10.0);
   public static final DCMotor gearbox =
-      DCMotor.getKrakenX60Foc(1).withReduction(DispenserIOFalcon.reduction);
+      DCMotor.getKrakenX60Foc(1).withReduction(PivotIOFalcon.reduction);
   public static final Matrix<N2, N2> A =
       MatBuilder.fill(
           Nat.N2(),
@@ -45,7 +45,7 @@ public class DispenserIOSim implements DispenserIO {
   private double feedforward = 0.0;
   private boolean closedLoop = false;
 
-  public DispenserIOSim() {
+  public PivotIOSim() {
     simState = VecBuilder.fill(0.0, 0.0);
   }
 

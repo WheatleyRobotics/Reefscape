@@ -5,19 +5,19 @@
 // license that can be found in the LICENSE file at
 // the root directory of this project.
 
-package frc.robot.subsystems.superstructure.roller;
+package frc.robot.subsystems.superstructure.dispenser;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.AutoLogOutput;
 
-public class RollerSystem extends SubsystemBase {
-  private final RollerSystemIO io;
-  protected final RollerSystemIOInputsAutoLogged inputs = new RollerSystemIOInputsAutoLogged();
+public class Tunnel extends SubsystemBase {
+  private final TunnelIO io;
+  protected final TunnelIOInputsAutoLogged inputs = new TunnelIOInputsAutoLogged();
   protected final Timer stateTimer = new Timer();
 
-  public RollerSystem(RollerSystemIO io) {
+  public Tunnel(TunnelIO io) {
     this.io = io;
     stateTimer.start();
   }

@@ -10,7 +10,7 @@ package frc.robot.subsystems.superstructure.dispenser;
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
 
-public interface DispenserIO {
+public interface PivotIO {
   @AutoLog
   class DispenserIOInputs {
     public boolean motorConnected = true;

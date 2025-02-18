@@ -12,31 +12,25 @@ import static frc.robot.util.PhoenixUtil.tryUntilOk;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
-import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.*;
 
-public class DispenserIOFalcon implements DispenserIO {
-  public static final double reduction = 3.0;
+public class PivotIOFalconIntegrated implements PivotIO {
   private static final Rotation2d offset = new Rotation2d();
-  private static final int encoderId = 0;
 
   // Hardware
   private final TalonFX talon;
-  private final CANcoder encoder;
 
   // Config
   private final TalonFXConfiguration Config = new TalonFXConfiguration();
@@ -60,18 +54,14 @@ public class DispenserIOFalcon implements DispenserIO {
   private final Debouncer motorConnectedDebouncer = new Debouncer(0.5);
   private final Debouncer encoderConnectedDebouncer = new Debouncer(0.5);
 
-  public DispenserIOFalcon() {
-    talon = new TalonFX(0, "*");
-    encoder = new CANcoder(encoderId, "*");
+  public PivotIOFalconIntegrated() {
+    talon = new TalonFX(6);
 
     // Configure  motor
     Config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     Config.Slot0 = new Slot0Configs().withKP(0).withKI(0).withKD(0);
-    Config.Feedback.RotorToSensorRatio = reduction;
-    Config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    Config.Feedback.FeedbackRemoteSensorID = encoderId;
-    Config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
-    Config.Feedback.SensorToMechanismRatio = 1.0;
+    Config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
+    Config.Feedback.SensorToMechanismRatio = 46.722;
     Config.TorqueCurrent.PeakForwardTorqueCurrent = 40.0;
     Config.TorqueCurrent.PeakReverseTorqueCurrent = -40.0;
     Config.CurrentLimits.StatorCurrentLimit = 40.0;
@@ -79,16 +69,12 @@ public class DispenserIOFalcon implements DispenserIO {
     Config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     tryUntilOk(5, () -> talon.getConfigurator().apply(Config, 0.25));
 
-    // Configure encoder
-    var cancoderConfig = new CANcoderConfiguration();
-    cancoderConfig.MagnetSensor.MagnetOffset = offset.getRotations();
-    cancoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
-    tryUntilOk(5, () -> encoder.getConfigurator().apply(cancoderConfig));
+    talon.setPosition(Degree.of(18));
 
     // Get and set status signals
     internalPosition = talon.getPosition();
-    encoderAbsolutePosition = encoder.getAbsolutePosition();
-    encoderRelativePosition = encoder.getPosition();
+    encoderAbsolutePosition = talon.getPosition();
+    encoderRelativePosition = talon.getPosition();
     Velocity = talon.getVelocity();
     appliedVolts = talon.getMotorVoltage();
     current = talon.getStatorCurrent();
@@ -103,7 +89,7 @@ public class DispenserIOFalcon implements DispenserIO {
         appliedVolts,
         current,
         temp);
-    ParentDevice.optimizeBusUtilizationForAll(talon, encoder);
+    ParentDevice.optimizeBusUtilizationForAll(talon);
   }
 
   @Override
@@ -112,12 +98,12 @@ public class DispenserIOFalcon implements DispenserIO {
     boolean motorConnected =
         BaseStatusSignal.refreshAll(internalPosition, Velocity, appliedVolts, current, temp).isOK();
     boolean encoderConnected =
-        BaseStatusSignal.refreshAll(encoderAbsolutePosition, encoderRelativePosition).isOK();
+        BaseStatusSignal.refreshAll(internalPosition, Velocity, appliedVolts, current, temp).isOK();
 
     inputs.motorConnected = motorConnectedDebouncer.calculate(motorConnected);
     inputs.encoderConnected = encoderConnectedDebouncer.calculate(encoderConnected);
     // Pivot inputs
-    inputs.internalPosition = Rotation2d.fromRotations(internalPosition.getValueAsDouble());
+    inputs.internalPosition = Rotation2d.fromRadians(internalPosition.getValue().in(Radian));
     inputs.encoderAbsolutePosition =
         Rotation2d.fromRotations(encoderAbsolutePosition.getValueAsDouble()).minus(offset);
     inputs.encoderRelativePosition =

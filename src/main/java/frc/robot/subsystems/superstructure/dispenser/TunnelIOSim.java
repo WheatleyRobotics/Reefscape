@@ -5,7 +5,7 @@
 // license that can be found in the LICENSE file at
 // the root directory of this project.
 
-package frc.robot.subsystems.superstructure.roller;
+package frc.robot.subsystems.superstructure.dispenser;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -14,19 +14,19 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc.robot.Constants;
 
-public class RollerSystemIOSim implements RollerSystemIO {
+public class TunnelIOSim implements TunnelIO {
   private final DCMotorSim sim;
   private final DCMotor gearbox;
   private double appliedVoltage = 0.0;
 
-  public RollerSystemIOSim(DCMotor motorModel, double reduction, double moi) {
+  public TunnelIOSim(DCMotor motorModel, double reduction, double moi) {
     gearbox = motorModel;
     sim =
         new DCMotorSim(LinearSystemId.createDCMotorSystem(motorModel, moi, reduction), motorModel);
   }
 
   @Override
-  public void updateInputs(RollerSystemIOInputs inputs) {
+  public void updateInputs(TunnelIOInputs inputs) {
     if (DriverStation.isDisabled()) {
       runVolts(0.0);
     }

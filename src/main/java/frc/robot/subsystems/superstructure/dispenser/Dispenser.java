@@ -22,8 +22,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotType;
-import frc.robot.subsystems.superstructure.roller.RollerSystemIO;
-import frc.robot.subsystems.superstructure.roller.RollerSystemIOInputsAutoLogged;
 import frc.robot.util.EqualsUtil;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.BooleanSupplier;
@@ -82,10 +80,10 @@ public class Dispenser {
   }
 
   // Hardware
-  private final DispenserIO pivotIO;
+  private final PivotIO pivotIO;
   private final DispenserIOInputsAutoLogged pivotInputs = new DispenserIOInputsAutoLogged();
-  private final RollerSystemIO tunnelIO;
-  private final RollerSystemIOInputsAutoLogged tunnelInputs = new RollerSystemIOInputsAutoLogged();
+  private final TunnelIO tunnelIO;
+  private final TunnelIOInputsAutoLogged tunnelInputs = new TunnelIOInputsAutoLogged();
 
   // Overrides
   private BooleanSupplier coastOverride = () -> false;
@@ -130,7 +128,7 @@ public class Dispenser {
   private final Alert canRangeDisconnectedAlart =
       new Alert("Dispenser CANRange disconnected!", Alert.AlertType.kWarning);
 
-  public Dispenser(DispenserIO pivotIO, RollerSystemIO tunnelIO) {
+  public Dispenser(PivotIO pivotIO, TunnelIO tunnelIO) {
     this.pivotIO = pivotIO;
     this.tunnelIO = tunnelIO;
 
@@ -152,7 +150,7 @@ public class Dispenser {
     pivotIO.updateInputs(pivotInputs);
     Logger.processInputs("Dispenser/Pivot", pivotInputs);
     tunnelIO.updateInputs(tunnelInputs);
-    Logger.processInputs("Dispenser/Effector", tunnelInputs);
+    Logger.processInputs("Dispenser/Tunnel", tunnelInputs);
 
     pivotMotorDisconnectedAlert.set(
         !pivotInputs.motorConnected && Constants.getRobotType() == RobotType.COMPBOT);
@@ -304,17 +302,6 @@ public class Dispenser {
   private static class StaticCharacterizationState {
     public double characterizationOutput = 0.0;
   }
-
-  /*
-  @AutoLogOutput(key = "Dispenser/StaticFF")
-  public double calculateStaticFF() {
-    if ((Math.abs(pivotInputs.velocityRadPerSec) < staticVelocityThresh.get())) {
-      return kS.get();
-    }
-    return 0.0;
-  }
-
-   */
 
   public void runVoltsPivot(double volts) {
     pivotIO.runVolts(volts);

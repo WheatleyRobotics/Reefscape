@@ -5,13 +5,13 @@
 // license that can be found in the LICENSE file at
 // the root directory of this project.
 
-package frc.robot.subsystems.superstructure.roller;
+package frc.robot.subsystems.superstructure.dispenser;
 
 import org.littletonrobotics.junction.AutoLog;
 
-public interface RollerSystemIO {
+public interface TunnelIO {
   @AutoLog
-  static class RollerSystemIOInputs {
+  static class TunnelIOInputs {
     public boolean talonConnected = false;
     public boolean CANRangeConnected = false;
     public boolean hasCoral = false;
@@ -23,7 +23,7 @@ public interface RollerSystemIO {
     public double talonTempCelsius = 0.0;
   }
 
-  default void updateInputs(RollerSystemIOInputs inputs) {}
+  default void updateInputs(TunnelIOInputs inputs) {}
 
   default void runTorqueCurrent(double current) {}
 

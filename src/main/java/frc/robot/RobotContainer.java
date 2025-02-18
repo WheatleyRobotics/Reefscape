@@ -32,13 +32,13 @@ import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.superstructure.Superstructure;
 import frc.robot.subsystems.superstructure.SuperstructureState;
 import frc.robot.subsystems.superstructure.dispenser.*;
+import frc.robot.subsystems.superstructure.dispenser.TunnelIO;
+import frc.robot.subsystems.superstructure.dispenser.TunnelIOFalcon;
+import frc.robot.subsystems.superstructure.dispenser.TunnelIOSim;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIO;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOFalcon;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
-import frc.robot.subsystems.superstructure.roller.RollerSystemIO;
-import frc.robot.subsystems.superstructure.roller.RollerSystemIOFalcon;
-import frc.robot.subsystems.superstructure.roller.RollerSystemIOSim;
 import frc.robot.subsystems.superstructure.slam.Slam;
 import frc.robot.subsystems.superstructure.slam.SlamIO;
 import frc.robot.subsystems.vision.*;
@@ -89,8 +89,8 @@ public class RobotContainer {
         // vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         elevator = new Elevator(new ElevatorIOFalcon());
 
-        dispenser = new Dispenser(new DispenserIOFalconIntegrated(), new RollerSystemIOFalcon());
-        slam = new Slam(new SlamIO() {}, new RollerSystemIO() {});
+        dispenser = new Dispenser(new PivotIOFalconIntegrated(), new TunnelIOFalcon());
+        slam = new Slam(new SlamIO() {}, new TunnelIO() {});
 
         break;
 
@@ -110,8 +110,7 @@ public class RobotContainer {
                 new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
         elevator = new Elevator(new ElevatorIOSim());
         dispenser =
-            new Dispenser(
-                new DispenserIOSim(), new RollerSystemIOSim(DCMotor.getKrakenX60Foc(1), 1.0, 0.2));
+            new Dispenser(new PivotIOSim(), new TunnelIOSim(DCMotor.getKrakenX60Foc(1), 1.0, 0.2));
         break;
 
       default:
@@ -131,10 +130,10 @@ public class RobotContainer {
       elevator = new Elevator(new ElevatorIO() {});
     }
     if (dispenser == null) {
-      dispenser = new Dispenser(new DispenserIO() {}, new RollerSystemIO() {});
+      dispenser = new Dispenser(new PivotIO() {}, new TunnelIO() {});
     }
     if (slam == null) {
-      slam = new Slam(new SlamIO() {}, new RollerSystemIO() {});
+      slam = new Slam(new SlamIO() {}, new TunnelIO() {});
     }
     superstructure = new Superstructure(elevator, dispenser, slam);
 

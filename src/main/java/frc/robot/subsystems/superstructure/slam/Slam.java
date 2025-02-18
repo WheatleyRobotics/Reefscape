@@ -10,8 +10,8 @@ package frc.robot.subsystems.superstructure.slam;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
-import frc.robot.subsystems.superstructure.roller.RollerSystemIO;
-import frc.robot.subsystems.superstructure.roller.RollerSystemIOInputsAutoLogged;
+import frc.robot.subsystems.superstructure.dispenser.TunnelIO;
+import frc.robot.subsystems.superstructure.dispenser.TunnelIOInputsAutoLogged;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -53,8 +53,8 @@ public class Slam {
 
   private final SlamIO slamIO;
   private final SlamIOInputsAutoLogged slamInputs = new SlamIOInputsAutoLogged();
-  private final RollerSystemIO rollerIO;
-  private final RollerSystemIOInputsAutoLogged rollerInputs = new RollerSystemIOInputsAutoLogged();
+  private final TunnelIO rollerIO;
+  private final TunnelIOInputsAutoLogged rollerInputs = new TunnelIOInputsAutoLogged();
 
   @Setter @Getter @AutoLogOutput private Goal goal = Goal.SLAM_UP;
   @Setter private double intakeVolts = 0.0;
@@ -66,7 +66,7 @@ public class Slam {
 
   @Setter private BooleanSupplier coastOverride = () -> false;
 
-  public Slam(SlamIO slamIO, RollerSystemIO rollerIO) {
+  public Slam(SlamIO slamIO, TunnelIO rollerIO) {
     this.slamIO = slamIO;
     this.rollerIO = rollerIO;
   }

@@ -41,7 +41,6 @@ import frc.robot.subsystems.superstructure.roller.RollerSystemIOSim;
 import frc.robot.subsystems.superstructure.slam.Slam;
 import frc.robot.subsystems.superstructure.slam.SlamIO;
 import frc.robot.subsystems.vision.*;
-import frc.robot.util.AllianceFlipUtil;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -79,15 +78,12 @@ public class RobotContainer {
                 new ModuleIOSpark(1),
                 new ModuleIOSpark(2),
                 new ModuleIOSpark(3));
-        /*
 
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision(camera0Name, robotToCamera0),
-                new VisionIOPhotonVision(camera1Name, robotToCamera1));
+                new VisionIOLimelight("limelight", drive::getRotation));
 
-         */
         // vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         elevator = new Elevator(new ElevatorIOFalcon());
 
@@ -214,24 +210,37 @@ public class RobotContainer {
         .b()
         .onTrue(
             Commands.runOnce(
-                    () ->
-                        RobotState.getInstance()
-                            .resetPose(
-                                new Pose2d(
-                                    RobotState.getInstance().getPose().getTranslation(),
-                                    AllianceFlipUtil.apply(new Rotation2d()))),
+                    () -> {
+                      drive.setPose(new Pose2d(drive.getPose().getTranslation(), new Rotation2d()));
+                      drive.setYaw(new Rotation2d());
+                      RobotState.getInstance().resetPose(drive.getPose());
+                    },
                     drive)
                 .ignoringDisable(true));
+    /*
+       driveController
+           .leftTrigger(0.8)
+           .whileTrue(AutoScore.getAutoScore(false, drive, superstructure))
+           .onFalse(AutoScore.backOut(drive, superstructure));
 
-    driveController
-        .leftTrigger(0.8)
-        .whileTrue(AutoScore.getAutoScore(false, drive, superstructure))
-        .onFalse(AutoScore.backOut(drive, superstructure));
+       driveController
+           .rightTrigger(0.8)
+           .whileTrue(AutoScore.getAutoScore(true, drive, superstructure))
+           .onFalse(AutoScore.backOut(drive, superstructure));
 
+    */
     driveController
-        .rightTrigger(0.8)
-        .whileTrue(AutoScore.getAutoScore(true, drive, superstructure))
-        .onFalse(AutoScore.backOut(drive, superstructure));
+        .rightBumper()
+        .whileTrue(
+            Commands.run(
+                () -> {
+                  SuperstructureState currentState = superstructure.getState();
+                  SuperstructureState ejectState = SuperstructureState.getEject(currentState);
+                  if (!currentState.equals(ejectState)) {
+                    superstructure.runGoal(ejectState).schedule();
+                  }
+                }))
+        .onFalse(superstructure.runGoal(SuperstructureState.STOW));
 
     operatorController
         .x()

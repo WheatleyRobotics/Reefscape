@@ -11,13 +11,13 @@ import frc.robot.util.FieldConstants;
 public class AutoScore {
   public static Command getAutoScore(boolean right, Drive drive, Superstructure superstructure) {
     return Commands.sequence(
-        new DriveToPose(drive, () -> FieldConstants.getNearestBranch(right, -0.4)),
+        new DriveToPose(drive, () -> FieldConstants.getNearestBranch(right, -0.6)),
         Commands.runOnce(
             () -> {
               SuperstructureState currentState = superstructure.getState();
               SuperstructureState ejectState = SuperstructureState.getEject(currentState);
               if (!currentState.equals(ejectState)) {
-                superstructure.runGoal(SuperstructureState.L4_CORAL_EJECT).schedule();
+                superstructure.runGoal(ejectState).schedule();
               }
             },
             superstructure));

@@ -27,7 +27,7 @@ public final class Constants {
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
   public static final double loopPeriodSecs = 0.02;
   @Getter private static RobotType robotType = RobotType.DEVBOT;
-  public static final boolean tuningMode = false;
+  public static final boolean tuningMode = true;
 
   public static Mode getMode() {
     return switch (robotType) {

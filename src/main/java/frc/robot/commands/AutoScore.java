@@ -9,6 +9,7 @@ import frc.robot.subsystems.superstructure.SuperstructureState;
 import frc.robot.util.FieldConstants;
 
 public class AutoScore {
+
   public static Command getAutoScore(boolean right, Drive drive, Superstructure superstructure) {
     return Commands.sequence(
         new DriveToPose(drive, () -> FieldConstants.getNearestBranch(right, -0.6)),
@@ -23,7 +24,7 @@ public class AutoScore {
             superstructure));
   }
 
-  public static Command backOut(Drive drive, Superstructure superstructure) {
+  public static Command getBackOut(Drive drive, Superstructure superstructure) {
     return Commands.sequence(
         Commands.run(
                 () -> {

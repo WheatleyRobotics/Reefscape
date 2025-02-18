@@ -42,7 +42,6 @@ import frc.robot.subsystems.superstructure.roller.RollerSystemIOSim;
 import frc.robot.subsystems.superstructure.slam.Slam;
 import frc.robot.subsystems.superstructure.slam.SlamIO;
 import frc.robot.subsystems.vision.*;
-import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -138,6 +137,27 @@ public class RobotContainer {
       slam = new Slam(new SlamIO() {}, new RollerSystemIO() {});
     }
     superstructure = new Superstructure(elevator, dispenser, slam);
+
+    NamedCommands.registerCommand(
+        "READY_L4",
+        superstructure.runGoal(SuperstructureState.L4_CORAL).until(superstructure::atGoal));
+
+    NamedCommands.registerCommand(
+        "SCORE_L4",
+        superstructure.runGoal(SuperstructureState.L4_CORAL_EJECT).until(superstructure::atGoal));
+
+    NamedCommands.registerCommand(
+        "INTAKE", superstructure.runGoal(SuperstructureState.INTAKE).withTimeout(1));
+
+    NamedCommands.registerCommand(
+        "STOW", superstructure.runGoal(SuperstructureState.STOW).until(superstructure::atGoal));
+
+    NamedCommands.registerCommand(
+        "ALIGN_RIGHT", new DriveToPose(drive, () -> FieldConstants.getNearestBranch(true, -0.5)));
+
+    NamedCommands.registerCommand(
+        "ALIGN_LEFT", new DriveToPose(drive, () -> FieldConstants.getNearestBranch(false, -0.5)));
+
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
@@ -162,44 +182,6 @@ public class RobotContainer {
     autoChooser.addOption("Elevator static", elevator.staticCharacterization(2.0));
     autoChooser.addOption("Pivot static", dispenser.staticCharacterization(2.0));
 
-    NamedCommands.registerCommand(
-        "CL4",
-        superstructure
-            .runGoal(SuperstructureState.L4_CORAL_EJECT)
-            .until(() -> superstructure.atGoal()));
-    NamedCommands.registerCommand(
-        "AL3", superstructure.runGoal(SuperstructureState.ALGAE_L3_INTAKE));
-    NamedCommands.registerCommand("STOW", superstructure.runGoal(SuperstructureState.STOW));
-    NamedCommands.registerCommand(
-        "ALIGN_LEFT",
-        Commands.sequence(
-                new DriveToPose(drive, () -> FieldConstants.getNearestBranch(false, -0.4)),
-                Commands.runOnce(
-                    () -> {
-                      SuperstructureState currentState = superstructure.getState();
-                      SuperstructureState ejectState = SuperstructureState.getEject(currentState);
-                      if (!currentState.equals(ejectState)) {
-                        superstructure.runGoal(SuperstructureState.L4_CORAL_EJECT).schedule();
-                      }
-                    },
-                    superstructure))
-            .until(
-                () ->
-                    new DriveToPose(drive, () -> FieldConstants.getNearestBranch(false, -0.4))
-                        .atGoal()));
-    NamedCommands.registerCommand(
-        "ALIGNR",
-        Commands.sequence(
-            new DriveToPose(drive, () -> FieldConstants.getNearestBranch(true, -0.4)),
-            Commands.runOnce(
-                () -> {
-                  SuperstructureState currentState = superstructure.getState();
-                  SuperstructureState ejectState = SuperstructureState.getEject(currentState);
-                  if (!currentState.equals(ejectState)) {
-                    superstructure.runGoal(SuperstructureState.L4_CORAL_EJECT).schedule();
-                  }
-                },
-                superstructure)));
     // Configure the button bindings
     configureButtonBindings();
   }

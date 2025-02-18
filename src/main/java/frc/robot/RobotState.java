@@ -10,6 +10,7 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import frc.robot.subsystems.superstructure.SuperstructureState;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
 import lombok.Data;
@@ -24,6 +25,9 @@ public class RobotState {
     if (instance == null) instance = new RobotState();
     return instance;
   }
+
+  @AutoLogOutput(key = "RobotState/Superstructure")
+  private SuperstructureState superstructureState = SuperstructureState.START;
 
   @AutoLogOutput(key = "RobotState/Pose")
   private Pose2d pose = new Pose2d();

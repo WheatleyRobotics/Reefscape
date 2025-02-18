@@ -22,6 +22,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotType;
+import frc.robot.RobotState;
+import frc.robot.subsystems.superstructure.SuperstructureState;
 import frc.robot.util.EqualsUtil;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.BooleanSupplier;
@@ -115,7 +117,7 @@ public class Dispenser {
   @Setter private double tunnelVolts = 0.0;
   @Setter private double gripperCurrent = 0.0;
 
-  private Debouncer algaeDebouncer = new Debouncer(0.1);
+  private Debouncer gamePieceDebouncer = new Debouncer(0.1);
   private Debouncer toleranceDebouncer = new Debouncer(0.25, DebounceType.kRising);
 
   // Disconnected alerts
@@ -240,11 +242,20 @@ public class Dispenser {
       tunnelIO.stop();
     }
 
-    // Check algae
+    // Check gamePiece
     if (Constants.getRobotType() != Constants.RobotType.SIMBOT) {
-      hasAlgae =
-          algaeDebouncer.calculate(
-              Math.abs(tunnelInputs.talonSupplyCurrentAmps) >= algaeIntakeCurrentThresh.get());
+      if (gamePieceDebouncer.calculate(
+          Math.abs(tunnelInputs.talonSupplyCurrentAmps) >= algaeIntakeCurrentThresh.get())) {
+        SuperstructureState currentState = RobotState.getInstance().getSuperstructureState();
+        if (currentState.equals(SuperstructureState.INTAKE)) {
+          hasCoral = true;
+          hasAlgae = false;
+        } else if (currentState.equals(SuperstructureState.ALGAE_L3_INTAKE)
+            || currentState.equals(SuperstructureState.ALGAE_L2_INTAKE)) {
+          hasAlgae = true;
+          hasCoral = false;
+        }
+      }
     }
 
     // Log state

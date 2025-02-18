@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
+import frc.robot.RobotState;
 import frc.robot.subsystems.superstructure.dispenser.Dispenser;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.superstructure.slam.Slam;
@@ -327,6 +328,7 @@ public class Superstructure extends SubsystemBase {
   }
 
   private void setGoal(SuperstructureState goal) {
+    RobotState.getInstance().setSuperstructureState(goal);
     // Don't do anything if goal is the same
     if (this.goal == goal) return;
     this.goal = goal;

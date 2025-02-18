@@ -65,7 +65,7 @@ public class SuperstructureVisualizer {
     elevatorMechanism.setLength(
         EqualsUtil.epsilonEquals(elevatorHeightMeters, 0.0)
             ? Units.inchesToMeters(1.0)
-            : elevatorHeightMeters);
+            : (elevatorHeightMeters * 2));
     pivotMechanism.setAngle(pivotFinalAngle.minus(elevatorAngle));
     Logger.recordOutput("Mechanism2d/" + name, mechanism);
 

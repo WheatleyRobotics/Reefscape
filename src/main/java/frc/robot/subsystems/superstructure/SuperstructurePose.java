@@ -36,8 +36,8 @@ public record SuperstructurePose(DoubleSupplier elevatorHeight, Supplier<Rotatio
   @Getter
   enum Preset {
     START("Start", 0.0, 18.0),
-    STOW("Stow", 0.02, 45.0),
-    L1("L1", Units.inchesToMeters(0.01), 18.0),
+    STOW("Stow", 0.1, 45.0),
+    L1("L1", Units.inchesToMeters(0.0), 18.0),
     L2("L2", Units.inchesToMeters(4.5), L2Angle + 5),
     L3("L3", Units.inchesToMeters(9.75), L3Angle + 10),
     L4("L4", Units.inchesToMeters(20.5), L4Angle - 10),

@@ -53,6 +53,12 @@
           }
         },
         {
+          "type": "path",
+          "data": {
+            "pathName": "Source-Z6"
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "SCORE_L4_LEFT"

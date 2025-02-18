@@ -1,0 +1,79 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Line to first score"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "CL4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "First score to coral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Coral to close score"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "CL4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Second Score to coral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Coral to close score"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ALIGN_RIGHT"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Third Score to coral "
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Coral to far score"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ALIGNL"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": true
+}

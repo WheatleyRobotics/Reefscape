@@ -35,6 +35,9 @@ public class RobotState {
   @AutoLogOutput(key = "RobotState/Zone")
   private Zones currentZone = Zones.Z1;
 
+  @AutoLogOutput(key = "RobotState/ClearedReef")
+  private boolean clearedReef = false;
+
   @Getter
   @AutoLogOutput(key = "RobotState/RobotVelocity")
   private ChassisSpeeds robotVelocity = new ChassisSpeeds();
@@ -93,6 +96,16 @@ public class RobotState {
     } else if (normalizedAngle >= 5 * Math.PI / 3 && normalizedAngle < 2 * Math.PI) {
       currentZone = Zones.Z6;
     }
+
+    double distanceToLeft =
+        FieldConstants.getBranch(currentZone, false)
+            .getTranslation()
+            .getDistance(pose.getTranslation());
+    double distanceToRight =
+        FieldConstants.getBranch(currentZone, true)
+            .getTranslation()
+            .getDistance(pose.getTranslation());
+    clearedReef = !(distanceToLeft < 0.45) && !(distanceToRight < 0.45);
   }
 
   public void resetPose(Pose2d pose) {

@@ -270,7 +270,10 @@ public class RobotContainer {
     driveController
         .x()
         .whileTrue(
-            AutoScore.getAutoScore(SuperstructureState.L4_CORAL, true, drive, superstructure));
+            AutoScore.getAutoScore(SuperstructureState.L4_CORAL, true, drive, superstructure))
+        .onFalse(
+            AutoScore.getClearReef(drive)
+                .andThen(superstructure.runGoal(SuperstructureState.STOW)));
 
     driveController
         .rightBumper()

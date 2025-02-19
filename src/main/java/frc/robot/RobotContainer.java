@@ -20,8 +20,6 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -162,10 +160,10 @@ public class RobotContainer {
 
     NamedCommands.registerCommand(
         "SCORE_L4_RIGHT",
-        AutoScore.getAutoScore(SuperstructureState.L4_CORAL, true, drive, superstructure));
+        AutoScore.getAutoScore(() -> SuperstructureState.L4_CORAL, true, drive, superstructure));
     NamedCommands.registerCommand(
         "SCORE_L4_LEFT",
-        AutoScore.getAutoScore(SuperstructureState.L4_CORAL, false, drive, superstructure));
+        AutoScore.getAutoScore(() -> SuperstructureState.L4_CORAL, false, drive, superstructure));
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -192,16 +190,118 @@ public class RobotContainer {
     autoChooser.addOption("Pivot static", dispenser.staticCharacterization(2.0));
 
     // Configure the button bindings
-    configureButtonBindings();
+    if (Robot.isReal()) {
+      configureButtonBindingsREAL();
+    } else {
+      configureButtonBindingsSIM();
+    }
   }
 
-  /**
-   * Use this method to define your button->command mappings. Buttons can be created by
-   * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
-   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
-   */
-  private void configureButtonBindings() {
+  private void configureButtonBindingsREAL() {
+    drive.setDefaultCommand(
+        DriveCommands.joystickDrive(
+            drive,
+            () -> -driveController.getLeftY(),
+            () -> -driveController.getLeftX(),
+            () -> -driveController.getRightX()));
+
+    driveController
+        .leftBumper()
+        .whileTrue(
+            DriveCommands.joystickDrive(
+                drive,
+                () -> -driveController.getLeftY() * 0.4,
+                () -> -driveController.getLeftX() * 0.4,
+                () -> -driveController.getRightX() * 0.3));
+
+    driveController
+        .a()
+        .whileTrue(
+            DriveCommands.joystickDriveAtAngle(
+                drive,
+                () -> -driveController.getLeftY(),
+                () -> -driveController.getLeftX(),
+                () -> Rotation2d.fromDegrees(60)));
+
+    driveController
+        .b()
+        .onTrue(
+            Commands.runOnce(
+                    () -> {
+                      drive.setPose(new Pose2d(drive.getPose().getTranslation(), new Rotation2d()));
+                      drive.setYaw(new Rotation2d());
+                      RobotState.getInstance().resetPose(drive.getPose());
+                    },
+                    drive)
+                .ignoringDisable(true));
+
+    driveController
+        .leftTrigger(0.8)
+        .whileTrue(
+            AutoScore.getAutoScore(
+                () -> RobotState.getInstance().getSuperstructureState(),
+                false,
+                drive,
+                superstructure))
+        .onFalse(
+            AutoScore.getClearReef(drive)
+                .andThen(superstructure.runGoal(SuperstructureState.STOW)));
+
+    driveController
+        .rightTrigger(0.8)
+        .whileTrue(
+            AutoScore.getAutoScore(
+                () -> RobotState.getInstance().getSuperstructureState(),
+                true,
+                drive,
+                superstructure))
+        .onFalse(
+            AutoScore.getClearReef(drive)
+                .andThen(superstructure.runGoal(SuperstructureState.STOW)));
+
+    driveController
+        .rightBumper()
+        .whileTrue(
+            Commands.run(
+                () -> {
+                  SuperstructureState currentState = superstructure.getState();
+                  SuperstructureState ejectState = currentState.getEject();
+                  if (!currentState.equals(ejectState)) {
+                    superstructure.runGoal(ejectState).schedule();
+                  }
+                }))
+        .onFalse(superstructure.runGoal(SuperstructureState.STOW));
+
+    operatorController
+        .x()
+        .whileTrue(superstructure.runGoal(SuperstructureState.INTAKE).withName("Running Intake"));
+
+    operatorController
+        .b()
+        .whileTrue(
+            Commands.run(
+                () -> {
+                  superstructure.runVoltsTunnel(-2);
+                },
+                superstructure));
+
+    operatorController
+        .rightBumper() // right bumper
+        .whileTrue(
+            superstructure.runGoal(SuperstructureState.L2_CORAL).withName("Scoring L2 Coral"));
+
+    operatorController
+        .leftTrigger(0.8) // left trigger
+        .whileTrue(
+            superstructure.runGoal(SuperstructureState.L3_CORAL).withName("Scoring L3 Coral"));
+
+    operatorController
+        .rightTrigger(0.8) // right trigger
+        .whileTrue(
+            superstructure.runGoal(SuperstructureState.L4_CORAL).withName("Scoring L4 Coral"));
+  }
+
+  private void configureButtonBindingsSIM() {
     // Default command, normal field-relative drive
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
@@ -240,37 +340,27 @@ public class RobotContainer {
                     },
                     drive)
                 .ignoringDisable(true));
-    /*
-       driveController
-           .x()
-           .whileTrue(
-               Commands.sequence(
-                   new DriveToPose(drive, () -> FieldConstants.getNearestBranch(false, -0.4)),
-                   Commands.runOnce(
-                       () -> {
-                         SuperstructureState currentState = superstructure.getState();
-                         SuperstructureState ejectState = SuperstructureState.getEject(currentState);
-                         if (!currentState.equals(ejectState)) {
-                           superstructure.runGoal(SuperstructureState.L4_CORAL_EJECT).schedule();
-                         }
-                       },
-                       superstructure)))
-           .onFalse(
-               Commands.sequence(
-                   Commands.run(
-                           () -> {
-                             drive.runVelocity(new ChassisSpeeds(-1, 0, 0));
-                           })
-                       .withTimeout(0.5),
-                   Commands.runOnce(() -> drive.runVelocity(new ChassisSpeeds(0, 0, 0))),
-                   superstructure.runGoal(SuperstructureState.STOW)));
-
-    */
 
     driveController
         .x()
         .whileTrue(
-            AutoScore.getAutoScore(SuperstructureState.L4_CORAL, true, drive, superstructure))
+            AutoScore.getAutoScore(
+                () -> RobotState.getInstance().getSuperstructureState(),
+                true,
+                drive,
+                superstructure))
+        .onFalse(
+            AutoScore.getClearReef(drive)
+                .andThen(superstructure.runGoal(SuperstructureState.STOW)));
+
+    driveController
+        .y()
+        .whileTrue(
+            AutoScore.getAutoScore(
+                () -> RobotState.getInstance().getSuperstructureState(),
+                false,
+                drive,
+                superstructure))
         .onFalse(
             AutoScore.getClearReef(drive)
                 .andThen(superstructure.runGoal(SuperstructureState.STOW)));
@@ -281,7 +371,7 @@ public class RobotContainer {
             Commands.run(
                 () -> {
                   SuperstructureState currentState = superstructure.getState();
-                  SuperstructureState ejectState = SuperstructureState.getEject(currentState);
+                  SuperstructureState ejectState = currentState.getEject();
                   if (!currentState.equals(ejectState)) {
                     superstructure.runGoal(ejectState).schedule();
                   }
@@ -302,17 +392,17 @@ public class RobotContainer {
                 superstructure));
 
     operatorController
-        .rightBumper()
+        .a() // right bumper
         .whileTrue(
             superstructure.runGoal(SuperstructureState.L2_CORAL).withName("Scoring L2 Coral"));
 
     operatorController
-        .leftTrigger(0.8)
+        .b() // left trigger
         .whileTrue(
             superstructure.runGoal(SuperstructureState.L3_CORAL).withName("Scoring L3 Coral"));
 
     operatorController
-        .rightTrigger(0.8)
+        .y() // right trigger
         .whileTrue(
             superstructure.runGoal(SuperstructureState.L4_CORAL).withName("Scoring L4 Coral"));
 

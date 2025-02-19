@@ -106,14 +106,18 @@ public enum SuperstructureState {
           .build());
   private final SuperstructureStateData value;
 
-  public static SuperstructureState getEject(SuperstructureState state) {
+  public SuperstructureState getEject() {
+    SuperstructureState returnState;
     try {
-      if (state.name().equals("STOW")) {
-        return SuperstructureState.L1_CORAL_EJECT;
+      if (this.name().equals("STOW")) {
+        returnState = SuperstructureState.L1_CORAL_EJECT;
+      } else {
+        returnState = SuperstructureState.valueOf(this.name() + "_EJECT");
       }
-      return SuperstructureState.valueOf(state.name() + "_EJECT");
     } catch (IllegalArgumentException e) {
-      return state;
+      returnState = this;
     }
+    System.out.println("Ejecting " + this.name() + " to " + returnState.name());
+    return returnState;
   }
 }

@@ -29,6 +29,9 @@ public class RobotState {
   @AutoLogOutput(key = "RobotState/Superstructure")
   private SuperstructureState superstructureState = SuperstructureState.START;
 
+  @AutoLogOutput(key = "RobotState/TargetState")
+  private SuperstructureState targetState = SuperstructureState.START;
+
   @AutoLogOutput(key = "RobotState/Pose")
   private Pose2d pose = new Pose2d();
 
@@ -67,6 +70,15 @@ public class RobotState {
   }
 
   public void update() {
+    updateZone();
+    updateIsClearedReef();
+  }
+
+  public void resetPose(Pose2d pose) {
+    this.pose = pose;
+  }
+
+  public void updateZone() {
     Translation2d flippedReef;
     double angle;
     if (AllianceFlipUtil.shouldFlip()) {
@@ -96,7 +108,9 @@ public class RobotState {
     } else if (normalizedAngle >= 5 * Math.PI / 3 && normalizedAngle < 2 * Math.PI) {
       currentZone = Zones.Z6;
     }
+  }
 
+  public void updateIsClearedReef() {
     double distanceToLeft =
         FieldConstants.getBranch(currentZone, false)
             .getTranslation()
@@ -106,9 +120,5 @@ public class RobotState {
             .getTranslation()
             .getDistance(pose.getTranslation());
     clearedReef = !(distanceToLeft < 0.45) && !(distanceToRight < 0.45);
-  }
-
-  public void resetPose(Pose2d pose) {
-    this.pose = pose;
   }
 }

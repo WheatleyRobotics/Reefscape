@@ -8,30 +8,39 @@ import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.superstructure.Superstructure;
 import frc.robot.subsystems.superstructure.SuperstructureState;
 import frc.robot.util.FieldConstants;
+import java.util.function.Supplier;
 
 public class AutoScore {
 
   public static Command getAutoScore(
-      SuperstructureState state, boolean right, Drive drive, Superstructure superstructure) {
+      Supplier<SuperstructureState> state,
+      boolean right,
+      Drive drive,
+      Superstructure superstructure) {
     return Commands.sequence(
         superstructure
-            .runGoal(state)
+            .runGoal(
+                () -> {
+                  if (state.get().equals(SuperstructureState.STOW))
+                    return SuperstructureState.L1_CORAL;
+                  else return state.get();
+                })
             .until(superstructure::atGoal)
-            .alongWith(
+            .deadlineFor(
                 new DriveToPose(
                     drive,
                     () ->
                         FieldConstants.addOffset(
                             FieldConstants.getBranch(
                                 RobotState.getInstance().getCurrentZone(), right),
-                            -0.6))),
+                            -0.5))),
         new DriveToPose(
             drive,
             () ->
                 FieldConstants.addOffset(
                     FieldConstants.getBranch(RobotState.getInstance().getCurrentZone(), right),
                     -0.4)),
-        superstructure.runGoal(SuperstructureState.getEject(state)).withTimeout(0.5),
+        superstructure.runGoal(() -> state.get().getEject()).withTimeout(0.5),
         getClearReef(drive),
         superstructure.runGoal(SuperstructureState.STOW).until(superstructure::atGoal));
   }

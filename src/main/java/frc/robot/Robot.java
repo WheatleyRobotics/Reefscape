@@ -14,11 +14,11 @@
 package frc.robot;
 
 import edu.wpi.first.hal.AllianceStationID;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Threads;
+import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.util.FieldConstants;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -27,6 +27,10 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import org.littletonrobotics.urcl.URCL;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.BiConsumer;
+
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
  * each mode, as described in the TimedRobot documentation. If you change the name of this class or
@@ -34,13 +38,23 @@ import org.littletonrobotics.urcl.URCL;
  * project.
  */
 public class Robot extends LoggedRobot {
+  private static final double canErrorTimeThreshold = 0.5; // Seconds to disable alert
+
   private Command autonomousCommand;
   private RobotContainer robotContainer;
+  private final Timer canInitialErrorTimer = new Timer();
+  private final Timer canErrorTimer = new Timer();
+
+  private final Alert canErrorAlert =
+          new Alert("CAN errors detected, robot may not be controllable.", Alert.AlertType.kError);
 
   public Robot() {
     DriverStation.silenceJoystickConnectionWarning(true);
     // DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
     // Record metadata
+    Logger.recordMetadata("Robot", Constants.getRobotType().toString());
+    Logger.recordMetadata("TuningMode", Boolean.toString(Constants.tuningMode));
+    Logger.recordMetadata("RuntimeType", getRuntimeType().toString());
     Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
     Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
     Logger.recordMetadata("GitSHA", BuildConstants.GIT_SHA);
@@ -86,28 +100,51 @@ public class Robot extends LoggedRobot {
     // Start AdvantageKit logger
     Logger.start();
 
+    Map<String, Integer> commandCounts = new HashMap<>();
+    BiConsumer<Command, Boolean> logCommandFunction =
+            (Command command, Boolean active) -> {
+              String name = command.getName();
+              int count = commandCounts.getOrDefault(name, 0) + (active ? 1 : -1);
+              commandCounts.put(name, count);
+              Logger.recordOutput(
+                      "CommandsUnique/" + name + "_" + Integer.toHexString(command.hashCode()), active);
+              Logger.recordOutput("CommandsAll/" + name, count > 0);
+            };
+    CommandScheduler.getInstance()
+            .onCommandInitialize((Command command) -> logCommandFunction.accept(command, true));
+    CommandScheduler.getInstance()
+            .onCommandFinish((Command command) -> logCommandFunction.accept(command, false));
+    CommandScheduler.getInstance()
+            .onCommandInterrupt((Command command) -> logCommandFunction.accept(command, false));
+
+
+    if (Constants.getMode() == Constants.Mode.SIM) {
+      DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
+      DriverStationSim.notifyNewData();
+    }
+
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
     robotContainer = new RobotContainer();
+
+    Threads.setCurrentThreadPriority(true, 5);
   }
 
   /** This function is called periodically during all modes. */
   @Override
   public void robotPeriodic() {
-    // Switch thread to high priority to improve loop timing
-    Threads.setCurrentThreadPriority(true, 99);
+    var canStatus = RobotController.getCANStatus();
+    if (canStatus.transmitErrorCount > 0 || canStatus.receiveErrorCount > 0) {
+      canErrorTimer.restart();
+    }
+    canErrorAlert.set(
+            !canErrorTimer.hasElapsed(canErrorTimeThreshold)
+                    && !canInitialErrorTimer.hasElapsed(canErrorTimeThreshold));
 
-    // Runs the Scheduler. This is responsible for polling buttons, adding
-    // newly-scheduled commands, running already-scheduled commands, removing
-    // finished or interrupted commands, and running subsystem periodic() methods.
-    // This must be called from the robot's periodic block in order for anything in
-    // the Command-based framework to work.
+
     CommandScheduler.getInstance().run();
 
     RobotState.getInstance().update();
-
-    // Return to normal thread priority
-    Threads.setCurrentThreadPriority(false, 10);
   }
 
   /** This function is called once when the robot is disabled. */

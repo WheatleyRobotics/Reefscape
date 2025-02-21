@@ -234,9 +234,21 @@ public class Dispenser {
       Logger.recordOutput("Dispenser/Tunnel/tunnelCurrent", 0.0);
     }
 
+    SuperstructureState currentState = RobotState.getInstance().getSuperstructureState();
     // Run tunnel and gripper
     if (!isEStopped) {
-      tunnelIO.runTorqueCurrent(gripperCurrent);
+      if (currentState.equals(SuperstructureState.ALGAE_L2_INTAKE)
+          || currentState.equals(SuperstructureState.ALGAE_L3_INTAKE)
+          || currentState.equals(SuperstructureState.ALGAE_STOW)
+          || currentState.equals(SuperstructureState.ALGAE_FLOOR_INTAKE)
+          || currentState.equals(SuperstructureState.PROCESSING)) {
+        tunnelIO.runTorqueCurrent(gripperCurrent);
+      } else if (currentState.equals(SuperstructureState.INTAKE) && !tunnelInputs.hasCoral) {
+        tunnelIO.runVolts(tunnelIntakeVolts.get());
+      } else {
+        tunnelIO.runVolts(tunnelVolts);
+      }
+
     } else {
       pivotIO.stop();
       tunnelIO.stop();
@@ -248,7 +260,6 @@ public class Dispenser {
           Math.abs(tunnelInputs.talonSupplyCurrentAmps) >= algaeIntakeCurrentThresh.get())) {
         hasAlgae = true;
       }
-      SuperstructureState currentState = RobotState.getInstance().getSuperstructureState();
       if (currentState.equals(SuperstructureState.PROCESSING)
           || currentState.equals(SuperstructureState.THROWN)) {
         hasAlgae = false;

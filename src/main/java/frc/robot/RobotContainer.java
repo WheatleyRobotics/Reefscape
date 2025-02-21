@@ -39,6 +39,7 @@ import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
 import frc.robot.subsystems.superstructure.slam.Slam;
 import frc.robot.subsystems.superstructure.slam.SlamIO;
 import frc.robot.subsystems.vision.*;
+import frc.robot.util.AllianceFlipUtil;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -214,14 +215,23 @@ public class RobotContainer {
                 () -> -driveController.getLeftX() * 0.4,
                 () -> -driveController.getRightX() * 0.3));
 
-    driveController
-        .a()
-        .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -driveController.getLeftY(),
-                () -> -driveController.getLeftX(),
-                () -> Rotation2d.fromDegrees(60)));
+      driveController
+              .a()
+              .whileTrue(
+                      DriveCommands.joystickDriveAtAngle(
+                              drive,
+                              () -> -driveController.getLeftY(),
+                              () -> -driveController.getLeftX(),
+                              () ->
+                                      switch (RobotState.getInstance().getCurrentZone()) {
+                                          case Z6 -> AllianceFlipUtil.getCorrected(
+                                                          new Pose2d(0, 0, Rotation2d.fromDegrees(55)))
+                                                  .getRotation();
+                                          case Z2 -> AllianceFlipUtil.getCorrected(
+                                                          new Pose2d(0, 0, Rotation2d.fromDegrees(-55)))
+                                                  .getRotation();
+                                          default -> RobotState.getInstance().getPose().getRotation();
+                                      }));
 
     driveController
         .b()
@@ -325,7 +335,6 @@ public class RobotContainer {
                 () -> -driveController.getLeftX() * 0.4,
                 () -> -driveController.getRightX() * 0.3));
 
-    // Lock to 0° when A button is held
     driveController
         .a()
         .whileTrue(
@@ -333,7 +342,16 @@ public class RobotContainer {
                 drive,
                 () -> -driveController.getLeftY(),
                 () -> -driveController.getLeftX(),
-                () -> Rotation2d.fromDegrees(60)));
+                () ->
+                    switch (RobotState.getInstance().getCurrentZone()) {
+                      case Z6 -> AllianceFlipUtil.getCorrected(
+                              new Pose2d(0, 0, Rotation2d.fromDegrees(55)))
+                          .getRotation();
+                      case Z2 -> AllianceFlipUtil.getCorrected(
+                              new Pose2d(0, 0, Rotation2d.fromDegrees(-55)))
+                          .getRotation();
+                      default -> RobotState.getInstance().getPose().getRotation();
+                    }));
 
     driveController
         .b()

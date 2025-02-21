@@ -31,7 +31,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Elevator {
-  public static final double sprocketRadius = Units.inchesToMeters(1.756);
+  public static final double sprocketRadius = Units.inchesToMeters(1.756 / 2.0);
 
   // Tunable numbers
   private static final LoggedTunableNumber kP = new LoggedTunableNumber("Elevator/kP");

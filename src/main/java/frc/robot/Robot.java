@@ -18,7 +18,9 @@ import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.util.FieldConstants;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.BiConsumer;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -26,10 +28,6 @@ import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import org.littletonrobotics.urcl.URCL;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.BiConsumer;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -46,7 +44,7 @@ public class Robot extends LoggedRobot {
   private final Timer canErrorTimer = new Timer();
 
   private final Alert canErrorAlert =
-          new Alert("CAN errors detected, robot may not be controllable.", Alert.AlertType.kError);
+      new Alert("CAN errors detected, robot may not be controllable.", Alert.AlertType.kError);
 
   public Robot() {
     DriverStation.silenceJoystickConnectionWarning(true);
@@ -102,21 +100,20 @@ public class Robot extends LoggedRobot {
 
     Map<String, Integer> commandCounts = new HashMap<>();
     BiConsumer<Command, Boolean> logCommandFunction =
-            (Command command, Boolean active) -> {
-              String name = command.getName();
-              int count = commandCounts.getOrDefault(name, 0) + (active ? 1 : -1);
-              commandCounts.put(name, count);
-              Logger.recordOutput(
-                      "CommandsUnique/" + name + "_" + Integer.toHexString(command.hashCode()), active);
-              Logger.recordOutput("CommandsAll/" + name, count > 0);
-            };
+        (Command command, Boolean active) -> {
+          String name = command.getName();
+          int count = commandCounts.getOrDefault(name, 0) + (active ? 1 : -1);
+          commandCounts.put(name, count);
+          Logger.recordOutput(
+              "CommandsUnique/" + name + "_" + Integer.toHexString(command.hashCode()), active);
+          Logger.recordOutput("CommandsAll/" + name, count > 0);
+        };
     CommandScheduler.getInstance()
-            .onCommandInitialize((Command command) -> logCommandFunction.accept(command, true));
+        .onCommandInitialize((Command command) -> logCommandFunction.accept(command, true));
     CommandScheduler.getInstance()
-            .onCommandFinish((Command command) -> logCommandFunction.accept(command, false));
+        .onCommandFinish((Command command) -> logCommandFunction.accept(command, false));
     CommandScheduler.getInstance()
-            .onCommandInterrupt((Command command) -> logCommandFunction.accept(command, false));
-
+        .onCommandInterrupt((Command command) -> logCommandFunction.accept(command, false));
 
     if (Constants.getMode() == Constants.Mode.SIM) {
       DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
@@ -138,9 +135,8 @@ public class Robot extends LoggedRobot {
       canErrorTimer.restart();
     }
     canErrorAlert.set(
-            !canErrorTimer.hasElapsed(canErrorTimeThreshold)
-                    && !canInitialErrorTimer.hasElapsed(canErrorTimeThreshold));
-
+        !canErrorTimer.hasElapsed(canErrorTimeThreshold)
+            && !canInitialErrorTimer.hasElapsed(canErrorTimeThreshold));
 
     CommandScheduler.getInstance().run();
 

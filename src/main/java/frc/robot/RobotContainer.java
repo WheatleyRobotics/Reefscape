@@ -299,6 +299,12 @@ public class RobotContainer {
         .rightTrigger(0.8) // right trigger
         .whileTrue(
             superstructure.runGoal(SuperstructureState.L4_CORAL).withName("Scoring L4 Coral"));
+
+    operatorController
+        .povUp()
+        .whileTrue(superstructure.runGoal(SuperstructureState.ALGAE_L3_INTAKE));
+
+    operatorController.povDown().whileTrue(superstructure.runGoal(SuperstructureState.PROCESSING));
   }
 
   private void configureButtonBindingsSIM() {

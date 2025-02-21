@@ -11,7 +11,6 @@ import static frc.robot.subsystems.superstructure.SuperstructureConstants.*;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
-import frc.robot.util.FieldConstants;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -47,17 +46,11 @@ public record SuperstructurePose(DoubleSupplier elevatorHeight, Supplier<Rotatio
             - groundToCarriageZero
             - (pivotToGripper / 2.0 * Rotation2d.fromDegrees(algaeIntakeAngle).getSin()),
         algaeIntakeAngle),
-    ALGAE_L2_INTAKE(
-        "AlgaeL2Intake",
-        FieldConstants.ReefLevel.L2.height - groundToCarriageZero,
-        -FieldConstants.ReefLevel.L2.pitch + 180),
-    ALGAE_L3_INTAKE(
-        "AlgaeL3Intake",
-        FieldConstants.ReefLevel.L3.height - groundToCarriageZero,
-        -FieldConstants.ReefLevel.L2.pitch + 180),
+    ALGAE_L2_INTAKE("AlgaeL2Intake", Units.inchesToMeters(6), 160),
+    ALGAE_L3_INTAKE("AlgaeL3Intake", Units.inchesToMeters(12.5), 160),
     THROW(() -> elevatorMaxTravel, () -> -40.0),
-    PRE_PROCESSOR("Processing", 0.05, -80.0),
-    ALGAE_STOW("AlgaeStow", 0.0, 25.0),
+    PRE_PROCESSOR("Processing", 0.05, 180),
+    ALGAE_STOW("AlgaeStow", 0.0, 100),
     ALGAE_STOW_FRONT("AlgaeStowFront", 0.1, pivotSafeAngle.getDegrees());
     /*
     ,L3_CORAL_REVERSED(

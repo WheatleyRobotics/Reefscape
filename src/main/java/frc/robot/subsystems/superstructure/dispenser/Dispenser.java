@@ -52,11 +52,11 @@ public class Dispenser {
   private static final LoggedTunableNumber staticVelocityThresh =
       new LoggedTunableNumber("Dispenser/staticVelocityThresh", 0.1);
   private static final LoggedTunableNumber algaeIntakeCurrentThresh =
-      new LoggedTunableNumber("Dispenser/AlgaeIntakeCurrentThreshold", 40.0);
+      new LoggedTunableNumber("Dispenser/AlgaeIntakeCurrentThreshold", 20.0);
   public static final LoggedTunableNumber gripperIntakeCurrent =
-      new LoggedTunableNumber("Dispenser/AlgaeIntakeCurrent", 30.0);
+      new LoggedTunableNumber("Dispenser/AlgaeIntakeCurrent", -30.0);
   public static final LoggedTunableNumber gripperDispenseCurrent =
-      new LoggedTunableNumber("Dispenser/AlgaeDispenseCurrent", -30.0);
+      new LoggedTunableNumber("Dispenser/AlgaeDispenseCurrent", 30.0);
   public static final LoggedTunableNumber tunnelDispenseVolts =
       new LoggedTunableNumber("Dispenser/TunnelDispenseVolts", 2.0);
   public static final LoggedTunableNumber tunnelIntakeVolts =
@@ -230,13 +230,13 @@ public class Dispenser {
       Logger.recordOutput("Dispenser/Profile/SetpointVelocityRadPerSec", 0.0);
       Logger.recordOutput("Dispenser/Profile/GoalPositionRad", 0.0);
 
-      Logger.recordOutput("Dispenser/Effector/tunnelVolts", 0.0);
-      Logger.recordOutput("Dispenser/Effector/tunnelVolts", 0.0);
+      Logger.recordOutput("Dispenser/Tunnel/tunnelVolts", 0.0);
+      Logger.recordOutput("Dispenser/Tunnel/tunnelCurrent", 0.0);
     }
 
     // Run tunnel and gripper
     if (!isEStopped) {
-      tunnelIO.runVolts(tunnelVolts);
+      tunnelIO.runTorqueCurrent(gripperCurrent);
     } else {
       pivotIO.stop();
       tunnelIO.stop();
@@ -246,15 +246,12 @@ public class Dispenser {
     if (Constants.getRobotType() != Constants.RobotType.SIMBOT) {
       if (gamePieceDebouncer.calculate(
           Math.abs(tunnelInputs.talonSupplyCurrentAmps) >= algaeIntakeCurrentThresh.get())) {
-        SuperstructureState currentState = RobotState.getInstance().getSuperstructureState();
-        if (currentState.equals(SuperstructureState.INTAKE)) {
-          hasCoral = true;
-          hasAlgae = false;
-        } else if (currentState.equals(SuperstructureState.ALGAE_L3_INTAKE)
-            || currentState.equals(SuperstructureState.ALGAE_L2_INTAKE)) {
-          hasAlgae = true;
-          hasCoral = false;
-        }
+        hasAlgae = true;
+      }
+      SuperstructureState currentState = RobotState.getInstance().getSuperstructureState();
+      if (currentState.equals(SuperstructureState.PROCESSING)
+          || currentState.equals(SuperstructureState.THROWN)) {
+        hasAlgae = false;
       }
     }
 

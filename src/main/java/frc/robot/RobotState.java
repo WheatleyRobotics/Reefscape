@@ -26,6 +26,9 @@ public class RobotState {
     return instance;
   }
 
+  @AutoLogOutput(key = "RobotState/isAuto")
+  private boolean isAuto = false;
+
   @AutoLogOutput(key = "RobotState/Superstructure")
   private SuperstructureState superstructureState = SuperstructureState.START;
 

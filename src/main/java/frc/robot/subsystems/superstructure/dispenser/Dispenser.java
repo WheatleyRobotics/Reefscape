@@ -255,13 +255,14 @@ public class Dispenser {
     }
 
     // Check gamePiece
-    if (Constants.getRobotType() != Constants.RobotType.SIMBOT) {
+    if ((Constants.getRobotType() != Constants.RobotType.SIMBOT)
+        && !RobotState.getInstance().isAuto()) {
       if (gamePieceDebouncer.calculate(
           Math.abs(tunnelInputs.talonSupplyCurrentAmps) >= algaeIntakeCurrentThresh.get())) {
         hasAlgae = true;
       }
       if (currentState.equals(SuperstructureState.PROCESSING)
-          || currentState.equals(SuperstructureState.THROWN)) {
+          || currentState.equals(SuperstructureState.THROWN) || currentState.equals(SuperstructureState.INTAKE)) {
         hasAlgae = false;
       }
     }

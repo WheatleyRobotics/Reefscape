@@ -215,23 +215,23 @@ public class RobotContainer {
                 () -> -driveController.getLeftX() * 0.4,
                 () -> -driveController.getRightX() * 0.3));
 
-      driveController
-              .a()
-              .whileTrue(
-                      DriveCommands.joystickDriveAtAngle(
-                              drive,
-                              () -> -driveController.getLeftY(),
-                              () -> -driveController.getLeftX(),
-                              () ->
-                                      switch (RobotState.getInstance().getCurrentZone()) {
-                                          case Z6 -> AllianceFlipUtil.getCorrected(
-                                                          new Pose2d(0, 0, Rotation2d.fromDegrees(55)))
-                                                  .getRotation();
-                                          case Z2 -> AllianceFlipUtil.getCorrected(
-                                                          new Pose2d(0, 0, Rotation2d.fromDegrees(-55)))
-                                                  .getRotation();
-                                          default -> RobotState.getInstance().getPose().getRotation();
-                                      }));
+    driveController
+        .a()
+        .whileTrue(
+            DriveCommands.joystickDriveAtAngle(
+                drive,
+                () -> -driveController.getLeftY(),
+                () -> -driveController.getLeftX(),
+                () ->
+                    switch (RobotState.getInstance().getCurrentZone()) {
+                      case Z6 -> AllianceFlipUtil.getCorrected(
+                              new Pose2d(0, 0, Rotation2d.fromDegrees(55)))
+                          .getRotation();
+                      case Z2 -> AllianceFlipUtil.getCorrected(
+                              new Pose2d(0, 0, Rotation2d.fromDegrees(-55)))
+                          .getRotation();
+                      default -> RobotState.getInstance().getPose().getRotation();
+                    }));
 
     driveController
         .b()

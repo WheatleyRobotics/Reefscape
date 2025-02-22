@@ -83,15 +83,19 @@ public class DynamicAuto {
 
   private Command buildSection(int target) {
     try {
+      String targetString = getCoralZone(target);
+      if(targetString.equals("NONE")) {
+        return Commands.none();
+      }
       boolean right = target % 2 == 0;
       return Commands.sequence(
           AutoBuilder.followPath(
               PathPlannerPath.fromPathFile(
-                  sourceChooser.getSelected() + "-" + getCoralZone(target))),
+                  sourceChooser.getSelected() + "-" + targetString)),
           AutoScore.getAutoScore(() -> SuperstructureState.L4_CORAL, right, drive, superstructure),
           AutoBuilder.followPath(
               PathPlannerPath.fromPathFile(
-                  getCoralZone(target) + "-" + sourceChooser.getSelected())));
+                  targetString + "-" + sourceChooser.getSelected())));
     } catch (Exception e) {
       System.out.println("Error in section " + target);
       errorAlert.set(true);
@@ -101,12 +105,12 @@ public class DynamicAuto {
 
   private String getCoralZone(int id) {
     return switch (id) {
-      case 0, 11 -> "Z0";
-      case 1, 2 -> "Z1";
-      case 3, 4 -> "Z2";
-      case 5, 6 -> "Z3";
-      case 7, 8 -> "Z4";
-      case 9, 10 -> "Z5";
+      case 0, 11 -> "Z1";
+      case 1, 2 -> "Z2";
+      case 3, 4 -> "Z3";
+      case 5, 6 -> "Z4";
+      case 7, 8 -> "Z5";
+      case 9, 10 -> "Z6";
       default -> "NONE";
     };
   }

@@ -3,44 +3,53 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.2,
-        "y": 4.0
+        "x": 7.5,
+        "y": 2.0
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.322648840758668,
-        "y": 3.994317661112208
+        "x": 8.20908228148189,
+        "y": 2.0305100824513165
       },
       "isLocked": false,
-      "linkedName": "MIDDLE"
+      "linkedName": "RIGHT"
     },
     {
       "anchor": {
-        "x": 6.1,
+        "x": 2.8396455409163135,
+        "y": 3.1150043034957626
+      },
+      "prevControl": {
+        "x": 3.790127367684902,
+        "y": 1.8553908630201121
+      },
+      "nextControl": {
+        "x": 2.689060956682289,
+        "y": 3.314564527466037
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.95,
         "y": 4.026
       },
       "prevControl": {
-        "x": 6.520772852231881,
-        "y": 4.043065453759488
+        "x": 2.7767229093759904,
+        "y": 3.845791648737139
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Z4"
+      "linkedName": "Z1"
     }
   ],
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "Outake Coral",
-      "waypointRelativePos": 0,
-      "endWaypointRelativePos": null,
-      "command": null
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 1.0,
+    "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
@@ -49,7 +58,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 0.0
   },
   "reversed": false,
   "folder": null,
@@ -57,5 +66,5 @@
     "velocity": 0,
     "rotation": 180.0
   },
-  "useDefaultConstraints": false
+  "useDefaultConstraints": true
 }

@@ -8,24 +8,24 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.132899760838131,
-        "y": 2.930410928982621
+        "x": 2.1500000000000004,
+        "y": 0.95
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "RSOURCE"
     },
     {
       "anchor": {
-        "x": 3.7,
-        "y": 2.7
+        "x": 5.3330193865740725,
+        "y": 2.6782671440972217
       },
       "prevControl": {
-        "x": 1.320179541967836,
-        "y": 1.0984215178263108
+        "x": 4.787093822337962,
+        "y": 2.3745287181712955
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Z5"
     }
   ],
   "rotationTargets": [],
@@ -33,7 +33,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 1.0,
+    "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 59.99999999999999
+    "rotation": 120.29344359932439
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 54.9798810356482
+    "rotation": 55.0
   },
-  "useDefaultConstraints": false
+  "useDefaultConstraints": true
 }

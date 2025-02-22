@@ -8,6 +8,11 @@
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Alerts": "Alerts",
       "/SmartDashboard/Auto Choices": "String Chooser",
+      "/SmartDashboard/Auto Coral #0": "String Chooser",
+      "/SmartDashboard/Auto Coral #1": "String Chooser",
+      "/SmartDashboard/Auto Coral #2": "String Chooser",
+      "/SmartDashboard/Auto Coral #3": "String Chooser",
+      "/SmartDashboard/Starting Position": "String Chooser",
       "/SmartDashboard/VisionSystemSim-main/Sim Field": "Field2d"
     }
   },

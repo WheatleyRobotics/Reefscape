@@ -7,13 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Start-Z5"
+            "pathName": "RIGHT-Z5"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Z5-Source"
+            "pathName": "Z5-RSOURCE"
           }
         }
       ]

@@ -40,6 +40,7 @@ import frc.robot.subsystems.superstructure.slam.Slam;
 import frc.robot.subsystems.superstructure.slam.SlamIO;
 import frc.robot.subsystems.vision.*;
 import frc.robot.util.AllianceFlipUtil;
+import frc.robot.util.DynamicAuto;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -50,6 +51,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  */
 public class RobotContainer {
   RobotState robotState = RobotState.getInstance();
+  DynamicAuto dynamicAuto;
   // Subsystems
   private Drive drive;
   private Vision vision;
@@ -167,6 +169,7 @@ public class RobotContainer {
         AutoScore.getAutoScore(() -> SuperstructureState.L4_CORAL, false, drive, superstructure));
 
     // Set up auto routines
+    dynamicAuto = new DynamicAuto(drive, superstructure);
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
     // Set up SysId routines
@@ -458,6 +461,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return autoChooser.get();
+    return dynamicAuto.getAutoCommand();
   }
 }

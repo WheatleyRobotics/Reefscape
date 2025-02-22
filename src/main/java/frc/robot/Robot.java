@@ -48,8 +48,6 @@ public class Robot extends LoggedRobot {
 
   public Robot() {
     DriverStation.silenceJoystickConnectionWarning(true);
-    // DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
-    // Record metadata
     Logger.recordMetadata("Robot", Constants.getRobotType().toString());
     Logger.recordMetadata("TuningMode", Boolean.toString(Constants.tuningMode));
     Logger.recordMetadata("RuntimeType", getRuntimeType().toString());

@@ -262,7 +262,8 @@ public class Dispenser {
         hasAlgae = true;
       }
       if (currentState.equals(SuperstructureState.PROCESSING)
-          || currentState.equals(SuperstructureState.THROWN) || currentState.equals(SuperstructureState.INTAKE)) {
+          || currentState.equals(SuperstructureState.THROWN)
+          || currentState.equals(SuperstructureState.INTAKE)) {
         hasAlgae = false;
       }
     }

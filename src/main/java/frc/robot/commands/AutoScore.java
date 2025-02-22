@@ -19,6 +19,7 @@ public class AutoScore {
       Supplier<SuperstructureState> state,
       boolean right,
       Drive drive,
+      boolean clear,
       Superstructure superstructure) {
     return Commands.sequence(
         superstructure
@@ -44,11 +45,10 @@ public class AutoScore {
                     FieldConstants.getBranch(RobotState.getInstance().getCurrentZone(), right),
                     -0.4)),
         superstructure.runGoal(() -> state.get().getEject()).withTimeout(0.25),
-        getClearReef(drive)
-            .deadlineFor(
-                superstructure
-                    .runGoal(SuperstructureState.STOW)
-                    .until(superstructure::atGoal))); //
+        superstructure
+            .runGoal(SuperstructureState.STOW)
+            .until(superstructure::atGoal)
+            .deadlineFor(getClearReef(drive).onlyIf(() -> clear))); //
   }
 
   public static Command getClearReef(Drive drive) {
@@ -58,8 +58,9 @@ public class AutoScore {
             () ->
                 FieldConstants.addOffset(
                     FieldConstants.Reef.centerFaces[
-                        RobotState.getInstance().getCurrentZone().getFace()].plus(new Transform2d(new Translation2d(),Rotation2d.fromRadians(Math.PI)))
-                        ,
+                        RobotState.getInstance().getCurrentZone().getFace()]
+                        .plus(
+                            new Transform2d(new Translation2d(), Rotation2d.fromRadians(Math.PI))),
                     -1)),
         Commands.runOnce(() -> drive.runVelocity(new ChassisSpeeds(0, 0, 0))));
   }

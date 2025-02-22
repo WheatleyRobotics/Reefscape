@@ -62,7 +62,7 @@ public class DynamicAuto {
                   PathPlannerPath.fromChoreoTrajectory(
                       startingChooser.getSelected() + "-" + getCoralZone(target))),
               AutoScore.getAutoScore(
-                  () -> SuperstructureState.L4_CORAL, right, drive, superstructure),
+                  () -> SuperstructureState.L4_CORAL, right, drive, true, superstructure),
               AutoBuilder.followPath(
                   PathPlannerPath.fromChoreoTrajectory(
                       getCoralZone(target) + "-" + sourceChooser.getSelected())));
@@ -92,7 +92,8 @@ public class DynamicAuto {
           AutoBuilder.followPath(
               PathPlannerPath.fromChoreoTrajectory(
                   sourceChooser.getSelected() + "-" + targetString)),
-          AutoScore.getAutoScore(() -> SuperstructureState.L4_CORAL, right, drive, superstructure),
+          AutoScore.getAutoScore(
+              () -> SuperstructureState.L4_CORAL, right, drive, true, superstructure),
           AutoBuilder.followPath(
               PathPlannerPath.fromChoreoTrajectory(
                   targetString + "-" + sourceChooser.getSelected())));

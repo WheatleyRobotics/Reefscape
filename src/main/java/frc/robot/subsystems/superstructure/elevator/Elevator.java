@@ -64,9 +64,9 @@ public class Elevator {
         kG.initDefault(4.5);
       }
       case SIMBOT -> {
-        kP.initDefault(5000);
+        kP.initDefault(3000);
         kI.initDefault(0);
-        kD.initDefault(2000);
+        kD.initDefault(800);
         kS.initDefault(5);
         kG.initDefault(50);
       }

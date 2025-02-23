@@ -84,18 +84,16 @@ public class DynamicAuto {
   private Command buildSection(int target) {
     try {
       String targetString = getCoralZone(target);
-      if(targetString.equals("NONE")) {
+      if (targetString.equals("NONE")) {
         return Commands.none();
       }
       boolean right = target % 2 == 0;
       return Commands.sequence(
           AutoBuilder.followPath(
-              PathPlannerPath.fromPathFile(
-                  sourceChooser.getSelected() + "-" + targetString)),
+              PathPlannerPath.fromPathFile(sourceChooser.getSelected() + "-" + targetString)),
           AutoScore.getAutoScore(() -> SuperstructureState.L4_CORAL, right, drive, superstructure),
           AutoBuilder.followPath(
-              PathPlannerPath.fromPathFile(
-                  targetString + "-" + sourceChooser.getSelected())));
+              PathPlannerPath.fromPathFile(targetString + "-" + sourceChooser.getSelected())));
     } catch (Exception e) {
       System.out.println("Error in section " + target);
       errorAlert.set(true);

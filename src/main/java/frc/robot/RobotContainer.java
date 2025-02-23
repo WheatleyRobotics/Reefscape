@@ -318,24 +318,26 @@ public class RobotContainer {
 
     operatorController
         .rightBumper() // right bumper
-        .whileTrue(
-            superstructure.runGoal(SuperstructureState.L2_CORAL).withName("Scoring L2 Coral"));
+        .whileTrue(superstructure.runGoal(SuperstructureState.L2_CORAL).withName("L2 Coral"));
 
     operatorController
         .leftTrigger(0.8) // left trigger
-        .whileTrue(
-            superstructure.runGoal(SuperstructureState.L3_CORAL).withName("Scoring L3 Coral"));
+        .whileTrue(superstructure.runGoal(SuperstructureState.L3_CORAL).withName("L3 Coral"));
 
     operatorController
         .rightTrigger(0.8) // right trigger
-        .whileTrue(
-            superstructure.runGoal(SuperstructureState.L4_CORAL).withName("Scoring L4 Coral"));
+        .whileTrue(superstructure.runGoal(SuperstructureState.L4_CORAL).withName("L4 Coral"));
 
     operatorController
         .povUp()
-        .whileTrue(superstructure.runGoal(SuperstructureState.ALGAE_L3_INTAKE));
+        .whileTrue(
+            superstructure
+                .runGoal(SuperstructureState.ALGAE_L3_INTAKE)
+                .withName("L3 Algae Intake"));
 
-    operatorController.povDown().whileTrue(superstructure.runGoal(SuperstructureState.PROCESSING));
+    operatorController
+        .povDown()
+        .whileTrue(superstructure.runGoal(SuperstructureState.PROCESSING).withName("Processing"));
   }
 
   private void configureButtonBindingsSIM() {
@@ -422,10 +424,7 @@ public class RobotContainer {
                   }
                 }))
         .onFalse(superstructure.runGoal(SuperstructureState.STOW));
-
-    operatorController
-        .x()
-        .whileTrue(superstructure.runGoal(SuperstructureState.INTAKE).withName("Running Intake"));
+    /*
 
     operatorController
         .b()
@@ -435,21 +434,31 @@ public class RobotContainer {
                   superstructure.runVoltsTunnel(-2);
                 },
                 superstructure));
+       operatorController
+           .a() // right bumper
+           .whileTrue(superstructure.runGoal(SuperstructureState.L2_CORAL).withName("L2 Coral"));
+
+
+    */
+    operatorController
+        .x()
+        .whileTrue(superstructure.runGoal(SuperstructureState.INTAKE).withName("Running Intake"));
 
     operatorController
-        .a() // right bumper
+        .b()
         .whileTrue(
-            superstructure.runGoal(SuperstructureState.L2_CORAL).withName("Scoring L2 Coral"));
+            superstructure.runGoal(SuperstructureState.L3_CORAL_EJECT).withName("L3 Coral Eject"));
 
     operatorController
-        .b() // left trigger
+        .y()
         .whileTrue(
-            superstructure.runGoal(SuperstructureState.L3_CORAL).withName("Scoring L3 Coral"));
+            superstructure
+                .runGoal(SuperstructureState.ALGAE_L3_INTAKE)
+                .withName("L3 Algae Intake"));
 
     operatorController
-        .y() // right trigger
-        .whileTrue(
-            superstructure.runGoal(SuperstructureState.L4_CORAL).withName("Scoring L4 Coral"));
+        .a()
+        .whileTrue(superstructure.runGoal(SuperstructureState.PROCESSING).withName("Processing"));
 
     /*
        var random = new Random();

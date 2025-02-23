@@ -139,13 +139,6 @@ public class Dispenser {
             new TrapezoidProfile.Constraints(
                 Units.degreesToRadians(maxVelocityDegPerSec.get()),
                 Units.degreesToRadians(maxAccelerationDegPerSec2.get())));
-
-    if (Constants.getRobotType() == Constants.RobotType.SIMBOT) {
-      new Trigger(() -> DriverStation.getStickButtonPressed(2, 1))
-          .onTrue(Commands.runOnce(() -> hasAlgae = !hasAlgae));
-      new Trigger(() -> DriverStation.getStickButtonPressed(2, 2))
-          .onTrue(Commands.runOnce(() -> hasCoral = !hasCoral));
-    }
   }
 
   public void periodic() {
@@ -243,7 +236,7 @@ public class Dispenser {
           || currentState.equals(SuperstructureState.ALGAE_FLOOR_INTAKE)
           || currentState.equals(SuperstructureState.PROCESSING)) {
         tunnelIO.runTorqueCurrent(gripperCurrent);
-      } else if (currentState.equals(SuperstructureState.INTAKE) && !tunnelInputs.hasCoral) {
+      } else if (currentState.equals(SuperstructureState.INTAKE) && !hasCoral) {
         tunnelIO.runVolts(tunnelIntakeVolts.get());
       } else {
         tunnelIO.runVolts(tunnelVolts);
@@ -261,11 +254,28 @@ public class Dispenser {
           Math.abs(tunnelInputs.talonSupplyCurrentAmps) >= algaeIntakeCurrentThresh.get())) {
         hasAlgae = true;
       }
-      if (currentState.equals(SuperstructureState.PROCESSING)
-          || currentState.equals(SuperstructureState.THROWN)
-          || currentState.equals(SuperstructureState.INTAKE)) {
-        hasAlgae = false;
+    }
+    if (Constants.getRobotType() == Constants.RobotType.SIMBOT) {
+      if (currentState.equals(SuperstructureState.ALGAE_L2_INTAKE)
+          || currentState.equals(SuperstructureState.ALGAE_L3_INTAKE)
+          || currentState.equals(SuperstructureState.ALGAE_STOW)
+          || currentState.equals(SuperstructureState.ALGAE_FLOOR_INTAKE)) {
+        hasAlgae = true;
       }
+      if (currentState.equals(SuperstructureState.INTAKE)) {
+        hasCoral = true;
+      }
+      if (currentState.equals(SuperstructureState.L1_CORAL_EJECT)
+          || currentState.equals(SuperstructureState.L2_CORAL_EJECT)
+          || currentState.equals(SuperstructureState.L3_CORAL_EJECT)
+          || currentState.equals(SuperstructureState.L4_CORAL_EJECT)) {
+        hasCoral = false;
+      }
+    }
+    if (currentState.equals(SuperstructureState.PROCESSING)
+        || currentState.equals(SuperstructureState.THROWN)
+        || currentState.equals(SuperstructureState.INTAKE)) {
+      hasAlgae = false;
     }
 
     // Log state

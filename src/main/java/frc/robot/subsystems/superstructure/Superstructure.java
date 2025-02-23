@@ -186,7 +186,7 @@ public class Superstructure extends SubsystemBase {
             new Pair<>(SuperstructureState.L2_CORAL, SuperstructureState.L2_CORAL_EJECT),
             new Pair<>(SuperstructureState.L3_CORAL, SuperstructureState.L3_CORAL_EJECT),
             new Pair<>(SuperstructureState.L4_CORAL, SuperstructureState.L4_CORAL_EJECT),
-            new Pair<>(SuperstructureState.ALGAE_STOW, SuperstructureState.PRE_PROCESSOR));
+            new Pair<>(SuperstructureState.ALGAE_STOW, SuperstructureState.PROCESSING));
     for (var ejectPair : pairedStates) {
       addEdge.accept(ejectPair.getFirst(), ejectPair.getSecond(), false, AlgaeEdge.NONE, true);
     }
@@ -195,7 +195,6 @@ public class Superstructure extends SubsystemBase {
     for (var from :
         Set.of(
             SuperstructureState.ALGAE_STOW,
-            SuperstructureState.PRE_PROCESSOR,
             SuperstructureState.PROCESSING,
             SuperstructureState.THROWN,
             SuperstructureState.TOSS)) {
@@ -209,21 +208,13 @@ public class Superstructure extends SubsystemBase {
 
     // Add miscellaneous edges
     addEdge.accept(
-        SuperstructureState.PRE_PROCESSOR,
-        SuperstructureState.PROCESSING,
-        true,
-        AlgaeEdge.NONE,
-        false);
+        SuperstructureState.START, SuperstructureState.STOW, false, AlgaeEdge.NONE, false);
+    addEdge.accept(
+        SuperstructureState.STOW, SuperstructureState.ALGAE_STOW, false, AlgaeEdge.ALGAE, false);
     addEdge.accept(
         SuperstructureState.ALGAE_STOW, SuperstructureState.THROWN, true, AlgaeEdge.NONE, false);
     addEdge.accept(
         SuperstructureState.ALGAE_STOW, SuperstructureState.TOSS, true, AlgaeEdge.NONE, false);
-    addEdge.accept(
-        SuperstructureState.PROCESSING,
-        SuperstructureState.PRE_PROCESSOR,
-        false,
-        AlgaeEdge.ALGAE,
-        false);
     addEdge.accept(
         SuperstructureState.THROWN, SuperstructureState.ALGAE_STOW, false, AlgaeEdge.ALGAE, false);
     addEdge.accept(
@@ -448,31 +439,6 @@ public class Superstructure extends SubsystemBase {
                       runSuperstructurePose(to.getValue().getPose()),
                       runSuperstructureExtras(to),
                       Commands.waitUntil(this::isAtGoal)))
-          .build();
-    } else if ((from == SuperstructureState.ALGAE_STOW && to == SuperstructureState.PRE_PROCESSOR)
-        || (from == SuperstructureState.PRE_PROCESSOR && to == SuperstructureState.ALGAE_STOW)) {
-      // Algae Stow Front <--> Pre-Processor
-      // Algae Stow Front <--> Pre-Processor
-      final boolean toProcessor = to == SuperstructureState.PRE_PROCESSOR;
-      return EdgeCommand.builder()
-          .command(
-              runSuperstructurePose(to.getValue().getPose())
-                  .andThen(
-                      getSlamCommand(toProcessor ? Slam.Goal.SLAM_UP : Slam.Goal.SLAM_DOWN),
-                      Commands.runOnce(
-                          () ->
-                              slam.setIntakeVolts(
-                                  (toProcessor ? 1.0 : -1.0) * Slam.occupiedVolts.get())),
-                      Commands.waitUntil(
-                          () ->
-                              isAtGoal()
-                                  && slam.isSlammed()
-                                  && (toProcessor == slam.isRetracting())))
-                  .finallyDo(
-                      () -> {
-                        slam.setGoal(to.getValue().getSlamGoal());
-                        slam.setIntakeVolts(to.getValue().getIntakeVolts().getAsDouble());
-                      }))
           .build();
     } else {
       // Just run to next state if no restrictions

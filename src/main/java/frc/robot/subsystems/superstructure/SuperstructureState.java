@@ -92,17 +92,12 @@ public enum SuperstructureState {
           .height(Height.INTAKE)
           .gripperCurrent(Dispenser.gripperDispenseCurrent)
           .build()),
-  PRE_PROCESSOR(
-      SuperstructureStateData.builder()
-          .pose(SuperstructurePose.Preset.PRE_PROCESSOR.getPose())
-          .slamGoal(Goal.SLAM_UP)
-          .intakeVolts(Slam.occupiedVolts)
-          .gripperCurrent(Dispenser.gripperIntakeCurrent)
-          .build()),
   PROCESSING(
-      PRE_PROCESSOR.getValue().toBuilder()
+      SuperstructureStateData.builder()
+          .pose(SuperstructurePose.Preset.PROCESSING.getPose())
+          .slamGoal(Goal.SLAM_UP)
           .gripperCurrent(Dispenser.gripperDispenseCurrent)
-          .intakeVolts(() -> 0.0)
+          .intakeVolts(Slam.occupiedVolts)
           .build());
   private final SuperstructureStateData value;
 

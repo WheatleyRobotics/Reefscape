@@ -261,6 +261,8 @@ public class Leds extends VirtualSubsystem {
     // Update dashboard
     SmartDashboard.putString("LEDs/First Priority", hexColor);
     SmartDashboard.putString("LEDs/Second Priority", secondaryHexColor);
+    SmartDashboard.putBoolean("LEDS/AutoAligned", autoAligned);
+    SmartDashboard.putBoolean("LEDS/AutoUnaligned", autoUnaligned);
 
     // Update LEDs
     leds.setData(buffer);

@@ -2,18 +2,22 @@ package frc.robot.util;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.commands.AutoScore;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.superstructure.Superstructure;
 import frc.robot.subsystems.superstructure.SuperstructureState;
 import java.util.ArrayList;
+import lombok.Getter;
 
 public class DynamicAuto {
+  private static final double intakeTime = .5; 
   private final Alert errorAlert = new Alert("Invalid dynamic auto", Alert.AlertType.kError);
 
   private final SendableChooser<String> startingChooser = new SendableChooser<>();
@@ -21,6 +25,7 @@ public class DynamicAuto {
   private final ArrayList<SendableChooser<Integer>> coralChooser = new ArrayList<>();
   private Superstructure superstructure;
   private Drive drive;
+  @Getter public static Pose2d startingPose2d = new Pose2d();
 
   public DynamicAuto(Drive drive, Superstructure superstructure) {
     this.drive = drive;
@@ -51,13 +56,14 @@ public class DynamicAuto {
     try {
       int target = coralChooser.get(0).getSelected();
       boolean right = !(coralChooser.get(0).getSelected() % 2 == 0);
+      startingPose2d =
+          PathPlannerPath.fromChoreoTrajectory(
+                  startingChooser.getSelected() + "-" + getCoralZone(target))
+              .getStartingHolonomicPose()
+              .get();
       s1 =
           Commands.sequence(
-              AutoBuilder.resetOdom(
-                  PathPlannerPath.fromChoreoTrajectory(
-                          startingChooser.getSelected() + "-" + getCoralZone(target))
-                      .getStartingHolonomicPose()
-                      .get()),
+              AutoBuilder.resetOdom(startingPose2d),
               AutoBuilder.followPath(
                   PathPlannerPath.fromChoreoTrajectory(
                       startingChooser.getSelected() + "-" + getCoralZone(target))),
@@ -81,6 +87,26 @@ public class DynamicAuto {
     return Commands.sequence(s1, s2, s3, s4);
   }
 
+  public void initalizPose2d() {
+    if (startingPose2d.equals(null)) {
+      if (coralChooser.get(0).getSelected().equals(null)) {
+        startingPose2d = new Pose2d();
+      } else {
+        try {
+          int target = coralChooser.get(0).getSelected();
+          startingPose2d =
+              PathPlannerPath.fromChoreoTrajectory(
+                      startingChooser.getSelected() + "-" + getCoralZone(target))
+                  .getStartingHolonomicPose()
+                  .get();
+        } catch (Exception e) {
+          System.out.println("Error initializing startingPose2d: " + e.toString());
+          errorAlert.set(true);
+        }
+      }
+    }
+  }
+
   private Command buildSection(int target) {
     try {
       String targetString = getCoralZone(target);
@@ -89,6 +115,7 @@ public class DynamicAuto {
       }
       boolean right = !(target % 2 == 0);
       return Commands.sequence(
+        new WaitCommand(intakeTime),
           AutoBuilder.followPath(
               PathPlannerPath.fromChoreoTrajectory(
                   sourceChooser.getSelected() + "-" + targetString)),

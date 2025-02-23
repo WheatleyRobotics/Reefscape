@@ -471,6 +471,7 @@ public class RobotContainer {
                    Set.of(superstructure)));
 
     */
+    dynamicAuto.initalizPose2d();
     new Trigger(
             () ->
                 DriverStation.isTeleopEnabled()
@@ -497,11 +498,11 @@ public class RobotContainer {
     new Trigger(
             () ->
                 DriverStation.isDisabled()
-                    && AutoBuilder.getCurrentPose().equals(robotState.getPose()))
+                    && DynamicAuto.getStartingPose2d().equals(RobotState.getInstance().getPose()))
         .onTrue(
-            Commands.run(() -> leds.autoAligned = false).andThen(() -> leds.autoUnaligned = true))
+            Commands.run(() -> leds.autoAligned = true).andThen(() -> leds.autoUnaligned = false))
         .onFalse(
-            Commands.run(() -> leds.autoUnaligned = false).andThen(() -> leds.autoAligned = true));
+            Commands.run(() -> leds.autoUnaligned = true).andThen(() -> leds.autoAligned = false));
   }
 
   private Command controllerRumbleCommand() {

@@ -61,7 +61,7 @@ public class AutoScore {
                         RobotState.getInstance().getCurrentZone().getFace()]
                         .plus(
                             new Transform2d(new Translation2d(), Rotation2d.fromRadians(Math.PI))),
-                    -1)),
-        Commands.runOnce(() -> drive.runVelocity(new ChassisSpeeds(0, 0, 0))));
+                    -1)));
+        //Commands.runOnce(() -> drive.runVelocity(new ChassisSpeeds(0, 0, 0))));
   }
 }

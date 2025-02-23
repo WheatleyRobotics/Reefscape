@@ -1,5 +1,8 @@
 package frc.robot.commands;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -16,6 +19,7 @@ public class AutoScore {
       Supplier<SuperstructureState> state,
       boolean right,
       Drive drive,
+      boolean clear,
       Superstructure superstructure) {
     return Commands.sequence(
         superstructure
@@ -40,15 +44,24 @@ public class AutoScore {
                 FieldConstants.addOffset(
                     FieldConstants.getBranch(RobotState.getInstance().getCurrentZone(), right),
                     -0.4)),
-        superstructure.runGoal(() -> state.get().getEject()).withTimeout(0.5),
-        getClearReef(drive),
-        superstructure.runGoal(SuperstructureState.STOW).until(superstructure::atGoal));
+        superstructure.runGoal(() -> state.get().getEject()).withTimeout(0.25),
+        superstructure
+            .runGoal(SuperstructureState.STOW)
+            .until(superstructure::atGoal)
+            .deadlineFor(getClearReef(drive).onlyIf(() -> clear))); //
   }
 
   public static Command getClearReef(Drive drive) {
     return Commands.sequence(
-        Commands.run(() -> drive.runVelocity(new ChassisSpeeds(-2.5, 0, 0)))
-            .until(() -> RobotState.getInstance().isClearedReef()),
+        new DriveToPose(
+            drive,
+            () ->
+                FieldConstants.addOffset(
+                    FieldConstants.Reef.centerFaces[
+                        RobotState.getInstance().getCurrentZone().getFace()]
+                        .plus(
+                            new Transform2d(new Translation2d(), Rotation2d.fromRadians(Math.PI))),
+                    -1)),
         Commands.runOnce(() -> drive.runVelocity(new ChassisSpeeds(0, 0, 0))));
   }
 }

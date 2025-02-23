@@ -20,18 +20,22 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoScore;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.drive.*;
+import frc.robot.subsystems.leds.Leds;
 import frc.robot.subsystems.superstructure.Superstructure;
 import frc.robot.subsystems.superstructure.SuperstructureState;
 import frc.robot.subsystems.superstructure.dispenser.*;
-import frc.robot.subsystems.superstructure.dispenser.TunnelIO;
-import frc.robot.subsystems.superstructure.dispenser.TunnelIOFalcon;
-import frc.robot.subsystems.superstructure.dispenser.TunnelIOSim;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIO;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOFalcon;
@@ -42,6 +46,7 @@ import frc.robot.subsystems.vision.*;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.DynamicAuto;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -58,10 +63,19 @@ public class RobotContainer {
   Elevator elevator;
   Dispenser dispenser;
   Slam slam;
+  private final Leds leds = Leds.getInstance();
   private final Superstructure superstructure;
   // Controller
   private final CommandXboxController driveController = new CommandXboxController(0);
   private final CommandXboxController operatorController = new CommandXboxController(1);
+  private final Alert driverDisconnected =
+      new Alert("Driver controller disconnected (port 0).", AlertType.kWarning);
+  private final Alert operatorDisconnected =
+      new Alert("Operator controller disconnected (port 1).", AlertType.kWarning);
+  private final LoggedNetworkNumber endgameAlert1 =
+      new LoggedNetworkNumber("/SmartDashboard/Endgame Alert #1", 30.0);
+  private final LoggedNetworkNumber endgameAlert2 =
+      new LoggedNetworkNumber("/SmartDashboard/Endgame Alert #2", 15.0);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -163,10 +177,12 @@ public class RobotContainer {
 
     NamedCommands.registerCommand(
         "SCORE_L4_RIGHT",
-        AutoScore.getAutoScore(() -> SuperstructureState.L4_CORAL, true, drive, superstructure));
+        AutoScore.getAutoScore(
+            () -> SuperstructureState.L4_CORAL, true, drive, false, superstructure));
     NamedCommands.registerCommand(
         "SCORE_L4_LEFT",
-        AutoScore.getAutoScore(() -> SuperstructureState.L4_CORAL, false, drive, superstructure));
+        AutoScore.getAutoScore(
+            () -> SuperstructureState.L4_CORAL, false, drive, false, superstructure));
 
     // Set up auto routines
     dynamicAuto = new DynamicAuto(drive, superstructure);
@@ -255,6 +271,7 @@ public class RobotContainer {
                 () -> RobotState.getInstance().getSuperstructureState(),
                 false,
                 drive,
+                false,
                 superstructure))
         .onFalse(
             AutoScore.getClearReef(drive)
@@ -267,6 +284,7 @@ public class RobotContainer {
                 () -> RobotState.getInstance().getSuperstructureState(),
                 true,
                 drive,
+                false,
                 superstructure))
         .onFalse(
             AutoScore.getClearReef(drive)
@@ -374,25 +392,25 @@ public class RobotContainer {
         .x()
         .whileTrue(
             AutoScore.getAutoScore(
-                () -> RobotState.getInstance().getSuperstructureState(),
-                true,
-                drive,
-                superstructure))
-        .onFalse(
-            AutoScore.getClearReef(drive)
-                .andThen(superstructure.runGoal(SuperstructureState.STOW)));
+                    () -> RobotState.getInstance().getSuperstructureState(),
+                    true,
+                    drive,
+                    false,
+                    superstructure)
+                .alongWith(Commands.run(() -> leds.autoScoring = true)))
+        .whileFalse(Commands.run(() -> leds.autoScoring = false));
 
     driveController
         .y()
         .whileTrue(
             AutoScore.getAutoScore(
-                () -> RobotState.getInstance().getSuperstructureState(),
-                false,
-                drive,
-                superstructure))
-        .onFalse(
-            AutoScore.getClearReef(drive)
-                .andThen(superstructure.runGoal(SuperstructureState.STOW)));
+                    () -> RobotState.getInstance().getSuperstructureState(),
+                    false,
+                    drive,
+                    false,
+                    superstructure)
+                .alongWith(Commands.run(() -> leds.autoScoring = true)))
+        .whileFalse(Commands.run(() -> leds.autoScoring = false));
 
     driveController
         .rightBumper()
@@ -462,6 +480,63 @@ public class RobotContainer {
                    Set.of(superstructure)));
 
     */
+    new Trigger(
+            () ->
+                DriverStation.isTeleopEnabled()
+                    && DriverStation.getMatchTime() > 0
+                    && DriverStation.getMatchTime() <= Math.round(endgameAlert1.get()))
+        .onTrue(
+            controllerRumbleCommand()
+                .withTimeout(0.5)
+                .beforeStarting(() -> leds.endgameAlert = true)
+                .finallyDo(() -> leds.endgameAlert = false));
+    new Trigger(
+            () ->
+                DriverStation.isTeleopEnabled()
+                    && DriverStation.getMatchTime() > 0
+                    && DriverStation.getMatchTime() <= Math.round(endgameAlert2.get()))
+        .onTrue(
+            controllerRumbleCommand()
+                .withTimeout(0.2)
+                .andThen(Commands.waitSeconds(0.1))
+                .repeatedly()
+                .withTimeout(0.9)
+                .beforeStarting(() -> leds.endgameAlert = true)
+                .finallyDo(() -> leds.endgameAlert = false)); // Rumble three times
+    new Trigger(
+            () ->
+                DriverStation.isDisabled()
+                    && AutoBuilder.getCurrentPose().equals(robotState.getPose()))
+        .onTrue(
+            Commands.run(() -> leds.autoAligned = false).andThen(() -> leds.autoUnaligned = true))
+        .onFalse(
+            Commands.run(() -> leds.autoUnaligned = false).andThen(() -> leds.autoAligned = true));
+  }
+
+  private Command controllerRumbleCommand() {
+    return Commands.startEnd(
+        () -> {
+          driveController.getHID().setRumble(RumbleType.kBothRumble, 1.0);
+          operatorController.getHID().setRumble(RumbleType.kBothRumble, 1.0);
+        },
+        () -> {
+          driveController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
+          operatorController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
+        });
+  }
+
+  public void updateDashboardOutputs() {
+    SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
+  }
+
+  public void updateAlerts() {
+    // Controller disconnected alerts
+    driverDisconnected.set(
+        !DriverStation.isJoystickConnected(driveController.getHID().getPort())
+            || !DriverStation.getJoystickIsXbox(driveController.getHID().getPort()));
+    operatorDisconnected.set(
+        !DriverStation.isJoystickConnected(operatorController.getHID().getPort())
+            || !DriverStation.getJoystickIsXbox(operatorController.getHID().getPort()));
   }
 
   /**

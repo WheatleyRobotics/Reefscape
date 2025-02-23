@@ -50,21 +50,21 @@ public class DynamicAuto {
     Command s1;
     try {
       int target = coralChooser.get(0).getSelected();
-      boolean right = coralChooser.get(0).getSelected() % 2 == 0;
+      boolean right = !(coralChooser.get(0).getSelected() % 2 == 0);
       s1 =
           Commands.sequence(
               AutoBuilder.resetOdom(
-                  PathPlannerPath.fromPathFile(
+                  PathPlannerPath.fromChoreoTrajectory(
                           startingChooser.getSelected() + "-" + getCoralZone(target))
                       .getStartingHolonomicPose()
                       .get()),
               AutoBuilder.followPath(
-                  PathPlannerPath.fromPathFile(
+                  PathPlannerPath.fromChoreoTrajectory(
                       startingChooser.getSelected() + "-" + getCoralZone(target))),
               AutoScore.getAutoScore(
-                  () -> SuperstructureState.L4_CORAL, right, drive, superstructure),
+                  () -> SuperstructureState.L4_CORAL, right, drive, true, superstructure),
               AutoBuilder.followPath(
-                  PathPlannerPath.fromPathFile(
+                  PathPlannerPath.fromChoreoTrajectory(
                       getCoralZone(target) + "-" + sourceChooser.getSelected())));
     } catch (Exception e) {
       System.out.println(e.toString());
@@ -87,13 +87,16 @@ public class DynamicAuto {
       if (targetString.equals("NONE")) {
         return Commands.none();
       }
-      boolean right = target % 2 == 0;
+      boolean right = !(target % 2 == 0);
       return Commands.sequence(
           AutoBuilder.followPath(
-              PathPlannerPath.fromPathFile(sourceChooser.getSelected() + "-" + targetString)),
-          AutoScore.getAutoScore(() -> SuperstructureState.L4_CORAL, right, drive, superstructure),
+              PathPlannerPath.fromChoreoTrajectory(
+                  sourceChooser.getSelected() + "-" + targetString)),
+          AutoScore.getAutoScore(
+              () -> SuperstructureState.L4_CORAL, right, drive, true, superstructure),
           AutoBuilder.followPath(
-              PathPlannerPath.fromPathFile(targetString + "-" + sourceChooser.getSelected())));
+              PathPlannerPath.fromChoreoTrajectory(
+                  targetString + "-" + sourceChooser.getSelected())));
     } catch (Exception e) {
       System.out.println("Error in section " + target);
       errorAlert.set(true);

@@ -261,18 +261,14 @@ public class RobotContainer {
         .whileTrue(
             AutoScore.getAutoScoreCommand(
                 () -> RobotState.getInstance().getDesiredState(), false, drive, superstructure))
-        .onFalse(
-            AutoScore.getClearReefCommand(drive)
-                .andThen(superstructure.runGoal(SuperstructureState.STOW)));
+        .onFalse(AutoScore.getClearReefCommand(drive));
 
     driveController
         .rightTrigger(0.8)
         .whileTrue(
             AutoScore.getAutoScoreCommand(
                 () -> RobotState.getInstance().getDesiredState(), true, drive, superstructure))
-        .onFalse(
-            AutoScore.getClearReefCommand(drive)
-                .andThen(superstructure.runGoal(SuperstructureState.STOW)));
+        .onFalse(AutoScore.getClearReefCommand(drive));
 
     driveController
         .rightBumper()
@@ -318,10 +314,7 @@ public class RobotContainer {
 
     operatorController
         .povUp()
-        .whileTrue(
-            superstructure
-                .runGoal(SuperstructureState.ALGAE_L3_INTAKE)
-                .withName("L3 Algae Intake"));
+        .onTrue(superstructure.runGoal(SuperstructureState.ALGAE_L3).withName("L3 Algae"));
 
     operatorController
         .povDown()
@@ -414,21 +407,9 @@ public class RobotContainer {
                   RobotState.getInstance().setDesiredState(SuperstructureState.ALGAE_L3);
                 }));
 
-    operatorController
-        .y()
-        .onTrue(
-            Commands.runOnce(
-                () -> {
-                  RobotState.getInstance().setDesiredState(SuperstructureState.L4_CORAL);
-                }));
+    operatorController.y().onTrue(superstructure.runGoal(SuperstructureState.STOW));
 
-    operatorController
-        .a()
-        .onTrue(
-            Commands.runOnce(
-                () -> {
-                  RobotState.getInstance().setDesiredState(SuperstructureState.PROCESSING);
-                }));
+    operatorController.a().onTrue(superstructure.runGoal(SuperstructureState.L4_CORAL));
 
     /*
        var random = new Random();

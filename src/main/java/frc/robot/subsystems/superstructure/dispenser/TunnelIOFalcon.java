@@ -17,6 +17,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -28,7 +29,7 @@ import edu.wpi.first.units.measure.*;
 /** Generic roller IO implementation for a roller or series of rollers using a Kraken. */
 public class TunnelIOFalcon implements TunnelIO {
   private final TalonFX talon;
-  // private final CANrange canRange;
+  private final CANrange canRange;
 
   private final StatusSignal<Angle> position;
   private final StatusSignal<AngularVelocity> velocity;
@@ -37,21 +38,19 @@ public class TunnelIOFalcon implements TunnelIO {
   private final StatusSignal<Current> torqueCurrent;
   private final StatusSignal<Temperature> tempCelsius;
 
-  // private final StatusSignal<Distance> distance;
-  // private final StatusSignal<Boolean> isDetected;
+  private final StatusSignal<Distance> distance;
+  private final StatusSignal<Boolean> isDetected;
 
   // Single shot for voltage mode, robot loop will call continuously
   private final TorqueCurrentFOC torqueCurrentFOC = new TorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
   private final VoltageOut voltageOut = new VoltageOut(0.0).withUpdateFreqHz(0);
   private final NeutralOut neutralOut = new NeutralOut();
 
-  private final double reduction = 0;
-
   private final Debouncer connectedDebouncer = new Debouncer(0.5);
 
   public TunnelIOFalcon() {
-    talon = new TalonFX(5);
-    // canRange = new CANrange(4);
+    talon = new TalonFX(5, "*");
+    canRange = new CANrange(4, "*");
 
     TalonFXConfiguration talonConfig = new TalonFXConfiguration();
     talonConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
@@ -69,16 +68,12 @@ public class TunnelIOFalcon implements TunnelIO {
 
     CANrangeConfiguration canRangeConfig = new CANrangeConfiguration();
     ProximityParamsConfigs proximityParamsConfigs = new ProximityParamsConfigs();
-    proximityParamsConfigs.withProximityHysteresis(2);
-    proximityParamsConfigs.withProximityThreshold(10);
+    proximityParamsConfigs.withProximityThreshold(0.5);
     canRangeConfig.withProximityParams(proximityParamsConfigs);
-    /*
     tryUntilOk(5, () -> canRange.getConfigurator().apply(canRangeConfig));
 
     distance = canRange.getDistance();
     isDetected = canRange.getIsDetected();
-
-     */
 
     tryUntilOk(
         5,
@@ -90,10 +85,10 @@ public class TunnelIOFalcon implements TunnelIO {
                 appliedVoltage,
                 supplyCurrent,
                 torqueCurrent,
-                tempCelsius // ,distance,isDetected
-                ));
-    ParentDevice.optimizeBusUtilizationForAll( // canRange,
-        talon);
+                tempCelsius,
+                distance,
+                isDetected));
+    ParentDevice.optimizeBusUtilizationForAll(canRange, talon);
   }
 
   @Override
@@ -103,12 +98,11 @@ public class TunnelIOFalcon implements TunnelIO {
             BaseStatusSignal.refreshAll(
                     position, velocity, appliedVoltage, supplyCurrent, torqueCurrent, tempCelsius)
                 .isOK());
-    inputs.CANRangeConnected = false;
-    // connectedDebouncer.calculate(BaseStatusSignal.refreshAll(distance, isDetected).isOK());
-    inputs.hasCoral = false; // isDetected.getValue();
-    inputs.talonPositionRads = Units.rotationsToRadians(position.getValueAsDouble()) / reduction;
-    inputs.talonVelocityRadsPerSec =
-        Units.rotationsToRadians(velocity.getValueAsDouble()) / reduction;
+    inputs.CANRangeConnected =
+        connectedDebouncer.calculate(BaseStatusSignal.refreshAll(distance, isDetected).isOK());
+    inputs.hasCoral = isDetected.getValue();
+    inputs.talonPositionRads = Units.rotationsToRadians(position.getValueAsDouble());
+    inputs.talonVelocityRadsPerSec = Units.rotationsToRadians(velocity.getValueAsDouble());
     inputs.talonAppliedVoltage = appliedVoltage.getValueAsDouble();
     inputs.talonSupplyCurrentAmps = supplyCurrent.getValueAsDouble();
     inputs.talonTorqueCurrentAmps = torqueCurrent.getValueAsDouble();

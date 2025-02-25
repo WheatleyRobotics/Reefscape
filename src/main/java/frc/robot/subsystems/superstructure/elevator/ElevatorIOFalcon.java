@@ -57,8 +57,8 @@ public class ElevatorIOFalcon implements ElevatorIO {
   private final VoltageOut voltageRequest = new VoltageOut(0.0).withUpdateFreqHz(0.0);
 
   public ElevatorIOFalcon() {
-    talon = new TalonFX(11);
-    followerTalon = new TalonFX(12);
+    talon = new TalonFX(11, "*");
+    followerTalon = new TalonFX(12, "*");
     followerTalon.setControl(new Follower(talon.getDeviceID(), false));
 
     // Configure motor

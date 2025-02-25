@@ -131,7 +131,7 @@ public class DynamicAuto {
   public Pose2d getStartPose() {
     try {
       if (startingChooser.getSelected() == null) {
-        System.out.println("No starting position selected");
+        // System.out.println("No starting position selected");
         return new Pose2d();
       }
       PathPlannerPath startPath =

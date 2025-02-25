@@ -72,8 +72,8 @@ public class Dispenser {
         kG.initDefault(0.0);
       }
       default -> {
-        kP.initDefault(640);
-        kD.initDefault(95);
+        kP.initDefault(1000);
+        kD.initDefault(100);
         kS.initDefault(4);
         kG.initDefault(0);
       }
@@ -237,8 +237,6 @@ public class Dispenser {
         tunnelIO.runTorqueCurrent(gripperCurrent);
       } else if (currentState.equals(SuperstructureState.INTAKE) && !hasCoral) {
         tunnelIO.runVolts(tunnelIntakeVolts.get());
-      } else {
-        tunnelIO.runVolts(tunnelVolts);
       }
 
     } else {

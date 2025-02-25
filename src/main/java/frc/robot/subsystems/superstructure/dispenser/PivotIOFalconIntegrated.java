@@ -55,7 +55,7 @@ public class PivotIOFalconIntegrated implements PivotIO {
   private final Debouncer encoderConnectedDebouncer = new Debouncer(0.5);
 
   public PivotIOFalconIntegrated() {
-    talon = new TalonFX(6);
+    talon = new TalonFX(6, "*");
 
     // Configure  motor
     Config.MotorOutput.NeutralMode = NeutralModeValue.Brake;

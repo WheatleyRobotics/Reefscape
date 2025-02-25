@@ -59,7 +59,7 @@ public class Elevator {
       case COMPBOT, DEVBOT -> {
         kP.initDefault(900);
         kI.initDefault(0);
-        kD.initDefault(45);
+        kD.initDefault(300);
         kS.initDefault(1.3);
         kG.initDefault(4.5);
       }

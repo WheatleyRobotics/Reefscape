@@ -52,8 +52,7 @@ public class AutoScore {
                         ? -l4Offset.get()
                         : -coralOffset.get())),
         superstructure.runGoal(() -> state.get().getEject()).withTimeout(0.5),
-        getClearReefCommand(drive),
-        superstructure.runGoal(SuperstructureState.STOW));
+        getClearReefCommand(drive));
   }
 
   public static Command getClearReefCommand(Drive drive) {

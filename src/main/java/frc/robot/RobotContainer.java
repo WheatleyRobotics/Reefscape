@@ -363,72 +363,47 @@ public class RobotContainer {
                           .getRotation();
                       default -> RobotState.getInstance().getPose().getRotation();
                     }));
+    /*
+       driveController
+           .b()
+           .onTrue(
+               Commands.runOnce(
+                       () -> {
+                         drive.setPose(new Pose2d(drive.getPose().getTranslation(), new Rotation2d()));
+                         drive.setYaw(new Rotation2d());
+                         RobotState.getInstance().resetPose(drive.getPose());
+                       },
+                       drive)
+                   .ignoringDisable(true));
 
-    driveController
-        .b()
-        .onTrue(
-            Commands.runOnce(
-                    () -> {
-                      drive.setPose(new Pose2d(drive.getPose().getTranslation(), new Rotation2d()));
-                      drive.setYaw(new Rotation2d());
-                      RobotState.getInstance().resetPose(drive.getPose());
-                    },
-                    drive)
-                .ignoringDisable(true));
+    */
 
     driveController
         .x()
         .whileTrue(
             AutoScore.getAutoScoreCommand(
                     () -> RobotState.getInstance().getDesiredState(), true, drive, superstructure)
-                .alongWith(Commands.run(() -> leds.autoScoring = true)))
-        .whileFalse(Commands.run(() -> leds.autoScoring = false));
+                .alongWith(Commands.runOnce(() -> leds.autoScoring = true)))
+        .onFalse(Commands.runOnce(() -> leds.autoScoring = false));
 
     driveController
         .y()
         .whileTrue(
             AutoScore.getAutoScoreCommand(
-                    () -> RobotState.getInstance().getSuperstructureState(),
-                    false,
-                    drive,
-                    superstructure)
-                .alongWith(Commands.run(() -> leds.autoScoring = true)))
-        .whileFalse(Commands.run(() -> leds.autoScoring = false));
+                    () -> RobotState.getInstance().getDesiredState(), false, drive, superstructure)
+                .alongWith(Commands.runOnce(() -> leds.autoScoring = true)))
+        .onFalse(Commands.runOnce(() -> leds.autoScoring = false));
 
     driveController
-        .rightBumper()
-        .whileTrue(
-            Commands.run(
-                () -> {
-                  SuperstructureState currentState = superstructure.getState();
-                  SuperstructureState ejectState = currentState.getEject();
-                  if (!currentState.equals(ejectState)) {
-                    superstructure.runGoal(ejectState).schedule();
-                  }
-                }))
-        .onFalse(superstructure.runGoal(SuperstructureState.STOW));
-    /*
-
-    operatorController
         .b()
-        .whileTrue(
-            Commands.run(
-                () -> {
-                  superstructure.runVoltsTunnel(-2);
-                },
-                superstructure));
-       operatorController
-           .a() // right bumper
-           .whileTrue(superstructure.runGoal(SuperstructureState.L2_CORAL).withName("L2 Coral"));
+        .whileTrue(superstructure.runGoal(RobotState.getInstance().getDesiredState().getEject()));
 
-
-    */
     operatorController
         .x()
         .onTrue(
             Commands.runOnce(
                 () -> {
-                  RobotState.getInstance().setDesiredState(SuperstructureState.L2_CORAL);
+                  RobotState.getInstance().setDesiredState(SuperstructureState.ALGAE_L2);
                 }));
 
     operatorController
@@ -436,7 +411,7 @@ public class RobotContainer {
         .onTrue(
             Commands.runOnce(
                 () -> {
-                  RobotState.getInstance().setDesiredState(SuperstructureState.L3_CORAL);
+                  RobotState.getInstance().setDesiredState(SuperstructureState.ALGAE_L3);
                 }));
 
     operatorController
@@ -452,7 +427,7 @@ public class RobotContainer {
         .onTrue(
             Commands.runOnce(
                 () -> {
-                  RobotState.getInstance().setDesiredState(SuperstructureState.L1_CORAL);
+                  RobotState.getInstance().setDesiredState(SuperstructureState.PROCESSING);
                 }));
 
     /*

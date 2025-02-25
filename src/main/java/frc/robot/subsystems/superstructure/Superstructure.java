@@ -113,14 +113,14 @@ public class Superstructure extends SubsystemBase {
     final Set<SuperstructureState> freeAlgaeStates =
         Set.of(
             SuperstructureState.ALGAE_STOW,
-            SuperstructureState.ALGAE_L2_INTAKE,
-            SuperstructureState.ALGAE_L3_INTAKE);
+            SuperstructureState.ALGAE_L2,
+            SuperstructureState.ALGAE_L3);
 
     final Set<SuperstructureState> algaeIntakeStates =
         Set.of(
             SuperstructureState.ALGAE_FLOOR_INTAKE,
-            SuperstructureState.ALGAE_L2_INTAKE,
-            SuperstructureState.ALGAE_L3_INTAKE);
+            SuperstructureState.ALGAE_L2,
+            SuperstructureState.ALGAE_L3);
 
     // Add all free edges
     for (var from : freeNoAlgaeStates) {
@@ -205,6 +205,30 @@ public class Superstructure extends SubsystemBase {
             getEdgeCommand(from, to).toBuilder().algaeEdgeType(AlgaeEdge.NO_ALGAE).build());
       }
     }
+
+    // Add bidirectional edge between ALGAE_L2 and ALGAE_L2_INTAKE
+    addEdge.accept(
+        SuperstructureState.ALGAE_L2,
+        SuperstructureState.ALGAE_L2_INTAKE,
+        false,
+        AlgaeEdge.ALGAE,
+        true);
+
+    // Add bidirectional edge between ALGAE_L3 and ALGAE_L3_INTAKE
+    addEdge.accept(
+        SuperstructureState.ALGAE_L3,
+        SuperstructureState.ALGAE_L3_INTAKE,
+        false,
+        AlgaeEdge.ALGAE,
+        true);
+
+    // Add bidirectional edge between PROCESSING and PROCESSING_EJECT
+    addEdge.accept(
+        SuperstructureState.PROCESSING,
+        SuperstructureState.PROCESSING_EJECT,
+        false,
+        AlgaeEdge.NONE,
+        true);
 
     // Add miscellaneous edges
     addEdge.accept(

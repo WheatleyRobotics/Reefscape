@@ -57,6 +57,16 @@ public enum SuperstructureState {
           .intakeVolts(Slam.floorIntakeVolts)
           .height(Height.BOTTOM)
           .build()),
+  ALGAE_L2(
+      SuperstructureStateData.builder()
+          .pose(SuperstructurePose.Preset.ALGAE_L2_INTAKE.getPose())
+          .height(Height.FIRST_STAGE)
+          .build()),
+  ALGAE_L3(
+      SuperstructureStateData.builder()
+          .pose(SuperstructurePose.Preset.ALGAE_L3_INTAKE.getPose())
+          .height(Height.FIRST_STAGE)
+          .build()),
   ALGAE_L2_INTAKE(
       SuperstructureStateData.builder()
           .pose(SuperstructurePose.Preset.ALGAE_L2_INTAKE.getPose())
@@ -69,6 +79,7 @@ public enum SuperstructureState {
           .gripperCurrent(Dispenser.gripperIntakeCurrent)
           .height(Height.FIRST_STAGE)
           .build()),
+
   THROWN(
       SuperstructureStateData.builder()
           .pose(SuperstructurePose.Preset.THROW.getPose())
@@ -96,6 +107,11 @@ public enum SuperstructureState {
       SuperstructureStateData.builder()
           .pose(SuperstructurePose.Preset.PROCESSING.getPose())
           .slamGoal(Goal.SLAM_UP)
+          .build()),
+  PROCESSING_EJECT(
+      SuperstructureStateData.builder()
+          .pose(SuperstructurePose.Preset.PROCESSING.getPose())
+          .slamGoal(Goal.SLAM_UP)
           .gripperCurrent(Dispenser.gripperDispenseCurrent)
           .intakeVolts(Slam.occupiedVolts)
           .build());
@@ -104,11 +120,13 @@ public enum SuperstructureState {
   public SuperstructureState getEject() {
     SuperstructureState returnState;
     try {
-      if (this.name().equals("STOW")) {
-        returnState = SuperstructureState.L1_CORAL_EJECT;
-      } else {
-        returnState = SuperstructureState.valueOf(this.name() + "_EJECT");
-      }
+      returnState =
+          switch (this.name()) {
+            case "STOW" -> SuperstructureState.L1_CORAL_EJECT;
+            case "ALGAE_L2" -> SuperstructureState.ALGAE_L2_INTAKE;
+            case "ALGAE_L3" -> SuperstructureState.ALGAE_L3_INTAKE;
+            default -> SuperstructureState.valueOf(this.name() + "_EJECT");
+          };
     } catch (IllegalArgumentException e) {
       returnState = this;
     }

@@ -72,10 +72,10 @@ public class Dispenser {
         kG.initDefault(0.0);
       }
       default -> {
-        kP.initDefault(640); // 55
+        kP.initDefault(640);
         kD.initDefault(95);
-        kS.initDefault(4); // 20
-        kG.initDefault(0); // 1
+        kS.initDefault(4);
+        kG.initDefault(0);
       }
     }
   }
@@ -212,7 +212,7 @@ public class Dispenser {
       Logger.recordOutput("Dispenser/Profile/GoalPositionRad", goalState.position);
 
       Logger.recordOutput("Dispenser/Effector/tunnelVolts", tunnelVolts);
-      Logger.recordOutput("Dispenser/Effector/tunnelVolts", gripperCurrent);
+      Logger.recordOutput("Dispenser/Effector/tunnelCurrent", gripperCurrent);
     } else {
       // Reset setpoint
       setpoint = new State(pivotAngle.getRadians(), 0.0);

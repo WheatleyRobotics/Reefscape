@@ -68,8 +68,8 @@ public class DynamicAuto {
           Commands.sequence(
               AutoBuilder.resetOdom(startingPose2d),
               AutoBuilder.followPath(startPath),
-              AutoScore.getAutoScore(
-                  () -> SuperstructureState.L4_CORAL, right, drive, true, superstructure),
+              AutoScore.getAutoScoreCommand(
+                  () -> SuperstructureState.L4_CORAL, right, drive, superstructure),
               AutoBuilder.followPath(
                   isChoreo
                       ? PathPlannerPath.fromChoreoTrajectory(
@@ -129,8 +129,8 @@ public class DynamicAuto {
                   ? PathPlannerPath.fromChoreoTrajectory(
                       sourceChooser.getSelected() + "-" + targetString)
                   : PathPlannerPath.fromPathFile(sourceChooser.getSelected() + "-" + targetString)),
-          AutoScore.getAutoScore(
-              () -> SuperstructureState.L4_CORAL, right, drive, true, superstructure),
+          AutoScore.getAutoScoreCommand(
+              () -> SuperstructureState.L4_CORAL, right, drive, superstructure),
           superstructure.runGoal(SuperstructureState.INTAKE),
           AutoBuilder.followPath(
               isChoreo

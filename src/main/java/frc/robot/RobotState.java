@@ -10,6 +10,7 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import frc.robot.commands.AutoScore;
 import frc.robot.subsystems.superstructure.SuperstructureState;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
@@ -32,8 +33,11 @@ public class RobotState {
   @AutoLogOutput(key = "RobotState/Superstructure")
   private SuperstructureState superstructureState = SuperstructureState.START;
 
-  @AutoLogOutput(key = "RobotState/TargetState")
-  private SuperstructureState targetState = SuperstructureState.START;
+  @AutoLogOutput(key = "RobotState/DesiredState")
+  private SuperstructureState desiredState = SuperstructureState.START;
+
+  @AutoLogOutput(key = "RobotState/hasDesiredState")
+  private boolean hasDesiredState = false;
 
   @AutoLogOutput(key = "RobotState/Pose")
   private Pose2d pose = new Pose2d();
@@ -122,6 +126,13 @@ public class RobotState {
         FieldConstants.getBranch(currentZone, true)
             .getTranslation()
             .getDistance(pose.getTranslation());
-    clearedReef = !(distanceToLeft < 0.7) && !(distanceToRight < 0.7);
+    clearedReef =
+        !(distanceToLeft < AutoScore.minClearReefDistance.get())
+            && !(distanceToRight < AutoScore.minClearReefDistance.get());
+  }
+
+  public void setDesiredState(SuperstructureState state) {
+    desiredState = state;
+    hasDesiredState = true;
   }
 }

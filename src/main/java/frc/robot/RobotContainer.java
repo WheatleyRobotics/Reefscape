@@ -160,12 +160,12 @@ public class RobotContainer {
 
     NamedCommands.registerCommand(
         "SCORE_L4_RIGHT",
-        AutoScore.getAutoScore(
-            () -> SuperstructureState.L4_CORAL, true, drive, false, superstructure));
+        AutoScore.getAutoScoreCommand(
+            () -> SuperstructureState.L4_CORAL, true, drive, superstructure));
     NamedCommands.registerCommand(
         "SCORE_L4_LEFT",
-        AutoScore.getAutoScore(
-            () -> SuperstructureState.L4_CORAL, false, drive, false, superstructure));
+        AutoScore.getAutoScoreCommand(
+            () -> SuperstructureState.L4_CORAL, false, drive, superstructure));
 
     // Set up auto routines
     dynamicAuto = new DynamicAuto(drive, superstructure);
@@ -259,27 +259,19 @@ public class RobotContainer {
     driveController
         .leftTrigger(0.8)
         .whileTrue(
-            AutoScore.getAutoScore(
-                () -> RobotState.getInstance().getSuperstructureState(),
-                false,
-                drive,
-                false,
-                superstructure))
+            AutoScore.getAutoScoreCommand(
+                () -> RobotState.getInstance().getDesiredState(), false, drive, superstructure))
         .onFalse(
-            AutoScore.getClearReef(drive)
+            AutoScore.getClearReefCommand(drive)
                 .andThen(superstructure.runGoal(SuperstructureState.STOW)));
 
     driveController
         .rightTrigger(0.8)
         .whileTrue(
-            AutoScore.getAutoScore(
-                () -> RobotState.getInstance().getSuperstructureState(),
-                true,
-                drive,
-                false,
-                superstructure))
+            AutoScore.getAutoScoreCommand(
+                () -> RobotState.getInstance().getDesiredState(), true, drive, superstructure))
         .onFalse(
-            AutoScore.getClearReef(drive)
+            AutoScore.getClearReefCommand(drive)
                 .andThen(superstructure.runGoal(SuperstructureState.STOW)));
 
     driveController
@@ -287,11 +279,9 @@ public class RobotContainer {
         .whileTrue(
             Commands.run(
                 () -> {
-                  SuperstructureState currentState = superstructure.getState();
-                  SuperstructureState ejectState = currentState.getEject();
-                  if (!currentState.equals(ejectState)) {
-                    superstructure.runGoal(ejectState).schedule();
-                  }
+                  SuperstructureState ejectState =
+                      RobotState.getInstance().getDesiredState().getEject();
+                  superstructure.runGoal(ejectState).schedule();
                 }))
         .onFalse(superstructure.runGoal(SuperstructureState.STOW));
 
@@ -310,15 +300,21 @@ public class RobotContainer {
 
     operatorController
         .rightBumper() // right bumper
-        .whileTrue(superstructure.runGoal(SuperstructureState.L2_CORAL).withName("L2 Coral"));
+        .onTrue(
+            Commands.runOnce(
+                () -> RobotState.getInstance().setDesiredState(SuperstructureState.L2_CORAL)));
 
     operatorController
         .leftTrigger(0.8) // left trigger
-        .whileTrue(superstructure.runGoal(SuperstructureState.L3_CORAL).withName("L3 Coral"));
+        .onTrue(
+            Commands.runOnce(
+                () -> RobotState.getInstance().setDesiredState(SuperstructureState.L3_CORAL)));
 
     operatorController
         .rightTrigger(0.8) // right trigger
-        .whileTrue(superstructure.runGoal(SuperstructureState.L4_CORAL).withName("L4 Coral"));
+        .onTrue(
+            Commands.runOnce(
+                () -> RobotState.getInstance().setDesiredState(SuperstructureState.L4_CORAL)));
 
     operatorController
         .povUp()
@@ -383,23 +379,18 @@ public class RobotContainer {
     driveController
         .x()
         .whileTrue(
-            AutoScore.getAutoScore(
-                    () -> RobotState.getInstance().getSuperstructureState(),
-                    true,
-                    drive,
-                    false,
-                    superstructure)
+            AutoScore.getAutoScoreCommand(
+                    () -> RobotState.getInstance().getDesiredState(), true, drive, superstructure)
                 .alongWith(Commands.run(() -> leds.autoScoring = true)))
         .whileFalse(Commands.run(() -> leds.autoScoring = false));
 
     driveController
         .y()
         .whileTrue(
-            AutoScore.getAutoScore(
+            AutoScore.getAutoScoreCommand(
                     () -> RobotState.getInstance().getSuperstructureState(),
                     false,
                     drive,
-                    false,
                     superstructure)
                 .alongWith(Commands.run(() -> leds.autoScoring = true)))
         .whileFalse(Commands.run(() -> leds.autoScoring = false));
@@ -434,23 +425,35 @@ public class RobotContainer {
     */
     operatorController
         .x()
-        .whileTrue(superstructure.runGoal(SuperstructureState.INTAKE).withName("Running Intake"));
+        .onTrue(
+            Commands.runOnce(
+                () -> {
+                  RobotState.getInstance().setDesiredState(SuperstructureState.L2_CORAL);
+                }));
 
     operatorController
         .b()
-        .whileTrue(
-            superstructure.runGoal(SuperstructureState.L3_CORAL_EJECT).withName("L3 Coral Eject"));
+        .onTrue(
+            Commands.runOnce(
+                () -> {
+                  RobotState.getInstance().setDesiredState(SuperstructureState.L3_CORAL);
+                }));
 
     operatorController
         .y()
-        .whileTrue(
-            superstructure
-                .runGoal(SuperstructureState.ALGAE_L3_INTAKE)
-                .withName("L3 Algae Intake"));
+        .onTrue(
+            Commands.runOnce(
+                () -> {
+                  RobotState.getInstance().setDesiredState(SuperstructureState.L4_CORAL);
+                }));
 
     operatorController
         .a()
-        .whileTrue(superstructure.runGoal(SuperstructureState.PROCESSING).withName("Processing"));
+        .onTrue(
+            Commands.runOnce(
+                () -> {
+                  RobotState.getInstance().setDesiredState(SuperstructureState.L1_CORAL);
+                }));
 
     /*
        var random = new Random();

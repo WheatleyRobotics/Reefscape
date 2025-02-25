@@ -8,20 +8,28 @@ import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.superstructure.Superstructure;
 import frc.robot.subsystems.superstructure.SuperstructureState;
 import frc.robot.util.FieldConstants;
+import frc.robot.util.LoggedTunableNumber;
 import java.util.function.Supplier;
 
 public class AutoScore {
 
-  public static Command getAutoScore(
+  public static final LoggedTunableNumber minClearReefDistance =
+      new LoggedTunableNumber("AutoScore/MinClearReefDistance", 0.75);
+  public static final LoggedTunableNumber l4Offset =
+      new LoggedTunableNumber("AutoScore/L4Offset", 0.75);
+  public static final LoggedTunableNumber coralOffset =
+      new LoggedTunableNumber("AutoScore/coralOffset", 0.6);
+
+  public static Command getAutoScoreCommand(
       Supplier<SuperstructureState> state,
       boolean right,
       Drive drive,
-      boolean clear,
       Superstructure superstructure) {
     return Commands.sequence(
         superstructure
             .runGoal(
                 () -> {
+                  RobotState.getInstance().setHasDesiredState(false);
                   if (state.get().equals(SuperstructureState.STOW))
                     return SuperstructureState.L1_CORAL;
                   else return state.get();
@@ -34,19 +42,21 @@ public class AutoScore {
                         FieldConstants.addOffset(
                             FieldConstants.getBranch(
                                 RobotState.getInstance().getCurrentZone(), right),
-                            -0.75))),
+                            -minClearReefDistance.get()))),
         new DriveToPose(
             drive,
             () ->
                 FieldConstants.addOffset(
                     FieldConstants.getBranch(RobotState.getInstance().getCurrentZone(), right),
-                    -0.63)),
+                    state.get().equals(SuperstructureState.L4_CORAL)
+                        ? -l4Offset.get()
+                        : -coralOffset.get())),
         superstructure.runGoal(() -> state.get().getEject()).withTimeout(0.5),
-        getClearReef(drive),
+        getClearReefCommand(drive),
         superstructure.runGoal(SuperstructureState.STOW));
   }
 
-  public static Command getClearReef(Drive drive) {
+  public static Command getClearReefCommand(Drive drive) {
     return Commands.sequence(
         Commands.run(() -> drive.runVelocity(new ChassisSpeeds(-2.5, 0, 0)))
             .until(() -> RobotState.getInstance().isClearedReef()),

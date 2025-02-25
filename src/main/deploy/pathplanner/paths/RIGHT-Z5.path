@@ -8,37 +8,30 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.238531170110103,
-        "y": 2.4130320461263204
+        "x": 8.334592022388714,
+        "y": 1.8308605916331446
       },
       "isLocked": false,
       "linkedName": "RIGHT"
     },
     {
       "anchor": {
-        "x": 5.3330193865740725,
-        "y": 2.6782671440972217
+        "x": 3.7,
+        "y": 2.7
       },
       "prevControl": {
-        "x": 7.267960968954488,
-        "y": 2.0557439741585855
+        "x": 3.2270583671943784,
+        "y": 2.7798448988604085
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Z5"
+      "linkedName": "Z6"
     }
   ],
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "Outake Coral",
-      "waypointRelativePos": 0,
-      "endWaypointRelativePos": null,
-      "command": null
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 1.0,
     "maxAcceleration": 3.0,
@@ -49,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 120.29344359932439
+    "rotation": 59.99999999999999
   },
   "reversed": false,
   "folder": null,

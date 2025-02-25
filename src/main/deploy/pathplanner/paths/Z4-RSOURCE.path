@@ -3,32 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 6.1,
-        "y": 4.026
+        "x": 5.3330193865740725,
+        "y": 2.6782671440972217
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.348452323768102,
-        "y": 3.9982251406082803
+        "x": 6.3330193865740725,
+        "y": 2.6782671440972217
       },
       "isLocked": false,
-      "linkedName": "Z4"
-    },
-    {
-      "anchor": {
-        "x": 6.0,
-        "y": 3.3
-      },
-      "prevControl": {
-        "x": 6.017807319020568,
-        "y": 3.575969497925127
-      },
-      "nextControl": {
-        "x": 5.983901877980874,
-        "y": 3.0505188374496837
-      },
-      "isLocked": false,
-      "linkedName": "RSOURCE-Z4-WP"
+      "linkedName": "Z5"
     },
     {
       "anchor": {
@@ -36,8 +20,8 @@
         "y": 0.95
       },
       "prevControl": {
-        "x": 0.76229893513398,
-        "y": 0.824857229545498
+        "x": 0.1499999999999999,
+        "y": 0.9500000000000001
       },
       "nextControl": null,
       "isLocked": false,
@@ -64,7 +48,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 120.29344359932439
   },
   "useDefaultConstraints": false
 }

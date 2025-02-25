@@ -8,40 +8,24 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.104305631215019,
-        "y": 2.1749634399527533
+        "x": 2.1500000000000004,
+        "y": 0.95
       },
       "isLocked": false,
       "linkedName": "RSOURCE"
     },
     {
       "anchor": {
-        "x": 6.0,
-        "y": 3.3
+        "x": 5.3330193865740725,
+        "y": 2.6782671440972217
       },
       "prevControl": {
-        "x": 5.53299168068882,
-        "y": 2.647675958209436
-      },
-      "nextControl": {
-        "x": 6.145528718331584,
-        "y": 3.503276639436917
-      },
-      "isLocked": false,
-      "linkedName": "RSOURCE-Z4-WP"
-    },
-    {
-      "anchor": {
-        "x": 6.1,
-        "y": 4.026
-      },
-      "prevControl": {
-        "x": 6.041001474992599,
-        "y": 4.268938621974669
+        "x": 4.787093822337962,
+        "y": 2.3745287181712955
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Z4"
+      "linkedName": "Z5"
     }
   ],
   "rotationTargets": [],
@@ -58,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 120.29344359932439
   },
   "reversed": false,
   "folder": null,

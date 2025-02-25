@@ -342,6 +342,10 @@ public class Superstructure extends SubsystemBase {
     return dispenser.isHasAlgae();
   }
 
+  public boolean isHasCoral() {
+    return dispenser.isHasCoral();
+  }
+
   private void setGoal(SuperstructureState goal) {
     RobotState.getInstance().setSuperstructureState(goal);
     // Don't do anything if goal is the same

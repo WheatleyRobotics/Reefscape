@@ -450,7 +450,6 @@ public class RobotContainer {
                    Set.of(superstructure)));
 
     */
-    dynamicAuto.initPose2d();
     new Trigger(
             () ->
                 DriverStation.isTeleopEnabled()
@@ -477,7 +476,7 @@ public class RobotContainer {
     new Trigger(
             () ->
                 DriverStation.isDisabled()
-                    && DynamicAuto.getStartingPose2d().equals(RobotState.getInstance().getPose()))
+                    && dynamicAuto.getStartPose().equals(RobotState.getInstance().getPose()))
         .onTrue(
             Commands.run(() -> leds.autoAligned = true).andThen(() -> leds.autoUnaligned = false))
         .onFalse(

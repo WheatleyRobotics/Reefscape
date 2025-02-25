@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "RIGHT-Z5"
+            "pathName": "RIGHT-Z4"
           }
         },
         {
@@ -19,7 +19,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Z5-RSOURCE"
+            "pathName": "Z4-RSOURCE"
           }
         },
         {
@@ -31,7 +31,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "RSOURCE-Z6"
+            "pathName": "RSOURCE-Z5"
           }
         }
       ]

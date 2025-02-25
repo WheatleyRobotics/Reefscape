@@ -19,7 +19,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotType;
 import frc.robot.RobotState;
@@ -62,7 +61,7 @@ public class Dispenser {
   public static final LoggedTunableNumber tunnelIntakeVolts =
       new LoggedTunableNumber("Dispenser/TunnelIntakeVolts", 2.0);
   public static final LoggedTunableNumber tolerance =
-      new LoggedTunableNumber("Dispenser/Tolerance", 0.2);
+      new LoggedTunableNumber("Dispenser/Tolerance", 0.5);
 
   static {
     switch (Constants.getRobotType()) {
@@ -73,8 +72,8 @@ public class Dispenser {
         kG.initDefault(0.0);
       }
       default -> {
-        kP.initDefault(300); // 55
-        kD.initDefault(16.5);
+        kP.initDefault(640); // 55
+        kD.initDefault(95);
         kS.initDefault(4); // 20
         kG.initDefault(0); // 1
       }

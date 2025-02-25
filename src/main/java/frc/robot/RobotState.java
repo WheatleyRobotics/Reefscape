@@ -122,6 +122,6 @@ public class RobotState {
         FieldConstants.getBranch(currentZone, true)
             .getTranslation()
             .getDistance(pose.getTranslation());
-    clearedReef = !(distanceToLeft < 0.45) && !(distanceToRight < 0.45);
+    clearedReef = !(distanceToLeft < 0.7) && !(distanceToRight < 0.7);
   }
 }

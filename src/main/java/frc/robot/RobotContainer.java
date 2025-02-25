@@ -31,8 +31,10 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoScore;
 import frc.robot.commands.DriveCommands;
+import frc.robot.subsystems.climb.Climb;
+import frc.robot.subsystems.climb.ClimbIOFalcon;
 import frc.robot.subsystems.drive.*;
-import frc.robot.subsystems.leds.Leds;
+import frc.robot.subsystems.leds.LED;
 import frc.robot.subsystems.superstructure.Superstructure;
 import frc.robot.subsystems.superstructure.SuperstructureState;
 import frc.robot.subsystems.superstructure.dispenser.*;
@@ -63,7 +65,8 @@ public class RobotContainer {
   Elevator elevator;
   Dispenser dispenser;
   Slam slam;
-  private final Leds leds = Leds.getInstance();
+  Climb climb;
+  private final LED leds = LED.getInstance();
   private final Superstructure superstructure;
   // Controller
   private final CommandXboxController driveController = new CommandXboxController(0);
@@ -104,6 +107,8 @@ public class RobotContainer {
 
         dispenser = new Dispenser(new PivotIOFalconIntegrated(), new TunnelIOFalcon());
         slam = new Slam(new SlamIO() {}, new TunnelIO() {});
+
+        climb = new Climb(new ClimbIOFalcon());
 
         break;
 
@@ -149,28 +154,6 @@ public class RobotContainer {
       slam = new Slam(new SlamIO() {}, new TunnelIO() {});
     }
     superstructure = new Superstructure(elevator, dispenser, slam);
-    /*
-       NamedCommands.registerCommand(
-           "READY_L4",
-           superstructure.runGoal(SuperstructureState.L4_CORAL).until(superstructure::atGoal));
-
-       NamedCommands.registerCommand(
-           "SCORE_L4",
-           superstructure.runGoal(SuperstructureState.L4_CORAL_EJECT).until(superstructure::atGoal));
-
-       NamedCommands.registerCommand(
-           "INTAKE", superstructure.runGoal(SuperstructureState.INTAKE).withTimeout(1));
-
-       NamedCommands.registerCommand(
-           "STOW", superstructure.runGoal(SuperstructureState.STOW).until(superstructure::atGoal));
-
-       NamedCommands.registerCommand(
-           "ALIGN_RIGHT", new DriveToPose(drive, () -> FieldConstants.getNearestBranch(true, -0.5)));
-
-       NamedCommands.registerCommand(
-           "ALIGN_LEFT", new DriveToPose(drive, () -> FieldConstants.getNearestBranch(false, -0.5)));
-
-    */
 
     NamedCommands.registerCommand(
         "INTAKE", superstructure.runGoal(SuperstructureState.INTAKE).withTimeout(1));
@@ -263,6 +246,15 @@ public class RobotContainer {
                     },
                     drive)
                 .ignoringDisable(true));
+
+    driveController
+        .povLeft()
+        .whileTrue(Commands.run(() -> climb.runVolts(8)))
+        .onFalse(Commands.runOnce(climb::stop));
+    driveController
+        .povRight()
+        .whileTrue(Commands.run(() -> climb.runVolts(-8)))
+        .onFalse(Commands.runOnce(climb::stop));
 
     driveController
         .leftTrigger(0.8)
@@ -480,7 +472,7 @@ public class RobotContainer {
                    Set.of(superstructure)));
 
     */
-    dynamicAuto.initalizPose2d();
+    dynamicAuto.initPose2d();
     new Trigger(
             () ->
                 DriverStation.isTeleopEnabled()

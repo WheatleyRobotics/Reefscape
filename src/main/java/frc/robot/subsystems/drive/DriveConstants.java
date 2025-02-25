@@ -23,8 +23,8 @@ import frc.robot.Constants;
 
 public class DriveConstants {
   public static final double odometryFrequency = 100; // Hz
-  public static final double trackWidth = Units.inchesToMeters(25);
-  public static final double wheelBase = Units.inchesToMeters(25);
+  public static final double trackWidth = Units.inchesToMeters(28);
+  public static final double wheelBase = Units.inchesToMeters(28);
   public static final double driveBaseRadius = Math.hypot(trackWidth / 2.0, wheelBase / 2.0);
   public static final double maxSpeedMetersPerSec = Units.feetToMeters(19.3);
   public static final double maxAngularSpeed = Units.feetToMeters(19.3) / driveBaseRadius;
@@ -72,8 +72,8 @@ public class DriveConstants {
   // Device CAN IDs
   public static final int pigeonCanId = 0;
 
-  // Front right 2
   // Front left 1
+  // Front right 2
   // Back left 3
   // Back right 4
 
@@ -106,7 +106,7 @@ public class DriveConstants {
       (2 * Math.PI) / 60.0 / driveMotorReduction; // Rotor RPM -> Wheel Rad/Sec
 
   // Drive PID configuration
-  public static final double driveKp = 0.001;
+  public static final double driveKp = 0.0006;
   public static final double driveKd = 0.02;
   public static final double driveKs = 0.1;
   public static final double driveKv = 0.11;
@@ -130,7 +130,7 @@ public class DriveConstants {
 
   // Turn PID configuration
   public static final double turnKp = 0.3;
-  public static final double turnKd = 0.01;
+  public static final double turnKd = 0.03;
   public static final double turnSimP = 8.0;
   public static final double turnSimD = 0.0;
   public static final double turnPIDMinInput = 0; // Radians

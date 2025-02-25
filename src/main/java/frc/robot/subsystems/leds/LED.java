@@ -20,12 +20,12 @@ import frc.robot.util.VirtualSubsystem;
 import java.util.List;
 import java.util.Optional;
 
-public class Leds extends VirtualSubsystem {
-  private static Leds instance;
+public class LED extends VirtualSubsystem {
+  private static LED instance;
 
-  public static Leds getInstance() {
+  public static LED getInstance() {
     if (instance == null) {
-      instance = new Leds();
+      instance = new LED();
     }
     return instance;
   }
@@ -86,7 +86,7 @@ public class Leds extends VirtualSubsystem {
   private static final Color l3PriorityColor = Color.kCyan;
   private static final Color l4PriorityColor = Color.kMediumPurple;
 
-  private Leds() {
+  private LED() {
     leds = new AddressableLED(0);
     buffer = new AddressableLEDBuffer(length);
     leds.setLength(length);

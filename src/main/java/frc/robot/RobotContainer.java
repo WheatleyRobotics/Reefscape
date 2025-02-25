@@ -314,11 +314,11 @@ public class RobotContainer {
 
     operatorController
         .povUp()
-        .onTrue(superstructure.runGoal(SuperstructureState.ALGAE_L3).withName("L3 Algae"));
+        .whileTrue(superstructure.runGoal(SuperstructureState.L3_CORAL).withName("L3"));
 
     operatorController
         .povDown()
-        .whileTrue(superstructure.runGoal(SuperstructureState.PROCESSING).withName("Processing"));
+        .whileTrue(superstructure.runGoal(SuperstructureState.L2_CORAL).withName("L2"));
   }
 
   private void configureButtonBindingsSIM() {

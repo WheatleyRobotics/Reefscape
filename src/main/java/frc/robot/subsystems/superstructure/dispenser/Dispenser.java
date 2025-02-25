@@ -238,7 +238,9 @@ public class Dispenser {
       } else if (currentState.equals(SuperstructureState.INTAKE) && !hasCoral) {
         tunnelIO.runVolts(tunnelIntakeVolts.get());
       }
-
+      if (hasCoral) {
+        tunnelIO.stop();
+      }
     } else {
       pivotIO.stop();
       tunnelIO.stop();

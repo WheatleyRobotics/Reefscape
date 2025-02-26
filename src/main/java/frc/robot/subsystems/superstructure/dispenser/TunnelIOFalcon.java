@@ -40,6 +40,7 @@ public class TunnelIOFalcon implements TunnelIO {
 
   private final StatusSignal<Distance> distance;
   private final StatusSignal<Boolean> isDetected;
+  private final StatusSignal<Time> measureTimestamp;
 
   // Single shot for voltage mode, robot loop will call continuously
   private final TorqueCurrentFOC torqueCurrentFOC = new TorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
@@ -74,6 +75,7 @@ public class TunnelIOFalcon implements TunnelIO {
 
     distance = canRange.getDistance();
     isDetected = canRange.getIsDetected();
+    measureTimestamp = canRange.getMeasurementTime();
 
     tryUntilOk(
         5,
@@ -87,7 +89,8 @@ public class TunnelIOFalcon implements TunnelIO {
                 torqueCurrent,
                 tempCelsius,
                 distance,
-                isDetected));
+                isDetected,
+                measureTimestamp));
     ParentDevice.optimizeBusUtilizationForAll(canRange, talon);
   }
 
@@ -100,6 +103,7 @@ public class TunnelIOFalcon implements TunnelIO {
                 .isOK());
     inputs.CANRangeConnected =
         connectedDebouncer.calculate(BaseStatusSignal.refreshAll(distance, isDetected).isOK());
+    inputs.measuredTimestamp = measureTimestamp.getValueAsDouble();
     inputs.hasCoral = isDetected.getValue();
     inputs.talonPositionRads = Units.rotationsToRadians(position.getValueAsDouble());
     inputs.talonVelocityRadsPerSec = Units.rotationsToRadians(velocity.getValueAsDouble());

@@ -59,7 +59,7 @@ public class Dispenser {
   public static final LoggedTunableNumber tunnelDispenseVolts =
       new LoggedTunableNumber("Dispenser/TunnelDispenseVolts", 2.0);
   public static final LoggedTunableNumber tunnelIntakeVolts =
-      new LoggedTunableNumber("Dispenser/TunnelIntakeVolts", 2.0);
+      new LoggedTunableNumber("Dispenser/TunnelIntakeVolts", 6.0);
   public static final LoggedTunableNumber tolerance =
       new LoggedTunableNumber("Dispenser/Tolerance", 0.5);
 
@@ -237,8 +237,12 @@ public class Dispenser {
         tunnelIO.runTorqueCurrent(gripperCurrent);
       } else if (currentState.equals(SuperstructureState.INTAKE) && !hasCoral) {
         tunnelIO.runVolts(tunnelIntakeVolts.get());
-      }
-      if (hasCoral) {
+      } else if (currentState.equals(SuperstructureState.L1_CORAL_EJECT)
+          || currentState.equals(SuperstructureState.L2_CORAL_EJECT)
+          || currentState.equals(SuperstructureState.L3_CORAL_EJECT)
+          || currentState.equals(SuperstructureState.L4_CORAL_EJECT)) {
+        tunnelIO.runVolts(tunnelDispenseVolts.get());
+      } else {
         tunnelIO.stop();
       }
     } else {

@@ -14,11 +14,11 @@ import java.util.function.Supplier;
 public class AutoScore {
 
   public static final LoggedTunableNumber minClearReefDistance =
-      new LoggedTunableNumber("AutoScore/MinClearReefDistance", 0.75);
+      new LoggedTunableNumber("AutoScore/MinClearReefDistance", 0.725);
   public static final LoggedTunableNumber l4Offset =
-      new LoggedTunableNumber("AutoScore/L4Offset", 0.75);
+      new LoggedTunableNumber("AutoScore/L4Offset", 0.66);
   public static final LoggedTunableNumber coralOffset =
-      new LoggedTunableNumber("AutoScore/coralOffset", 0.6);
+      new LoggedTunableNumber("AutoScore/coralOffset", 0.57);
 
   public static Command getAutoScoreCommand(
       Supplier<SuperstructureState> state,

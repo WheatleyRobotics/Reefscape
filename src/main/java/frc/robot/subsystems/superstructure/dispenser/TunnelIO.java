@@ -15,6 +15,7 @@ public interface TunnelIO {
     public boolean talonConnected = false;
     public boolean CANRangeConnected = false;
     public boolean hasCoral = false;
+    public double measuredTimestamp = 0.0;
     public double talonPositionRads = 0.0;
     public double talonVelocityRadsPerSec = 0.0;
     public double talonAppliedVoltage = 0.0;

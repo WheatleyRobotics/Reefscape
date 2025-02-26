@@ -100,7 +100,9 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOLimelight("limelight", drive::getRotation));
+                new VisionIOLimelight("limelight", drive::getRotation),
+                new VisionIOPhotonVision(camera0Name, robotToCamera0),
+                new VisionIOPhotonVision(camera1Name, robotToCamera1));
 
         // vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         elevator = new Elevator(new ElevatorIOFalcon());
@@ -247,9 +249,7 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    driveController
-        .y()
-        .whileTrue(superstructure.runGoal(superstructure.getState().getEject()));
+    driveController.y().whileTrue(superstructure.runGoal(superstructure.getState().getEject()));
 
     driveController
         .povLeft()
@@ -316,7 +316,11 @@ public class RobotContainer {
 
     operatorController
         .povDown()
-        .onTrue(superstructure.runGoal(SuperstructureState.PROCESSING).withName("Processor"));
+        .whileTrue(superstructure.runGoal(SuperstructureState.PROCESSING).withName("Processor"))
+        .onFalse(
+            Commands.run(
+                    () -> superstructure.runVoltsTunnel(Dispenser.gripperDispenseCurrent.get()))
+                .withTimeout(1));
 
     operatorController.y().onTrue(superstructure.runGoal(SuperstructureState.BARGE));
   }

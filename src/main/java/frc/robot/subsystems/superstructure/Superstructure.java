@@ -113,7 +113,9 @@ public class Superstructure extends SubsystemBase {
         Set.of(
             SuperstructureState.ALGAE_STOW,
             SuperstructureState.ALGAE_L2,
-            SuperstructureState.ALGAE_L3);
+            SuperstructureState.ALGAE_L3,
+            SuperstructureState.PROCESSING,
+            SuperstructureState.PROCESSING_EJECT);
 
     final Set<SuperstructureState> algaeIntakeStates =
         Set.of(

@@ -247,6 +247,8 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
+    driveController.y().whileTrue(superstructure.runGoal(RobotState.getInstance().getDesiredState().getEject()));
+
     driveController
         .povLeft()
         .whileTrue(Commands.run(() -> climb.runVolts(8)))
@@ -272,14 +274,7 @@ public class RobotContainer {
 
     driveController
         .rightBumper()
-        .whileTrue(
-            Commands.run(
-                () -> {
-                  SuperstructureState ejectState =
-                      RobotState.getInstance().getDesiredState().getEject();
-                  superstructure.runGoal(ejectState).schedule();
-                }))
-        .onFalse(superstructure.runGoal(SuperstructureState.STOW));
+        .whileTrue(superstructure.runGoal(RobotState.getInstance().getDesiredState()));
 
     operatorController
         .x()
@@ -314,7 +309,7 @@ public class RobotContainer {
 
     operatorController
         .povUp()
-        .whileTrue(superstructure.runGoal(SuperstructureState.L3_CORAL_EJECT).withName("L3 Algae"));
+        .whileTrue(superstructure.runGoal(SuperstructureState.ALGAE_L3_INTAKE).withName("L3 Algae"));
 
     operatorController
         .povDown()

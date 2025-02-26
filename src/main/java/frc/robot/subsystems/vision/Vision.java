@@ -35,6 +35,7 @@ public class Vision extends SubsystemBase {
   private final VisionIO[] io;
   private final VisionIOInputsAutoLogged[] inputs;
   private final Alert[] disconnectedAlerts;
+  private boolean shouldTrigSolve;
 
   public Vision(VisionConsumer consumer, VisionIO... io) {
     this.consumer = consumer;
@@ -184,5 +185,13 @@ public class Vision extends SubsystemBase {
         Pose2d visionRobotPoseMeters,
         double timestampSeconds,
         Matrix<N3, N1> visionMeasurementStdDevs);
+  }
+
+  public boolean getShouldTrigSolve() {
+    return shouldTrigSolve;
+  }
+
+  public void setShouldTrigSolve(boolean state) {
+    shouldTrigSolve = state;
   }
 }

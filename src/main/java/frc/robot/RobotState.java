@@ -49,6 +49,10 @@ public class RobotState {
   private boolean clearedReef = false;
 
   @Getter
+  @AutoLogOutput(key = "RobotState/shouldTrigSolve")
+  private boolean shouldTrigSolve = false;
+
+  @Getter
   @AutoLogOutput(key = "RobotState/RobotVelocity")
   private ChassisSpeeds robotVelocity = new ChassisSpeeds();
 

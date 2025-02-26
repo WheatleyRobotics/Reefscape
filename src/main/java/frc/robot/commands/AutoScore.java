@@ -26,6 +26,7 @@ public class AutoScore {
       Drive drive,
       Superstructure superstructure) {
     return Commands.sequence(
+        superstructure.runGoal(SuperstructureState.INTAKE).until(() -> superstructure.isHasCoral()),
         superstructure
             .runGoal(
                 () -> {

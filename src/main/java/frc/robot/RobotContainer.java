@@ -124,8 +124,18 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
-                new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
+                new VisionIOPhotonVisionSim(
+                    camera0Name,
+                    robotToCamera0,
+                    drive::getRotation,
+                    drive::getPose,
+                    RobotState.getInstance().isShouldTrigSolve()),
+                new VisionIOPhotonVisionSim(
+                    camera1Name,
+                    robotToCamera1,
+                    drive::getRotation,
+                    drive::getPose,
+                    RobotState.getInstance().isShouldTrigSolve()));
         elevator = new Elevator(new ElevatorIOSim());
         dispenser =
             new Dispenser(new PivotIOSim(), new TunnelIOSim(DCMotor.getKrakenX60Foc(1), 1.0, 0.2));
@@ -247,9 +257,7 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    driveController
-        .y()
-        .whileTrue(superstructure.runGoal(superstructure.getState().getEject()));
+    driveController.y().whileTrue(superstructure.runGoal(superstructure.getState().getEject()));
 
     driveController
         .povLeft()
@@ -316,9 +324,38 @@ public class RobotContainer {
 
     operatorController
         .povDown()
-        .onTrue(superstructure.runGoal(SuperstructureState.PROCESSING).withName("Processor"));
-
-    operatorController.y().onTrue(superstructure.runGoal(SuperstructureState.BARGE));
+        .whileTrue(superstructure.runGoal(SuperstructureState.PROCESSING).withName("Processing"));
+    new Trigger(
+            () ->
+                DriverStation.isTeleopEnabled()
+                    && DriverStation.getMatchTime() > 0
+                    && DriverStation.getMatchTime() <= Math.round(endgameAlert1.get()))
+        .onTrue(
+            controllerRumbleCommand()
+                .withTimeout(0.5)
+                .beforeStarting(() -> leds.endgameAlert = true)
+                .finallyDo(() -> leds.endgameAlert = false));
+    new Trigger(
+            () ->
+                DriverStation.isTeleopEnabled()
+                    && DriverStation.getMatchTime() > 0
+                    && DriverStation.getMatchTime() <= Math.round(endgameAlert2.get()))
+        .onTrue(
+            controllerRumbleCommand()
+                .withTimeout(0.2)
+                .andThen(Commands.waitSeconds(0.1))
+                .repeatedly()
+                .withTimeout(0.9)
+                .beforeStarting(() -> leds.endgameAlert = true)
+                .finallyDo(() -> leds.endgameAlert = false)); // Rumble three times
+    new Trigger(
+            () ->
+                DriverStation.isDisabled()
+                    && dynamicAuto.getStartPose().equals(RobotState.getInstance().getPose()))
+        .onTrue(
+            Commands.run(() -> leds.autoAligned = true).andThen(() -> leds.autoUnaligned = false))
+        .onFalse(
+            Commands.run(() -> leds.autoUnaligned = true).andThen(() -> leds.autoAligned = false));
   }
 
   private void configureButtonBindingsSIM() {
@@ -376,8 +413,13 @@ public class RobotContainer {
         .whileTrue(
             AutoScore.getAutoScoreCommand(
                     () -> RobotState.getInstance().getDesiredState(), true, drive, superstructure)
-                .alongWith(Commands.runOnce(() -> leds.autoScoring = true)))
-        .onFalse(Commands.runOnce(() -> leds.autoScoring = false));
+                .alongWith(Commands.runOnce(() -> leds.autoScoring = true))
+                .alongWith(
+                    Commands.runOnce(() -> RobotState.getInstance().setShouldTrigSolve(true))))
+        .onFalse(
+            Commands.runOnce(() -> leds.autoScoring = false)
+                .alongWith(
+                    Commands.runOnce(() -> RobotState.getInstance().setShouldTrigSolve(false))));
 
     driveController
         .y()
@@ -437,37 +479,7 @@ public class RobotContainer {
                    Set.of(superstructure)));
 
     */
-    new Trigger(
-            () ->
-                DriverStation.isTeleopEnabled()
-                    && DriverStation.getMatchTime() > 0
-                    && DriverStation.getMatchTime() <= Math.round(endgameAlert1.get()))
-        .onTrue(
-            controllerRumbleCommand()
-                .withTimeout(0.5)
-                .beforeStarting(() -> leds.endgameAlert = true)
-                .finallyDo(() -> leds.endgameAlert = false));
-    new Trigger(
-            () ->
-                DriverStation.isTeleopEnabled()
-                    && DriverStation.getMatchTime() > 0
-                    && DriverStation.getMatchTime() <= Math.round(endgameAlert2.get()))
-        .onTrue(
-            controllerRumbleCommand()
-                .withTimeout(0.2)
-                .andThen(Commands.waitSeconds(0.1))
-                .repeatedly()
-                .withTimeout(0.9)
-                .beforeStarting(() -> leds.endgameAlert = true)
-                .finallyDo(() -> leds.endgameAlert = false)); // Rumble three times
-    new Trigger(
-            () ->
-                DriverStation.isDisabled()
-                    && dynamicAuto.getStartPose().equals(RobotState.getInstance().getPose()))
-        .onTrue(
-            Commands.run(() -> leds.autoAligned = true).andThen(() -> leds.autoUnaligned = false))
-        .onFalse(
-            Commands.run(() -> leds.autoUnaligned = true).andThen(() -> leds.autoAligned = false));
+
   }
 
   private Command controllerRumbleCommand() {

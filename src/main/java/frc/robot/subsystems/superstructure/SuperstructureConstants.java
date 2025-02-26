@@ -27,7 +27,7 @@ public class SuperstructureConstants {
   // Height from superstructure origin to bottom face of first stage at maxed height
   // minus the difference from superstructure origin to dispenser origin and from the topped out
   // position to the dispenser
-  public static final double elevatorMaxTravel = 0.85;
+  public static final double elevatorMaxTravel = Units.inchesToMeters(22);
 
   // 2d position of both superstructure and dispenser origin on robot (x forward from center, y off
   // the ground)

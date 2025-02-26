@@ -9,7 +9,6 @@ package frc.robot.subsystems.superstructure;
 
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.*;
@@ -196,7 +195,8 @@ public class Superstructure extends SubsystemBase {
         Set.of(
             SuperstructureState.ALGAE_STOW,
             SuperstructureState.PROCESSING,
-            SuperstructureState.THROWN,
+            SuperstructureState.BARGE,
+            SuperstructureState.BARGE_EJECT,
             SuperstructureState.TOSS)) {
       for (var to : freeNoAlgaeStates) {
         graph.addEdge(
@@ -236,11 +236,17 @@ public class Superstructure extends SubsystemBase {
     addEdge.accept(
         SuperstructureState.STOW, SuperstructureState.ALGAE_STOW, false, AlgaeEdge.ALGAE, false);
     addEdge.accept(
-        SuperstructureState.ALGAE_STOW, SuperstructureState.THROWN, true, AlgaeEdge.NONE, false);
+        SuperstructureState.ALGAE_STOW, SuperstructureState.BARGE, true, AlgaeEdge.ALGAE, false);
+    addEdge.accept(
+        SuperstructureState.ALGAE_STOW,
+        SuperstructureState.BARGE_EJECT,
+        true,
+        AlgaeEdge.ALGAE,
+        false);
     addEdge.accept(
         SuperstructureState.ALGAE_STOW, SuperstructureState.TOSS, true, AlgaeEdge.NONE, false);
     addEdge.accept(
-        SuperstructureState.THROWN, SuperstructureState.ALGAE_STOW, false, AlgaeEdge.ALGAE, false);
+        SuperstructureState.BARGE, SuperstructureState.ALGAE_STOW, false, AlgaeEdge.ALGAE, false);
     addEdge.accept(
         SuperstructureState.TOSS, SuperstructureState.ALGAE_STOW, false, AlgaeEdge.ALGAE, false);
     addEdge.accept(
@@ -448,38 +454,16 @@ public class Superstructure extends SubsystemBase {
    * subsystems are complete with profiles.
    */
   private EdgeCommand getEdgeCommand(SuperstructureState from, SuperstructureState to) {
-    if ((from == SuperstructureState.ALGAE_STOW && to == SuperstructureState.THROWN)) {
-      // Algae Stow Front --> Thrown
-      return EdgeCommand.builder()
-          .command(
-              Commands.runOnce(
-                      () -> {
-                        elevator.setGoal(
-                            () ->
-                                new TrapezoidProfile.State(
-                                    SuperstructureConstants.throwHeight.get(),
-                                    SuperstructureConstants.throwVelocity.get()));
-                        dispenser.setGoal(to.getValue().getPose().pivotAngle());
-                      })
-                  .andThen(
-                      getSlamCommand(Slam.Goal.SLAM_DOWN),
-                      Commands.waitUntil(this::isAtGoal),
-                      runSuperstructurePose(to.getValue().getPose()),
-                      runSuperstructureExtras(to),
-                      Commands.waitUntil(this::isAtGoal)))
-          .build();
-    } else {
-      // Just run to next state if no restrictions
-      return EdgeCommand.builder()
-          .command(
-              addSlamAvoidance(
-                      runSuperstructurePose(to.getValue().getPose())
-                          .andThen(Commands.waitUntil(this::isAtGoal)),
-                      from,
-                      to)
-                  .andThen(runSuperstructureExtras(to)))
-          .build();
-    }
+    // Just run to next state if no restrictions
+    return EdgeCommand.builder()
+        .command(
+            addSlamAvoidance(
+                    runSuperstructurePose(to.getValue().getPose())
+                        .andThen(Commands.waitUntil(this::isAtGoal)),
+                    from,
+                    to)
+                .andThen(runSuperstructureExtras(to)))
+        .build();
   }
 
   private Command addSlamAvoidance(

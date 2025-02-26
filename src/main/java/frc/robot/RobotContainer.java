@@ -247,7 +247,9 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    driveController.y().whileTrue(superstructure.runGoal(RobotState.getInstance().getDesiredState().getEject()));
+    driveController
+        .y()
+        .whileTrue(superstructure.runGoal(superstructure.getState().getEject()));
 
     driveController
         .povLeft()
@@ -309,11 +311,14 @@ public class RobotContainer {
 
     operatorController
         .povUp()
-        .whileTrue(superstructure.runGoal(SuperstructureState.ALGAE_L3_INTAKE).withName("L3 Algae"));
+        .whileTrue(
+            superstructure.runGoal(SuperstructureState.ALGAE_L3_INTAKE).withName("L3 Algae"));
 
     operatorController
         .povDown()
-        .whileTrue(superstructure.runGoal(SuperstructureState.PROCESSING).withName("Processor"));
+        .onTrue(superstructure.runGoal(SuperstructureState.PROCESSING).withName("Processor"));
+
+    operatorController.y().onTrue(superstructure.runGoal(SuperstructureState.BARGE));
   }
 
   private void configureButtonBindingsSIM() {
@@ -399,10 +404,16 @@ public class RobotContainer {
         .onTrue(
             Commands.runOnce(
                 () -> {
-                  RobotState.getInstance().setDesiredState(SuperstructureState.ALGAE_L3);
+                  RobotState.getInstance().setDesiredState(SuperstructureState.PROCESSING);
                 }));
 
-    operatorController.y().onTrue(superstructure.runGoal(SuperstructureState.STOW));
+    operatorController
+        .y()
+        .onTrue(
+            Commands.runOnce(
+                () -> {
+                  RobotState.getInstance().setDesiredState(SuperstructureState.BARGE);
+                }));
 
     operatorController.a().onTrue(superstructure.runGoal(SuperstructureState.L4_CORAL));
 

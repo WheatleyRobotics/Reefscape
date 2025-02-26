@@ -80,12 +80,14 @@ public enum SuperstructureState {
           .height(Height.FIRST_STAGE)
           .build()),
 
-  THROWN(
+  BARGE(SuperstructureStateData.builder().pose(SuperstructurePose.Preset.THROW.getPose()).build()),
+
+  BARGE_EJECT(
       SuperstructureStateData.builder()
           .pose(SuperstructurePose.Preset.THROW.getPose())
-          .gripperCurrent(Dispenser.gripperDispenseCurrent)
-          .height(Height.SECOND_STAGE)
+          .tunnelVolts(Dispenser.gripperDispenseCurrent)
           .build()),
+
   ALGAE_STOW(
       SuperstructureStateData.builder()
           .pose(SuperstructurePose.Preset.ALGAE_STOW.getPose())
@@ -106,6 +108,7 @@ public enum SuperstructureState {
   PROCESSING(
       SuperstructureStateData.builder()
           .pose(SuperstructurePose.Preset.PROCESSING.getPose())
+          .gripperCurrent(Dispenser.gripperIntakeCurrent)
           .slamGoal(Goal.SLAM_UP)
           .build()),
   PROCESSING_EJECT(
@@ -125,6 +128,7 @@ public enum SuperstructureState {
             case "STOW" -> SuperstructureState.L1_CORAL_EJECT;
             case "ALGAE_L2" -> SuperstructureState.ALGAE_L2_INTAKE;
             case "ALGAE_L3" -> SuperstructureState.ALGAE_L3_INTAKE;
+            case "PROCESSING" -> SuperstructureState.PROCESSING_EJECT;
             default -> SuperstructureState.valueOf(this.name() + "_EJECT");
           };
     } catch (IllegalArgumentException e) {

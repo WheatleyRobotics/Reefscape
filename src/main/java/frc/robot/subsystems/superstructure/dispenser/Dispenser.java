@@ -51,7 +51,7 @@ public class Dispenser {
   private static final LoggedTunableNumber staticVelocityThresh =
       new LoggedTunableNumber("Dispenser/staticVelocityThresh", 0.1);
   private static final LoggedTunableNumber algaeIntakeCurrentThresh =
-      new LoggedTunableNumber("Dispenser/AlgaeIntakeCurrentThreshold", 20.0);
+      new LoggedTunableNumber("Dispenser/AlgaeIntakeCurrentThreshold", 15.0);
   public static final LoggedTunableNumber gripperIntakeCurrent =
       new LoggedTunableNumber("Dispenser/AlgaeIntakeCurrent", -30.0);
   public static final LoggedTunableNumber gripperDispenseCurrent =
@@ -235,7 +235,10 @@ public class Dispenser {
           || currentState.equals(SuperstructureState.ALGAE_FLOOR_INTAKE)
           || currentState.equals(SuperstructureState.PROCESSING)) {
         tunnelIO.runTorqueCurrent(gripperCurrent);
-      } else if (currentState.equals(SuperstructureState.INTAKE) && !hasCoral) {
+      } else if(currentState.equals(SuperstructureState.PROCESSING_EJECT) || currentState.equals(SuperstructureState.BARGE_EJECT)) {
+        tunnelIO.runTorqueCurrent(gripperDispenseCurrent.get());
+      }
+      else if (currentState.equals(SuperstructureState.INTAKE) && !hasCoral) {
         tunnelIO.runVolts(tunnelIntakeVolts.get());
       } else if (currentState.equals(SuperstructureState.L1_CORAL_EJECT)
           || currentState.equals(SuperstructureState.L2_CORAL_EJECT)
@@ -275,8 +278,8 @@ public class Dispenser {
         hasCoral = false;
       }
     }
-    if (currentState.equals(SuperstructureState.PROCESSING)
-        || currentState.equals(SuperstructureState.THROWN)
+    if (currentState.equals(SuperstructureState.PROCESSING_EJECT)
+        || currentState.equals(SuperstructureState.BARGE_EJECT)
         || currentState.equals(SuperstructureState.INTAKE)) {
       hasAlgae = false;
     }

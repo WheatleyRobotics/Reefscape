@@ -267,7 +267,9 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    driveController.y().whileTrue(superstructure.runGoal(superstructure.getState().getEject()));
+    driveController
+        .y()
+        .whileTrue(superstructure.runGoal(() -> superstructure.getState().getEject()));
 
     driveController
         .povLeft()
@@ -294,7 +296,7 @@ public class RobotContainer {
 
     driveController
         .rightBumper()
-        .whileTrue(superstructure.runGoal(RobotState.getInstance().getDesiredState()));
+        .whileTrue(superstructure.runGoal(RobotState.getInstance()::getDesiredState));
 
     operatorController
         .x()
@@ -328,13 +330,19 @@ public class RobotContainer {
                 () -> RobotState.getInstance().setDesiredState(SuperstructureState.L4_CORAL)));
 
     operatorController
-        .povUp()
-        .whileTrue(
-            superstructure.runGoal(SuperstructureState.ALGAE_L3_INTAKE).withName("L3 Algae"));
+        .y()
+        .onTrue(superstructure.runGoal(SuperstructureState.ALGAE_L3_INTAKE).withName("L3 Algae"));
 
     operatorController
-        .povDown()
-        .whileTrue(superstructure.runGoal(SuperstructureState.PROCESSING).withName("Processing"));
+        .a()
+        .onTrue(superstructure.runGoal(SuperstructureState.ALGAE_L2_INTAKE).withName("L2 Algae"));
+    /*
+       operatorController.povUp().onTrue(superstructure.runGoal(SuperstructureState.BARGE));
+
+    */
+
+    operatorController.povDown().onTrue(superstructure.runGoal(SuperstructureState.PROCESSING));
+
     new Trigger(
             () ->
                 DriverStation.isTeleopEnabled()
@@ -458,14 +466,16 @@ public class RobotContainer {
                 () -> {
                   RobotState.getInstance().setDesiredState(SuperstructureState.PROCESSING);
                 }));
+    /*
+       operatorController
+           .y()
+           .onTrue(
+               Commands.runOnce(
+                   () -> {
+                     RobotState.getInstance().setDesiredState(SuperstructureState.BARGE);
+                   }));
 
-    operatorController
-        .y()
-        .onTrue(
-            Commands.runOnce(
-                () -> {
-                  RobotState.getInstance().setDesiredState(SuperstructureState.BARGE);
-                }));
+    */
 
     operatorController.a().onTrue(superstructure.runGoal(SuperstructureState.L4_CORAL));
 

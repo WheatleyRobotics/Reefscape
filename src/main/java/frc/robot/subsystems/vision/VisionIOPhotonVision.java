@@ -77,7 +77,7 @@ public class VisionIOPhotonVision implements VisionIO {
       estimator.addHeadingData(
           result.getTimestampSeconds(), new Rotation3d(rotationSupplier.get()));
       // Add pose observation
-      if (shouldTrigSolve) {
+      if (shouldTrigSolve && result.hasTargets()) {
         var estimatedRobotPose = estimator.update(result).get();
         Pose3d robotPose = estimatedRobotPose.estimatedPose;
         double totalTagDistance = 0.0;

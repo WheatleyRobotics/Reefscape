@@ -35,13 +35,19 @@ public class VisionConstants {
           Units.inchesToMeters(12.75),
           Units.inchesToMeters(8.2),
           Units.inchesToMeters(7.7),
-          new Rotation3d(0, 0, 0));
+          new Rotation3d(
+              0,
+              Units.degreesToRadians(0),
+              Units.degreesToRadians(0))); // pitch of -15 and yaw of -15
   public static Transform3d robotToCamera1 =
       new Transform3d(
           Units.inchesToMeters(12.75),
           Units.inchesToMeters(-8.2),
           Units.inchesToMeters(7.7),
-          new Rotation3d(0, 0, 0));
+          new Rotation3d(
+              0,
+              Units.degreesToRadians(0),
+              Units.degreesToRadians(0))); // pitch of -15 and yaw of 15
 
   // Basic filtering thresholds
   public static double maxAmbiguity = 0.3;
@@ -49,8 +55,8 @@ public class VisionConstants {
 
   // Standard deviation baselines, for 1 meter distance and 1 tag
   // (Adjusted automatically based on distance and # of tags)
-  public static double linearStdDevBaseline = 0.2; // Meters .02
-  public static double angularStdDevBaseline = 0.6; // Radians .06
+  public static double linearStdDevBaseline = 3; // Meters .02
+  public static double angularStdDevBaseline = Double.POSITIVE_INFINITY; // Radians .06
 
   // Standard deviation multipliers for each camera
   // (Adjust to trust some cameras more than others)
@@ -61,7 +67,7 @@ public class VisionConstants {
       };
 
   // Multipliers to apply for MegaTag 2 observations
-  public static double linearStdDevMegatag2Factor = 0.5; // More stable than full 3D solve
+  public static double linearStdDevMegatag2Factor = 3; // More stable than full 3D solve
   public static double angularStdDevMegatag2Factor =
       Double.POSITIVE_INFINITY; // No rotation data available
 }

@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 public class AutoScore {
 
   public static final LoggedTunableNumber minClearReefDistance =
-      new LoggedTunableNumber("AutoScore/MinClearReefDistance", 0.725);
+      new LoggedTunableNumber("AutoScore/MinClearReefDistance", 0.65);
   public static final LoggedTunableNumber l4Offset =
       new LoggedTunableNumber("AutoScore/L4Offset", 0.6);
   public static final LoggedTunableNumber coralOffset =
@@ -33,6 +33,7 @@ public class AutoScore {
             .onlyIf(() -> !superstructure.isHasCoral()),
 
          */
+        /*
         superstructure
             .runGoal(
                 () -> {
@@ -49,6 +50,8 @@ public class AutoScore {
                             FieldConstants.getBranch(
                                 RobotState.getInstance().getCurrentZone(), right),
                             -minClearReefDistance.get()))),
+
+             */
         new DriveToPose(
             drive,
             () ->
@@ -57,9 +60,9 @@ public class AutoScore {
                     state.get().equals(SuperstructureState.L4_CORAL)
                         ? -l4Offset.get()
                         : -coralOffset.get())),
-        superstructure.runGoal(() -> state.get().getEject()).withTimeout(0.5),
+        // superstructure.runGoal(() -> state.get().getEject()).withTimeout(0.5),
         getClearReefCommand(drive),
-        superstructure.runGoal(() -> SuperstructureState.STOW).until(superstructure::atGoal),
+        // superstructure.runGoal(() -> SuperstructureState.STOW).until(superstructure::atGoal),
         Commands.runOnce(() -> RobotState.getInstance().setShouldTrigSolve(false)));
   }
 

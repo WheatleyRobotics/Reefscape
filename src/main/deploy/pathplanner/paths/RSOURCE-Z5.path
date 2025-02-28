@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.15,
-        "y": 0.95
+        "x": 1.05,
+        "y": 0.9
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.132899760838131,
-        "y": 2.930410928982621
+        "x": 4.032899760838132,
+        "y": 2.880410928982621
       },
       "isLocked": false,
       "linkedName": "RSOURCE"

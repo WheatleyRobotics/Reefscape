@@ -285,8 +285,6 @@ public class Dispenser {
         || currentState.equals(SuperstructureState.BARGE_EJECT)) {
       hasAlgae = false;
     }
-//10->60
-    //8->60
     // Log state
     Logger.recordOutput("Dispenser/CoastOverride", coastOverride.getAsBoolean());
     Logger.recordOutput("Dispenser/DisabledOverride", disabledOverride.getAsBoolean());

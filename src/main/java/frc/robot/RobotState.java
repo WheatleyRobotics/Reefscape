@@ -34,7 +34,7 @@ public class RobotState {
   private SuperstructureState superstructureState = SuperstructureState.START;
 
   @AutoLogOutput(key = "RobotState/DesiredState")
-  private SuperstructureState desiredState = SuperstructureState.START;
+  private SuperstructureState desiredState = SuperstructureState.L1_CORAL;
 
   @AutoLogOutput(key = "RobotState/hasDesiredState")
   private boolean hasDesiredState = false;
@@ -50,7 +50,7 @@ public class RobotState {
 
   @Getter
   @AutoLogOutput(key = "RobotState/shouldTrigSolve")
-  private boolean shouldTrigSolve = true;
+  private boolean shouldTrigSolve = false;
 
   @Getter
   @AutoLogOutput(key = "RobotState/RobotVelocity")

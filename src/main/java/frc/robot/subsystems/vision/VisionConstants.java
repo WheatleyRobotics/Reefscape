@@ -37,8 +37,8 @@ public class VisionConstants {
           Units.inchesToMeters(7.7),
           new Rotation3d(
               0,
-              Units.degreesToRadians(0),
-              Units.degreesToRadians(0))); // pitch of -15 and yaw of -15
+              Units.degreesToRadians(-15),
+              Units.degreesToRadians(-15))); // pitch of -15 and yaw of -15
   public static Transform3d robotToCamera1 =
       new Transform3d(
           Units.inchesToMeters(12.75),
@@ -46,8 +46,8 @@ public class VisionConstants {
           Units.inchesToMeters(7.7),
           new Rotation3d(
               0,
-              Units.degreesToRadians(0),
-              Units.degreesToRadians(0))); // pitch of -15 and yaw of 15
+              Units.degreesToRadians(-15),
+              Units.degreesToRadians(15))); // pitch of -15 and yaw of 15
 
   // Basic filtering thresholds
   public static double maxAmbiguity = 0.3;

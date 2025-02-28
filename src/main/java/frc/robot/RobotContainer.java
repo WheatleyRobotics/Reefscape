@@ -32,7 +32,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoScore;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.climb.Climb;
-import frc.robot.subsystems.climb.ClimbIOFalcon;
+import frc.robot.subsystems.climb.ClimbIO;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.leds.LED;
 import frc.robot.subsystems.superstructure.Superstructure;
@@ -40,7 +40,6 @@ import frc.robot.subsystems.superstructure.SuperstructureState;
 import frc.robot.subsystems.superstructure.dispenser.*;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIO;
-import frc.robot.subsystems.superstructure.elevator.ElevatorIOFalcon;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
 import frc.robot.subsystems.superstructure.slam.Slam;
 import frc.robot.subsystems.superstructure.slam.SlamIO;
@@ -100,7 +99,7 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOLimelight("limelight", drive::getRotation),
+                // new VisionIOLimelight("limelight", drive::getRotation),
                 new VisionIOPhotonVision(
                     camera0Name,
                     robotToCamera0,
@@ -112,13 +111,12 @@ public class RobotContainer {
                     drive::getRotation,
                     robotState.isShouldTrigSolve()));
 
-        // vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
-        elevator = new Elevator(new ElevatorIOFalcon());
-
-        dispenser = new Dispenser(new PivotIOFalconIntegrated(), new TunnelIOFalcon());
+        elevator = new Elevator(new ElevatorIOSim());
+        dispenser =
+            new Dispenser(new PivotIOSim(), new TunnelIOSim(DCMotor.getKrakenX60Foc(1), 1.0, 0.2));
         slam = new Slam(new SlamIO() {}, new TunnelIO() {});
 
-        climb = new Climb(new ClimbIOFalcon());
+        climb = new Climb(new ClimbIO() {});
 
         break;
 
@@ -336,10 +334,8 @@ public class RobotContainer {
     operatorController
         .a()
         .onTrue(superstructure.runGoal(SuperstructureState.ALGAE_L2_INTAKE).withName("L2 Algae"));
-    /*
-       operatorController.povUp().onTrue(superstructure.runGoal(SuperstructureState.BARGE));
 
-    */
+    operatorController.povUp().onTrue(superstructure.runGoal(SuperstructureState.BARGE));
 
     operatorController.povDown().onTrue(superstructure.runGoal(SuperstructureState.PROCESSING));
 
@@ -534,6 +530,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return dynamicAuto.getAutoCommand();
+    return autoChooser.get();
   }
 }

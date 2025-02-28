@@ -40,13 +40,13 @@ public class DriveConstants {
   public static final Rotation2d frontLeftZeroRotation =
       switch (Constants.getRobotType()) {
         case SIMBOT -> new Rotation2d();
-        case DEVBOT -> Rotation2d.fromRotations(0.31); // 0.31
+        case DEVBOT -> Rotation2d.fromRotations(0.302734); // 0.31
         case COMPBOT -> Rotation2d.fromRotations(0.290527); // 0.290527
       };
   public static final Rotation2d frontRightZeroRotation =
       switch (Constants.getRobotType()) {
         case SIMBOT -> new Rotation2d();
-        case DEVBOT -> Rotation2d.fromRotations(0.22); // 0.22
+        case DEVBOT -> Rotation2d.fromRotations(0.197021); // 0.22
         case COMPBOT -> Rotation2d.fromRotations(0.095215)
             .plus(Rotation2d.fromRadians(0.17))
             .minus(Rotation2d.fromRadians(0.151)); // 0.095215
@@ -54,7 +54,7 @@ public class DriveConstants {
   public static final Rotation2d backLeftZeroRotation =
       switch (Constants.getRobotType()) {
         case SIMBOT -> new Rotation2d();
-        case DEVBOT -> Rotation2d.fromRotations(-0.11); // -0.094
+        case DEVBOT -> Rotation2d.fromRotations(-0.106201); // -0.094
         case COMPBOT -> Rotation2d.fromRotations(0.360352 + 0.25)
             .plus(Rotation2d.fromRadians(0.16)); // 0.360352
       };
@@ -62,7 +62,7 @@ public class DriveConstants {
   public static final Rotation2d backRightZeroRotation =
       switch (Constants.getRobotType()) {
         case SIMBOT -> new Rotation2d();
-        case DEVBOT -> Rotation2d.fromRotations(-0.096); // 0.096
+        case DEVBOT -> Rotation2d.fromRotations(-0.098145); // 0.096
         case COMPBOT -> Rotation2d.fromRotations(-0.5 + 0.41254)
             .minus(Rotation2d.fromRadians(0.14))
             .plus(Rotation2d.fromRadians(0.076))
@@ -106,10 +106,10 @@ public class DriveConstants {
       (2 * Math.PI) / 60.0 / driveMotorReduction; // Rotor RPM -> Wheel Rad/Sec
 
   // Drive PID configuration
-  public static final double driveKp = 0.0006;
-  public static final double driveKd = 0.02;
-  public static final double driveKs = 0.1;
-  public static final double driveKv = 0.11;
+  public static final double driveKp = 0.0023;
+  public static final double driveKd = 0.04;
+  public static final double driveKs = 0.11;
+  public static final double driveKv = 0.10;
   public static final double driveSimP = 0.05;
   public static final double driveSimD = 0.0;
   public static final double driveSimKs = 0.0;
@@ -129,8 +129,8 @@ public class DriveConstants {
       (2 * Math.PI) / 60.0 / turnMotorReduction; // Rotor RPM -> Wheel Rad/Sec
 
   // Turn PID configuration
-  public static final double turnKp = 0.3;
-  public static final double turnKd = 0.03;
+  public static final double turnKp = 0.6;
+  public static final double turnKd = 0.04;
   public static final double turnSimP = 8.0;
   public static final double turnSimD = 0.0;
   public static final double turnPIDMinInput = 0; // Radians

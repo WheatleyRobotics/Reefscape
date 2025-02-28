@@ -336,10 +336,8 @@ public class RobotContainer {
     operatorController
         .a()
         .onTrue(superstructure.runGoal(SuperstructureState.ALGAE_L2_INTAKE).withName("L2 Algae"));
-    /*
-       operatorController.povUp().onTrue(superstructure.runGoal(SuperstructureState.BARGE));
 
-    */
+    operatorController.povUp().onTrue(superstructure.runGoal(SuperstructureState.BARGE));
 
     operatorController.povDown().onTrue(superstructure.runGoal(SuperstructureState.PROCESSING));
 

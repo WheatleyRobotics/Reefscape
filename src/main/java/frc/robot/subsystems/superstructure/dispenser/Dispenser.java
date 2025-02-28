@@ -30,6 +30,7 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import lombok.Getter;
 import lombok.Setter;
+import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -62,6 +63,9 @@ public class Dispenser {
       new LoggedTunableNumber("Dispenser/TunnelIntakeVolts", 6.0);
   public static final LoggedTunableNumber tolerance =
       new LoggedTunableNumber("Dispenser/Tolerance", 0.5);
+  private static final LoggedTunableNumber homingVelocityThresh = new LoggedTunableNumber("Dispenser/HomingVelocityThresh", 5.0);
+  private static final LoggedTunableNumber homingVolts = new LoggedTunableNumber("Dispenser/HomingVolts", -2.0);
+  private static final LoggedTunableNumber homingTimeSecs = new LoggedTunableNumber("Dispenser/HomingTimeSecs", 0.25);
 
   static {
     switch (Constants.getRobotType()) {
@@ -98,6 +102,9 @@ public class Dispenser {
   @AutoLogOutput(key = "Dispenser/MeasuredAngle")
   private Rotation2d pivotAngle = new Rotation2d();
 
+  @AutoLogOutput(key = "Dispenser/HomedPositionRad")
+  private double homedPosition = 0.0;
+
   private TrapezoidProfile profile;
   @Getter private State setpoint = new State();
   private DoubleSupplier goal = () -> 0.0;
@@ -108,6 +115,10 @@ public class Dispenser {
   @Getter
   @AutoLogOutput(key = "Dispenser/Profile/AtGoal")
   private boolean atGoal = false;
+
+  @AutoLogOutput @Getter private boolean homed = false;
+
+  private Debouncer homingDebouncer = new Debouncer(homingTimeSecs.get());
 
   @Getter @AutoLogOutput private boolean hasAlgae = false;
 
@@ -174,7 +185,7 @@ public class Dispenser {
     setBrakeMode(!coastOverride.getAsBoolean());
 
     // Calculate combined angle
-    pivotAngle = pivotInputs.internalPosition;
+    pivotAngle = Rotation2d.fromRadians(pivotInputs.internalPosition.getRadians() - homedPosition);
 
     // Run profile
     final boolean shouldRunProfile =
@@ -235,7 +246,7 @@ public class Dispenser {
           || currentState.equals(SuperstructureState.ALGAE_FLOOR_INTAKE)
           || currentState.equals(SuperstructureState.PROCESSING)) {
         tunnelIO.runTorqueCurrent(gripperCurrent);
-      } else if (currentState.equals(SuperstructureState.PROCESSING_EJECT)) {
+      } else if (currentState.equals(SuperstructureState.PROCESSING_EJECT) || currentState.equals(SuperstructureState.BARGE_EJECT)) {
         tunnelIO.runTorqueCurrent(gripperDispenseCurrent.get());
       } else if (currentState.equals(SuperstructureState.INTAKE) && !hasCoral) {
         tunnelIO.runVolts(tunnelIntakeVolts.get());
@@ -332,6 +343,31 @@ public class Dispenser {
               timer.stop();
               Logger.recordOutput("Dispenser/CharacterizationOutput", state.characterizationOutput);
             });
+  }
+
+  public Command homingSequence(){
+    return Commands.startRun(
+            () -> {
+              stopProfile = true;
+              homed = false;
+              homingDebouncer = new Debouncer(homingTimeSecs.get());
+              homingDebouncer.calculate(false);
+            },
+            () -> {
+              if(disabledOverride.getAsBoolean() || coastOverride.getAsBoolean()) return;
+              pivotIO.runVolts(homingVolts.get());
+              homed = homingDebouncer.calculate(Math.abs(pivotInputs.velocityRadPerSec) <= homingVelocityThresh.get());
+            })
+            .until(() -> homed)
+            .andThen(
+                    () -> {
+                      homedPosition = pivotInputs.internalPosition.getRadians();
+                      homed = true;
+                    }).finallyDo(
+                    () -> {
+                      stopProfile = false;
+                    }
+    );
   }
 
   private static class StaticCharacterizationState {

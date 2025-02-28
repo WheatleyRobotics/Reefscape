@@ -16,7 +16,7 @@ public class AutoScore {
   public static final LoggedTunableNumber minClearReefDistance =
       new LoggedTunableNumber("AutoScore/MinClearReefDistance", 0.725);
   public static final LoggedTunableNumber l4Offset =
-      new LoggedTunableNumber("AutoScore/L4Offset", 0.66);
+      new LoggedTunableNumber("AutoScore/L4Offset", 0.6);
   public static final LoggedTunableNumber coralOffset =
       new LoggedTunableNumber("AutoScore/coralOffset", 0.57);
 

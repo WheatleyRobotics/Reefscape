@@ -50,7 +50,7 @@ public class RobotState {
 
   @Getter
   @AutoLogOutput(key = "RobotState/shouldTrigSolve")
-  private boolean shouldTrigSolve = true;
+  private boolean shouldTrigSolve = false;
 
   @Getter
   @AutoLogOutput(key = "RobotState/RobotVelocity")

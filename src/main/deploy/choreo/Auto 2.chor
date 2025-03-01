@@ -4,32 +4,18 @@
  "type":"Swerve",
  "variables":{
   "expressions":{
+   "MIDX":{
+    "dimension":"Number",
+    "var":{
+     "exp":"7.2",
+     "val":7.2
+    }
+   },
    "LSOURCETHETA":{
     "dimension":"Number",
     "var":{
      "exp":"305",
      "val":305.0
-    }
-   },
-   "STARTTHETA":{
-    "dimension":"Number",
-    "var":{
-     "exp":"180",
-     "val":180.0
-    }
-   },
-   "LSOURCEX":{
-    "dimension":"Number",
-    "var":{
-     "exp":"1",
-     "val":1.0
-    }
-   },
-   "RSOURCEX":{
-    "dimension":"Number",
-    "var":{
-     "exp":"0.9",
-     "val":0.9
     }
    },
    "RIGHTX":{
@@ -39,11 +25,25 @@
      "val":7.5
     }
    },
-   "MIDY":{
+   "STARTTHETA":{
     "dimension":"Number",
     "var":{
-     "exp":"4",
-     "val":4.0
+     "exp":"180",
+     "val":180.0
+    }
+   },
+   "RSOURCEX":{
+    "dimension":"Number",
+    "var":{
+     "exp":"1.2",
+     "val":1.2
+    }
+   },
+   "LSOURCEY":{
+    "dimension":"Number",
+    "var":{
+     "exp":"7",
+     "val":7.0
     }
    },
    "LEFTY":{
@@ -60,25 +60,11 @@
      "val":55.0
     }
    },
-   "LEFTX":{
+   "MIDY":{
     "dimension":"Number",
     "var":{
-     "exp":"7.2",
-     "val":7.2
-    }
-   },
-   "RSOURCEY":{
-    "dimension":"Number",
-    "var":{
-     "exp":"1.05",
-     "val":1.05
-    }
-   },
-   "LSOURCEY":{
-    "dimension":"Number",
-    "var":{
-     "exp":"7",
-     "val":7.0
+     "exp":"4",
+     "val":4.0
     }
    },
    "RIGHTY":{
@@ -88,7 +74,21 @@
      "val":2.0
     }
    },
-   "MIDX":{
+   "LSOURCEX":{
+    "dimension":"Number",
+    "var":{
+     "exp":"1",
+     "val":1.0
+    }
+   },
+   "RSOURCEY":{
+    "dimension":"Number",
+    "var":{
+     "exp":"1.3",
+     "val":1.3
+    }
+   },
+   "LEFTX":{
     "dimension":"Number",
     "var":{
      "exp":"7.2",
@@ -120,8 +120,8 @@
    }
   },
   "mass":{
-   "exp":"135 lbs",
-   "val":61.23496995
+   "exp":"65 lbs",
+   "val":29.48350405
   },
   "inertia":{
    "exp":"4.33 kg m ^ 2",

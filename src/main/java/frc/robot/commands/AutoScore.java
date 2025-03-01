@@ -1,24 +1,31 @@
 package frc.robot.commands;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.RobotState;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.superstructure.Superstructure;
 import frc.robot.subsystems.superstructure.SuperstructureState;
+import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.AutoLogOutput;
 
 public class AutoScore {
 
   public static final LoggedTunableNumber minClearReefDistance =
-      new LoggedTunableNumber("AutoScore/MinClearReefDistance", 0.65);
+      new LoggedTunableNumber("AutoScore/MinClearReefDistance", 0.7);
   public static final LoggedTunableNumber l4Offset =
       new LoggedTunableNumber("AutoScore/L4Offset", 0.6);
   public static final LoggedTunableNumber coralOffset =
       new LoggedTunableNumber("AutoScore/coralOffset", 0.57);
+
+  @AutoLogOutput(key = "AutoScore/StartPose")
+  public static Pose2d startPose = new Pose2d();
 
   public static Command getAutoScoreCommand(
       Supplier<SuperstructureState> state,
@@ -52,6 +59,7 @@ public class AutoScore {
                             -minClearReefDistance.get()))),
 
              */
+        Commands.runOnce(() -> startPose = drive.getPose()),
         new DriveToPose(
             drive,
             () ->
@@ -61,7 +69,19 @@ public class AutoScore {
                         ? -l4Offset.get()
                         : -coralOffset.get())),
         // superstructure.runGoal(() -> state.get().getEject()).withTimeout(0.5),
-        getClearReefCommand(drive),
+        new WaitCommand(2),
+        // getClearReefCommand(drive),
+        new DriveToPose(
+            drive,
+            () ->
+                FieldConstants.addOffset(
+                    new Pose2d(
+                        AllianceFlipUtil.apply(
+                            FieldConstants.Reef.centerFaces[
+                                RobotState.getInstance().getCurrentZone().getFace()]
+                                .getTranslation()),
+                        RobotState.getInstance().getPose().getRotation()),
+                    -0.75)),
         // superstructure.runGoal(() -> SuperstructureState.STOW).until(superstructure::atGoal),
         Commands.runOnce(() -> RobotState.getInstance().setShouldTrigSolve(false)));
   }

@@ -25,7 +25,7 @@ public class DynamicAuto {
   private final ArrayList<SendableChooser<Integer>> coralChooser = new ArrayList<>();
   private Superstructure superstructure;
   private Drive drive;
-  private final boolean isChoreo = true;
+  private final boolean isChoreo = false;
 
   public DynamicAuto(Drive drive, Superstructure superstructure) {
     this.drive = drive;

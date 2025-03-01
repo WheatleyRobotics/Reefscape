@@ -9,7 +9,6 @@ import frc.robot.RobotState;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.superstructure.Superstructure;
 import frc.robot.subsystems.superstructure.SuperstructureState;
-import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.Supplier;
@@ -59,7 +58,8 @@ public class AutoScore {
                             -minClearReefDistance.get()))),
 
              */
-        Commands.runOnce(() -> startPose = drive.getPose()),
+        Commands.runOnce(() -> {startPose = drive.getPose();
+          System.out.println(startPose);}),
         new DriveToPose(
             drive,
             () ->
@@ -70,7 +70,8 @@ public class AutoScore {
                         : -coralOffset.get())),
         // superstructure.runGoal(() -> state.get().getEject()).withTimeout(0.5),
         new WaitCommand(2),
-        // getClearReefCommand(drive),
+        getClearReefCommand(drive),
+        /*
         new DriveToPose(
             drive,
             () ->
@@ -82,14 +83,39 @@ public class AutoScore {
                                 .getTranslation()),
                         RobotState.getInstance().getPose().getRotation()),
                     -0.75)),
+
+         */
         // superstructure.runGoal(() -> SuperstructureState.STOW).until(superstructure::atGoal),
         Commands.runOnce(() -> RobotState.getInstance().setShouldTrigSolve(false)));
   }
 
   public static Command getClearReefCommand(Drive drive) {
-    return Commands.sequence(
-        Commands.run(() -> drive.runVelocity(new ChassisSpeeds(-2.5, 0, 0)))
-            .until(() -> RobotState.getInstance().isClearedReef()),
-        Commands.runOnce(() -> drive.runVelocity(new ChassisSpeeds(0, 0, 0))));
+    return Commands.run(
+            () ->
+                drive.runVelocity(
+                    new ChassisSpeeds(
+                        startPose
+                            .getTranslation()
+                            .minus(RobotState.getInstance().getPose().getTranslation())
+                            .getX(),
+                        startPose
+                            .getTranslation()
+                            .minus(RobotState.getInstance().getPose().getTranslation())
+                            .getY(),
+                        0
+                        /*
+                        startPose.getRotation().getRadians()
+                            - RobotState.getInstance().getPose().getRotation().getRadians()
+                                / startPose
+                                    .getTranslation()
+                                    .getDistance(
+                                        RobotState.getInstance().getPose().getTranslation())
+
+                             */
+                        )))
+        .withTimeout(
+            startPose
+                .getTranslation()
+                .getDistance(RobotState.getInstance().getPose().getTranslation()));
   }
 }

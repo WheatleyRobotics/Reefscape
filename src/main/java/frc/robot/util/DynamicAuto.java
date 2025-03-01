@@ -4,6 +4,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -26,6 +27,7 @@ public class DynamicAuto {
   private Superstructure superstructure;
   private Drive drive;
   private final boolean isChoreo = true;
+  private double startTime;
 
   public DynamicAuto(Drive drive, Superstructure superstructure) {
     this.drive = drive;
@@ -82,14 +84,20 @@ public class DynamicAuto {
       return Commands.none();
     }
 
-    Command s2 = buildSection(coralChooser.get(1));
-    Command s3 = buildSection(coralChooser.get(2));
-    Command s4 = buildSection(coralChooser.get(3));
+    Command s2 = buildSection(coralChooser.get(1), false);
+    Command s3 = buildSection(coralChooser.get(2), false);
+    Command s4 = buildSection(coralChooser.get(3), true);
 
-    return Commands.sequence(s1, s2, s3, s4);
+    return Commands.sequence(
+        Commands.runOnce(() -> startTime = Timer.getFPGATimestamp()),
+        s1,
+        s2,
+        s3,
+        s4,
+        Commands.runOnce(() -> System.out.println(Timer.getFPGATimestamp() - startTime)));
   }
 
-  private Command buildSection(SendableChooser<Integer> chooser) {
+  private Command buildSection(SendableChooser<Integer> chooser, boolean isLast) {
     if (chooser.getSelected() == null) {
       System.out.println("No target selected");
       return Commands.none();
@@ -114,12 +122,14 @@ public class DynamicAuto {
               ),
           AutoScore.getAutoScoreCommand(
               () -> SuperstructureState.L4_CORAL, right, drive, superstructure),
-          AutoBuilder.followPath(
-              isChoreo
-                  ? PathPlannerPath.fromChoreoTrajectory(
-                      targetString + "-" + sourceChooser.getSelected())
-                  : PathPlannerPath.fromPathFile(
-                      targetString + "-" + sourceChooser.getSelected())));
+          isLast
+              ? Commands.none()
+              : AutoBuilder.followPath(
+                  isChoreo
+                      ? PathPlannerPath.fromChoreoTrajectory(
+                          targetString + "-" + sourceChooser.getSelected())
+                      : PathPlannerPath.fromPathFile(
+                          targetString + "-" + sourceChooser.getSelected())));
     } catch (Exception e) {
       System.out.println("Error in section " + target);
       errorAlert.set(true);

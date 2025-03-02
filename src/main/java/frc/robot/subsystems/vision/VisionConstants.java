@@ -55,7 +55,7 @@ public class VisionConstants {
 
   // Standard deviation baselines, for 1 meter distance and 1 tag
   // (Adjusted automatically based on distance and # of tags)
-  public static double linearStdDevBaseline = 3; // Meters .02
+  public static double linearStdDevBaseline = 2.0; // Meters .02
   public static double angularStdDevBaseline = Double.POSITIVE_INFINITY; // Radians .06
 
   // Standard deviation multipliers for each camera
@@ -70,4 +70,7 @@ public class VisionConstants {
   public static double linearStdDevMegatag2Factor = 3; // More stable than full 3D solve
   public static double angularStdDevMegatag2Factor =
       Double.POSITIVE_INFINITY; // No rotation data available
+
+  public static double linearStdDevPhotonTrig = 0.5;
+  public static double angularStdDevPhotonTrig = Double.POSITIVE_INFINITY;
 }

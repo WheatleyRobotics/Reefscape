@@ -85,7 +85,7 @@ public class DynamicAuto {
     }
 
     Command s2 = buildSection(coralChooser.get(1), false);
-    Command s3 = buildSection(coralChooser.get(2), false);
+    Command s3 = buildSection(coralChooser.get(2), true);
     Command s4 = buildSection(coralChooser.get(3), true);
 
     return Commands.sequence(

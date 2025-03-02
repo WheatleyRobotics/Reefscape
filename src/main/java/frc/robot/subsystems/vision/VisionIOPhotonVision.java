@@ -132,7 +132,7 @@ public class VisionIOPhotonVision implements VisionIO {
           for (var target : result.targets) {
             totalTagDistance += target.bestCameraToTarget.getTranslation().getNorm();
           }
-          if (totalTagDistance / result.targets.size() > 1) {
+          if (totalTagDistance / result.targets.size() > 0.75) {
             continue;
           }
           poseObservations.add(

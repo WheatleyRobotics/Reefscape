@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.3,
-        "y": 1.2
+        "x": 1.7,
+        "y": 1.25
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.107137981324016,
-        "y": 2.9650425473858504
+        "x": 4.507137981324014,
+        "y": 3.0150425473858506
       },
       "isLocked": false,
       "linkedName": "RSOURCE"
@@ -33,7 +33,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 1.75,
+    "maxVelocity": 2.0,
     "maxAcceleration": 4.5,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,

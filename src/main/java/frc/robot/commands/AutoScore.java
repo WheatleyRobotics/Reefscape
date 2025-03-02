@@ -58,19 +58,23 @@ public class AutoScore {
                             -minClearReefDistance.get()))),
 
              */
-        Commands.runOnce(() -> {startPose = drive.getPose();
-          System.out.println(startPose);}),
+        Commands.runOnce(
+            () -> {
+              startPose = drive.getPose();
+              System.out.println(startPose);
+            }),
         new DriveToPose(
-            drive,
-            () ->
-                FieldConstants.addOffset(
-                    FieldConstants.getBranch(RobotState.getInstance().getCurrentZone(), right),
-                    state.get().equals(SuperstructureState.L4_CORAL)
-                        ? -l4Offset.get()
-                        : -coralOffset.get())),
+                drive,
+                () ->
+                    FieldConstants.addOffset(
+                        FieldConstants.getBranch(RobotState.getInstance().getCurrentZone(), right),
+                        state.get().equals(SuperstructureState.L4_CORAL)
+                            ? -l4Offset.get()
+                            : -coralOffset.get()))
+            .withTimeout(1),
         // superstructure.runGoal(() -> state.get().getEject()).withTimeout(0.5),
-        new WaitCommand(2),
-        getClearReefCommand(drive),
+        new WaitCommand(1),
+        // RobotState.getInstance().isAuto() ? Commands.none() : getClearReefCommand(drive),
         /*
         new DriveToPose(
             drive,
@@ -90,32 +94,8 @@ public class AutoScore {
   }
 
   public static Command getClearReefCommand(Drive drive) {
-    return Commands.run(
-            () ->
-                drive.runVelocity(
-                    new ChassisSpeeds(
-                        startPose
-                            .getTranslation()
-                            .minus(RobotState.getInstance().getPose().getTranslation())
-                            .getX(),
-                        startPose
-                            .getTranslation()
-                            .minus(RobotState.getInstance().getPose().getTranslation())
-                            .getY(),
-                        0
-                        /*
-                        startPose.getRotation().getRadians()
-                            - RobotState.getInstance().getPose().getRotation().getRadians()
-                                / startPose
-                                    .getTranslation()
-                                    .getDistance(
-                                        RobotState.getInstance().getPose().getTranslation())
-
-                             */
-                        )))
-        .withTimeout(
-            startPose
-                .getTranslation()
-                .getDistance(RobotState.getInstance().getPose().getTranslation()));
+    return Commands.run(() -> drive.runVelocity(new ChassisSpeeds(-2.5, 0, 0)))
+        .withTimeout(0.5)
+        .andThen(Commands.runOnce(() -> drive.runVelocity(new ChassisSpeeds(0, 0, 0))));
   }
 }

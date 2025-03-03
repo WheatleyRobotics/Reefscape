@@ -157,26 +157,14 @@ public class DynamicAuto {
   }
 
   private String getCoralZone(int id) {
-    if (isChoreo) {
-      return switch (id) {
-        case 0, 11 -> "Z1";
-        case 1, 2 -> "Z2";
-        case 3, 4 -> "Z3";
-        case 5, 6 -> "Z4";
-        case 7, 8 -> "Z5";
-        case 9, 10 -> "Z6";
-        default -> "NONE";
-      };
-    } else {
-      return switch (id) {
-        case 0, 11 -> "Z0";
-        case 1, 2 -> "Z1";
-        case 3, 4 -> "Z2";
-        case 5, 6 -> "Z3";
-        case 7, 8 -> "Z4";
-        case 9, 10 -> "Z5";
-        default -> "NONE";
-      };
-    }
+    return switch (id) {
+      case 0, 11 -> "Z0";
+      case 1, 2 -> "Z1";
+      case 3, 4 -> "Z2";
+      case 5, 6 -> "Z3";
+      case 7, 8 -> "Z4";
+      case 9, 10 -> "Z5";
+      default -> "NONE";
+    };
   }
 }

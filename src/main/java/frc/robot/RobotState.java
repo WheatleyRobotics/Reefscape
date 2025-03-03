@@ -40,7 +40,7 @@ public class RobotState {
   private Pose2d pose = new Pose2d();
 
   @AutoLogOutput(key = "RobotState/Zone")
-  private Zones currentZone = Zones.Z1;
+  private Zones currentZone = Zones.Z0;
 
   @AutoLogOutput(key = "RobotState/ClearedReef")
   private boolean clearedReef = false;
@@ -64,12 +64,12 @@ public class RobotState {
 
   @Getter
   public enum Zones {
-    Z1(0),
-    Z2(1),
-    Z3(2),
-    Z4(3),
-    Z5(4),
-    Z6(5);
+    Z0(0),
+    Z1(1),
+    Z2(2),
+    Z3(3),
+    Z4(4),
+    Z5(5);
     private final int face;
 
     Zones(int face) {
@@ -104,17 +104,17 @@ public class RobotState {
     double normalizedAngle = (angle + (2 * Math.PI)) % (2 * Math.PI);
 
     if (normalizedAngle >= 0 && normalizedAngle < Math.PI / 3) {
-      currentZone = Zones.Z1;
+      currentZone = Zones.Z0;
     } else if (normalizedAngle >= Math.PI / 3 && normalizedAngle < 2 * Math.PI / 3) {
-      currentZone = Zones.Z2;
+      currentZone = Zones.Z1;
     } else if (normalizedAngle >= 2 * Math.PI / 3 && normalizedAngle < Math.PI) {
-      currentZone = Zones.Z3;
+      currentZone = Zones.Z2;
     } else if (normalizedAngle >= Math.PI && normalizedAngle < 4 * Math.PI / 3) {
-      currentZone = Zones.Z4;
+      currentZone = Zones.Z3;
     } else if (normalizedAngle >= 4 * Math.PI / 3 && normalizedAngle < 5 * Math.PI / 3) {
-      currentZone = Zones.Z5;
+      currentZone = Zones.Z4;
     } else if (normalizedAngle >= 5 * Math.PI / 3 && normalizedAngle < 2 * Math.PI) {
-      currentZone = Zones.Z6;
+      currentZone = Zones.Z5;
     }
   }
 

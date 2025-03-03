@@ -57,7 +57,7 @@ public class Dispenser {
   public static final LoggedTunableNumber gripperDispenseCurrent =
       new LoggedTunableNumber("Dispenser/AlgaeDispenseCurrent", 30.0);
   public static final LoggedTunableNumber tunnelDispenseVolts =
-      new LoggedTunableNumber("Dispenser/TunnelDispenseVolts", 2.0);
+      new LoggedTunableNumber("Dispenser/TunnelDispenseVolts", 6.0);
   public static final LoggedTunableNumber tunnelIntakeVolts =
       new LoggedTunableNumber("Dispenser/TunnelIntakeVolts", 6.0);
   public static final LoggedTunableNumber tolerance =

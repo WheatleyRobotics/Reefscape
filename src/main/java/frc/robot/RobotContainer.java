@@ -244,10 +244,10 @@ public class RobotContainer {
                 () -> -driveController.getLeftX(),
                 () ->
                     switch (RobotState.getInstance().getCurrentZone()) {
-                      case Z6 -> AllianceFlipUtil.getCorrected(
+                      case Z5 -> AllianceFlipUtil.getCorrected(
                               new Pose2d(0, 0, Rotation2d.fromDegrees(55)))
                           .getRotation();
-                      case Z2 -> AllianceFlipUtil.getCorrected(
+                      case Z1 -> AllianceFlipUtil.getCorrected(
                               new Pose2d(0, 0, Rotation2d.fromDegrees(-55)))
                           .getRotation();
                       default -> RobotState.getInstance().getPose().getRotation();
@@ -399,10 +399,10 @@ public class RobotContainer {
                 () -> -driveController.getLeftX(),
                 () ->
                     switch (RobotState.getInstance().getCurrentZone()) {
-                      case Z6 -> AllianceFlipUtil.getCorrected(
+                      case Z5 -> AllianceFlipUtil.getCorrected(
                               new Pose2d(0, 0, Rotation2d.fromDegrees(55)))
                           .getRotation();
-                      case Z2 -> AllianceFlipUtil.getCorrected(
+                      case Z1 -> AllianceFlipUtil.getCorrected(
                               new Pose2d(0, 0, Rotation2d.fromDegrees(-55)))
                           .getRotation();
                       default -> RobotState.getInstance().getPose().getRotation();

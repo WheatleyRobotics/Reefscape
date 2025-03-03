@@ -4,20 +4,6 @@
  "type":"Swerve",
  "variables":{
   "expressions":{
-   "LEFTX":{
-    "dimension":"Number",
-    "var":{
-     "exp":"7.2",
-     "val":7.2
-    }
-   },
-   "MIDX":{
-    "dimension":"Number",
-    "var":{
-     "exp":"7.2",
-     "val":7.2
-    }
-   },
    "LSOURCEX":{
     "dimension":"Number",
     "var":{
@@ -32,46 +18,11 @@
      "val":55.0
     }
    },
-   "MIDY":{
-    "dimension":"Number",
-    "var":{
-     "exp":"4",
-     "val":4.0
-    }
-   },
-   "LEFTY":{
-    "dimension":"Number",
-    "var":{
-     "exp":"6.4",
-     "val":6.4
-    }
-   },
-   "STARTTHETA":{
-    "dimension":"Number",
-    "var":{
-     "exp":"180",
-     "val":180.0
-    }
-   },
-   "RIGHTX":{
-    "dimension":"Number",
-    "var":{
-     "exp":"7.5",
-     "val":7.5
-    }
-   },
    "LSOURCETHETA":{
     "dimension":"Number",
     "var":{
      "exp":"305",
      "val":305.0
-    }
-   },
-   "LSOURCEY":{
-    "dimension":"Number",
-    "var":{
-     "exp":"7",
-     "val":7.0
     }
    },
    "RSOURCEY":{
@@ -81,11 +32,46 @@
      "val":1.7
     }
    },
-   "RIGHTY":{
+   "RIGHTX":{
     "dimension":"Number",
     "var":{
-     "exp":"2",
-     "val":2.0
+     "exp":"7.5",
+     "val":7.5
+    }
+   },
+   "MIDX":{
+    "dimension":"Number",
+    "var":{
+     "exp":"7.2",
+     "val":7.2
+    }
+   },
+   "LSOURCEY":{
+    "dimension":"Number",
+    "var":{
+     "exp":"7",
+     "val":7.0
+    }
+   },
+   "LEFTY":{
+    "dimension":"Number",
+    "var":{
+     "exp":"6.4",
+     "val":6.4
+    }
+   },
+   "LEFTX":{
+    "dimension":"Number",
+    "var":{
+     "exp":"7.2",
+     "val":7.2
+    }
+   },
+   "STARTTHETA":{
+    "dimension":"Number",
+    "var":{
+     "exp":"180",
+     "val":180.0
     }
    },
    "RSOURCEX":{
@@ -94,17 +80,59 @@
      "exp":"1.2",
      "val":1.2
     }
+   },
+   "MIDY":{
+    "dimension":"Number",
+    "var":{
+     "exp":"4",
+     "val":4.0
+    }
+   },
+   "RIGHTY":{
+    "dimension":"Number",
+    "var":{
+     "exp":"2",
+     "val":2.0
+    }
    }
   },
   "poses":{
-   "Z5":{
+   "Z4":{
     "x":{
-     "exp":"3.57 m",
-     "val":3.57
+     "exp":"5.4 m",
+     "val":5.4
     },
     "y":{
      "exp":"2.44 m",
      "val":2.44
+    },
+    "heading":{
+     "exp":"-120 deg",
+     "val":-2.0943951023931953
+    }
+   },
+   "Z3":{
+    "x":{
+     "exp":"6.32 m",
+     "val":6.32
+    },
+    "y":{
+     "exp":"4.03 m",
+     "val":4.03
+    },
+    "heading":{
+     "exp":"-120 deg",
+     "val":-2.0943951023931953
+    }
+   },
+   "Z0":{
+    "x":{
+     "exp":"2.66 m",
+     "val":2.66
+    },
+    "y":{
+     "exp":"4.03 m",
+     "val":4.03
     },
     "heading":{
      "exp":"-120 deg",
@@ -139,42 +167,14 @@
      "val":-2.0943951023931953
     }
    },
-   "Z0":{
+   "Z5":{
     "x":{
-     "exp":"2.66 m",
-     "val":2.66
-    },
-    "y":{
-     "exp":"4.03 m",
-     "val":4.03
-    },
-    "heading":{
-     "exp":"-120 deg",
-     "val":-2.0943951023931953
-    }
-   },
-   "Z4":{
-    "x":{
-     "exp":"5.4 m",
-     "val":5.4
+     "exp":"3.57 m",
+     "val":3.57
     },
     "y":{
      "exp":"2.44 m",
      "val":2.44
-    },
-    "heading":{
-     "exp":"-120 deg",
-     "val":-2.0943951023931953
-    }
-   },
-   "Z3":{
-    "x":{
-     "exp":"6.32 m",
-     "val":6.32
-    },
-    "y":{
-     "exp":"4.03 m",
-     "val":4.03
     },
     "heading":{
      "exp":"-120 deg",
@@ -186,31 +186,31 @@
  "config":{
   "frontLeft":{
    "x":{
-    "exp":"12.5 in",
-    "val":0.3175
+    "exp":"14 in",
+    "val":0.35559999999999997
    },
    "y":{
-    "exp":"12.5 in",
-    "val":0.3175
+    "exp":"14 in",
+    "val":0.35559999999999997
    }
   },
   "backLeft":{
    "x":{
-    "exp":"-12.5 in",
-    "val":-0.3175
+    "exp":"-14 in",
+    "val":-0.35559999999999997
    },
    "y":{
-    "exp":"12.5 in",
-    "val":0.3175
+    "exp":"14 in",
+    "val":0.35559999999999997
    }
   },
   "mass":{
-   "exp":"45 lbs",
-   "val":20.41165665
+   "exp":"130 lbs",
+   "val":58.9670081
   },
   "inertia":{
-   "exp":"1.8 kg m ^ 2",
-   "val":1.8
+   "exp":"4.75 kg m ^ 2",
+   "val":4.75
   },
   "gearing":{
    "exp":"6.12",

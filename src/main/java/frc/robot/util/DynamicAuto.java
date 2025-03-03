@@ -111,15 +111,16 @@ public class DynamicAuto {
       boolean right = !(target % 2 == 0);
       return Commands.sequence(
           new WaitCommand(intakeTime),
-          Commands.parallel(
-              AutoBuilder.followPath(
+          AutoBuilder.followPath(
                   isChoreo
                       ? PathPlannerPath.fromChoreoTrajectory(
                           sourceChooser.getSelected() + "-" + targetString)
                       : PathPlannerPath.fromPathFile(
                           sourceChooser.getSelected() + "-" + targetString))
-              // superstructure.runGoal(SuperstructureState.INTAKE).withTimeout(3)),
-              ),
+              .deadlineFor(
+                  superstructure
+                      .runGoal(SuperstructureState.INTAKE)
+                      .until(() -> superstructure.isHasCoral())),
           AutoScore.getAutoScoreCommand(
               () -> SuperstructureState.L4_CORAL, right, drive, superstructure),
           isLast

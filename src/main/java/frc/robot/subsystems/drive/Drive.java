@@ -67,7 +67,7 @@ public class Drive extends SubsystemBase {
   private final Alert gyroDisconnectedAlert =
       new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
 
-  private boolean gyroDisconnected = false;
+  private boolean gyroHasDisconnected = false;
 
   private final SwerveSetpointGenerator setpointGenerator;
   private SwerveSetpoint previousSetpoint;
@@ -194,11 +194,11 @@ public class Drive extends SubsystemBase {
       }
 
       // Update gyro angle
-      if (gyroInputs.connected && !gyroDisconnected) {
+      if (gyroInputs.connected && !gyroHasDisconnected) {
         // Use the real gyro angle
         rawGyroRotation = gyroInputs.odometryYawPositions[i];
       } else {
-        gyroDisconnected = true;
+        gyroHasDisconnected = true;
         // Use the angle delta from the kinematics and module deltas
         Twist2d twist = kinematics.toTwist2d(moduleDeltas);
         rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
@@ -349,7 +349,7 @@ public class Drive extends SubsystemBase {
   }
 
   public void setYaw(Rotation2d yaw) {
-    gyroDisconnected = false;
+    gyroHasDisconnected = false;
     gyroIO.setYaw(yaw);
   }
 

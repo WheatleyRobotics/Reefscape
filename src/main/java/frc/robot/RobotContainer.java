@@ -427,13 +427,8 @@ public class RobotContainer {
         .whileTrue(
             AutoScore.getAutoScoreCommand(
                     () -> RobotState.getInstance().getDesiredState(), true, drive, superstructure)
-                .alongWith(Commands.runOnce(() -> leds.autoScoring = true))
-                .alongWith(
-                    Commands.runOnce(() -> RobotState.getInstance().setShouldTrigSolve(true))))
-        .onFalse(
-            Commands.runOnce(() -> leds.autoScoring = false)
-                .alongWith(
-                    Commands.runOnce(() -> RobotState.getInstance().setShouldTrigSolve(false))));
+                .alongWith(Commands.runOnce(() -> leds.autoScoring = true)))
+        .onFalse(Commands.runOnce(() -> leds.autoScoring = false));
 
     driveController
         .y()
@@ -445,14 +440,15 @@ public class RobotContainer {
 
     driveController
         .b()
-        .whileTrue(superstructure.runGoal(RobotState.getInstance().getDesiredState().getEject()));
+        .whileTrue(
+            superstructure.runGoal(() -> RobotState.getInstance().getDesiredState().getEject()));
 
     operatorController
         .x()
         .onTrue(
             Commands.runOnce(
                 () -> {
-                  RobotState.getInstance().setDesiredState(SuperstructureState.ALGAE_L2);
+                  RobotState.getInstance().setDesiredState(SuperstructureState.L3_CORAL);
                 }));
 
     operatorController
@@ -460,20 +456,16 @@ public class RobotContainer {
         .onTrue(
             Commands.runOnce(
                 () -> {
-                  RobotState.getInstance().setDesiredState(SuperstructureState.PROCESSING);
+                  RobotState.getInstance().setDesiredState(SuperstructureState.L2_CORAL);
                 }));
-    /*
-       operatorController
-           .y()
-           .onTrue(
-               Commands.runOnce(
-                   () -> {
-                     RobotState.getInstance().setDesiredState(SuperstructureState.BARGE);
-                   }));
 
-    */
-
-    operatorController.a().onTrue(superstructure.runGoal(SuperstructureState.L4_CORAL));
+    operatorController
+        .a()
+        .onTrue(
+            Commands.runOnce(
+                () -> {
+                  RobotState.getInstance().setDesiredState(SuperstructureState.L4_CORAL);
+                }));
 
     /*
        var random = new Random();

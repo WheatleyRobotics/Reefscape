@@ -265,7 +265,6 @@ public class Dispenser {
     if (Constants.getRobotType() == Constants.RobotType.SIMBOT) {
       if (currentState.equals(SuperstructureState.ALGAE_L2_INTAKE)
           || currentState.equals(SuperstructureState.ALGAE_L3_INTAKE)
-          || currentState.equals(SuperstructureState.ALGAE_STOW)
           || currentState.equals(SuperstructureState.ALGAE_FLOOR_INTAKE)) {
         hasAlgae = true;
       }
@@ -280,7 +279,6 @@ public class Dispenser {
       }
       // }
       if (currentState.equals(SuperstructureState.PROCESSING_EJECT)
-          || currentState.equals(SuperstructureState.INTAKE)
           || currentState.equals(SuperstructureState.BARGE_EJECT)) {
         hasAlgae = false;
       }

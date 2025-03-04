@@ -253,6 +253,7 @@ public class Dispenser {
     }
 
     // Check gamePiece
+    /*
     if ((Constants.getRobotType() != Constants.RobotType.SIMBOT)
         && !RobotState.getInstance().isAuto()) {
       if (gamePieceDebouncer.calculate(
@@ -260,28 +261,30 @@ public class Dispenser {
         hasAlgae = true;
       }
     }
-    if (Constants.getRobotType() == Constants.RobotType.SIMBOT) {
-      if (currentState.equals(SuperstructureState.ALGAE_L2_INTAKE)
-          || currentState.equals(SuperstructureState.ALGAE_L3_INTAKE)
-          || currentState.equals(SuperstructureState.ALGAE_STOW)
-          || currentState.equals(SuperstructureState.ALGAE_FLOOR_INTAKE)) {
-        hasAlgae = true;
-      }
-      if (currentState.equals(SuperstructureState.INTAKE)) {
-        hasCoral = true;
-      }
-      if (currentState.equals(SuperstructureState.L1_CORAL_EJECT)
-          || currentState.equals(SuperstructureState.L2_CORAL_EJECT)
-          || currentState.equals(SuperstructureState.L3_CORAL_EJECT)
-          || currentState.equals(SuperstructureState.L4_CORAL_EJECT)) {
-        hasCoral = false;
-      }
+
+     */
+    // if (Constants.getRobotType() == Constants.RobotType.SIMBOT) {
+    if (currentState.equals(SuperstructureState.ALGAE_L2_INTAKE)
+        || currentState.equals(SuperstructureState.ALGAE_L3_INTAKE)
+        || currentState.equals(SuperstructureState.ALGAE_STOW)
+        || currentState.equals(SuperstructureState.ALGAE_FLOOR_INTAKE)) {
+      hasAlgae = true;
     }
+    if (currentState.equals(SuperstructureState.INTAKE)) {
+      hasCoral = true;
+    }
+    if (currentState.equals(SuperstructureState.L1_CORAL_EJECT)
+        || currentState.equals(SuperstructureState.L2_CORAL_EJECT)
+        || currentState.equals(SuperstructureState.L3_CORAL_EJECT)
+        || currentState.equals(SuperstructureState.L4_CORAL_EJECT)) {
+      hasCoral = false;
+    }
+    // }
     if (currentState.equals(SuperstructureState.PROCESSING_EJECT)
-        || currentState.equals(SuperstructureState.INTAKE)) {
+        || currentState.equals(SuperstructureState.INTAKE)
+        || currentState.equals(SuperstructureState.BARGE_EJECT)) {
       hasAlgae = false;
     }
-
     // Log state
     Logger.recordOutput("Dispenser/CoastOverride", coastOverride.getAsBoolean());
     Logger.recordOutput("Dispenser/DisabledOverride", disabledOverride.getAsBoolean());

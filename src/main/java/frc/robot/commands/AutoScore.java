@@ -26,18 +26,21 @@ public class AutoScore {
       Drive drive,
       Superstructure superstructure) {
     return Commands.sequence(
+        Commands.runOnce(() -> RobotState.getInstance().setShouldTrigSolve(true)),
+        /*
         superstructure
             .runGoal(SuperstructureState.INTAKE)
             .onlyIf(() -> !superstructure.isHasCoral()),
+
+             */
         superstructure
             .runGoal(
                 () -> {
-                  RobotState.getInstance().setHasDesiredState(false);
                   if (state.get().equals(SuperstructureState.STOW))
                     return SuperstructureState.L1_CORAL;
                   else return state.get();
                 })
-            .until(superstructure::atGoal)
+            .withTimeout(0.8)
             .deadlineFor(
                 new DriveToPose(
                     drive,
@@ -46,17 +49,20 @@ public class AutoScore {
                             FieldConstants.getBranch(
                                 RobotState.getInstance().getCurrentZone(), right),
                             -minClearReefDistance.get()))),
-        new DriveToPose(
-            drive,
-            () ->
-                FieldConstants.addOffset(
-                    FieldConstants.getBranch(RobotState.getInstance().getCurrentZone(), right),
-                    state.get().equals(SuperstructureState.L4_CORAL)
-                        ? -l4Offset.get()
-                        : -coralOffset.get())),
+        Commands.parallel(
+            superstructure.runGoal(state.get()).until(superstructure::atGoal),
+            new DriveToPose(
+                drive,
+                () ->
+                    FieldConstants.addOffset(
+                        FieldConstants.getBranch(RobotState.getInstance().getCurrentZone(), right),
+                        state.get().equals(SuperstructureState.L4_CORAL)
+                            ? -l4Offset.get()
+                            : -coralOffset.get()))),
         superstructure.runGoal(() -> state.get().getEject()).withTimeout(0.5),
-        getClearReefCommand(drive),
-        superstructure.runGoal(() -> SuperstructureState.STOW).until(superstructure::atGoal));
+        RobotState.getInstance().isAuto() ? Commands.none() : getClearReefCommand(drive),
+        superstructure.runGoal(SuperstructureState.STOW).withTimeout(0.4),
+        Commands.runOnce(() -> RobotState.getInstance().setShouldTrigSolve(false)));
   }
 
   public static Command getClearReefCommand(Drive drive) {

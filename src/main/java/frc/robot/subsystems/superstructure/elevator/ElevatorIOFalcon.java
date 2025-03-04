@@ -26,7 +26,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 
 public class ElevatorIOFalcon implements ElevatorIO {
-  public static final double reduction = 7.75;
+  public static final double reduction = 6.0;
   // box not including the sproket
 
   // Hardware

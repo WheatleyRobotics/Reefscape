@@ -52,4 +52,8 @@ public class AllianceFlipUtil {
         ? new Pose2d(apply(pose.getTranslation()), apply(pose.getRotation()))
         : pose;
   }
+
+  public static Translation2d getCorrected(Translation2d translation) {
+    return shouldFlip() ? apply(translation) : translation;
+  }
 }

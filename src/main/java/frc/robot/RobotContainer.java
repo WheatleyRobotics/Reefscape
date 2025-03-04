@@ -16,7 +16,6 @@ package frc.robot;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -32,7 +31,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoScore;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.climb.Climb;
-import frc.robot.subsystems.climb.ClimbIO;
+import frc.robot.subsystems.climb.WinchIO;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.leds.LED;
 import frc.robot.subsystems.superstructure.Superstructure;
@@ -40,6 +39,7 @@ import frc.robot.subsystems.superstructure.SuperstructureState;
 import frc.robot.subsystems.superstructure.dispenser.*;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIO;
+import frc.robot.subsystems.superstructure.elevator.ElevatorIOFalcon;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
 import frc.robot.subsystems.superstructure.slam.Slam;
 import frc.robot.subsystems.superstructure.slam.SlamIO;
@@ -87,7 +87,7 @@ public class RobotContainer {
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
-
+        /*
         drive =
             new Drive(
                 new GyroIOPigeon2(),
@@ -96,6 +96,31 @@ public class RobotContainer {
                 new ModuleIOSpark(2),
                 new ModuleIOSpark(3));
 
+         */
+        drive =
+            new Drive(
+                new GyroIO() {},
+                new ModuleIOSim(),
+                new ModuleIOSim(),
+                new ModuleIOSim(),
+                new ModuleIOSim());
+
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                new VisionIOPhotonVisionSim(
+                    camera0Name,
+                    robotToCamera0,
+                    drive::getRotation,
+                    drive::getPose,
+                    RobotState.getInstance().isShouldTrigSolve()),
+                new VisionIOPhotonVisionSim(
+                    camera1Name,
+                    robotToCamera1,
+                    drive::getRotation,
+                    drive::getPose,
+                    RobotState.getInstance().isShouldTrigSolve()));
+        /*
         vision =
             new Vision(
                 drive::addVisionMeasurement,
@@ -111,12 +136,13 @@ public class RobotContainer {
                     drive::getRotation,
                     robotState.isShouldTrigSolve()));
 
-        elevator = new Elevator(new ElevatorIOSim());
-        dispenser =
-            new Dispenser(new PivotIOSim(), new TunnelIOSim(DCMotor.getKrakenX60Foc(1), 1.0, 0.2));
+         */
+
+        elevator = new Elevator(new ElevatorIOFalcon());
+        dispenser = new Dispenser(new PivotIOFalconIntegrated(), new TunnelIOFalcon());
         slam = new Slam(new SlamIO() {}, new TunnelIO() {});
 
-        climb = new Climb(new ClimbIO() {});
+        climb = new Climb(new WinchIO() {});
 
         break;
 
@@ -172,18 +198,6 @@ public class RobotContainer {
       slam = new Slam(new SlamIO() {}, new TunnelIO() {});
     }
     superstructure = new Superstructure(elevator, dispenser, slam);
-
-    NamedCommands.registerCommand(
-        "INTAKE", superstructure.runGoal(SuperstructureState.INTAKE).withTimeout(1));
-
-    NamedCommands.registerCommand(
-        "SCORE_L4_RIGHT",
-        AutoScore.getAutoScoreCommand(
-            () -> SuperstructureState.L4_CORAL, true, drive, superstructure));
-    NamedCommands.registerCommand(
-        "SCORE_L4_LEFT",
-        AutoScore.getAutoScoreCommand(
-            () -> SuperstructureState.L4_CORAL, false, drive, superstructure));
 
     // Set up auto routines
     dynamicAuto = new DynamicAuto(drive, superstructure);
@@ -271,11 +285,16 @@ public class RobotContainer {
 
     driveController
         .povLeft()
-        .whileTrue(Commands.run(() -> climb.runVolts(8)))
+        .whileTrue(
+            Commands.run(() -> climb.runVolts(8))
+                .alongWith(Commands.runOnce(() -> climb.setServoPosition(0.0))))
         .onFalse(Commands.runOnce(climb::stop));
+
     driveController
         .povRight()
-        .whileTrue(Commands.run(() -> climb.runVolts(-8)))
+        .whileTrue(
+            Commands.run(() -> climb.runVolts(-8))
+                .alongWith(Commands.runOnce(() -> climb.setServoPosition(0.0))))
         .onFalse(Commands.runOnce(climb::stop));
 
     driveController
@@ -295,6 +314,10 @@ public class RobotContainer {
     driveController
         .rightBumper()
         .whileTrue(superstructure.runGoal(RobotState.getInstance()::getDesiredState));
+
+    driveController.povDown().whileTrue(Commands.runOnce(() -> climb.setServoPosition(0.0)));
+
+    driveController.povUp().whileTrue(Commands.runOnce(() -> climb.setServoPosition(1)));
 
     operatorController
         .x()

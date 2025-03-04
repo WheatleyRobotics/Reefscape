@@ -23,7 +23,7 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 
-public class ClimbIOFalcon implements ClimbIO {
+public class WinchIOFalcon implements WinchIO {
   // Hardware
   private final TalonFX climb;
 
@@ -46,7 +46,7 @@ public class ClimbIOFalcon implements ClimbIO {
       new PositionTorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
   private final VoltageOut voltageRequest = new VoltageOut(0.0).withUpdateFreqHz(0.0);
 
-  public ClimbIOFalcon() {
+  public WinchIOFalcon() {
     climb = new TalonFX(13, "*");
 
     // Configure motor
@@ -71,7 +71,7 @@ public class ClimbIOFalcon implements ClimbIO {
   }
 
   @Override
-  public void updateInputs(ClimbIOInputs inputs) {
+  public void updateInputs(WinchIOInputs inputs) {
     boolean connected =
         BaseStatusSignal.refreshAll(
                 position, velocity, appliedVolts, torqueCurrent, supplyCurrent, temp)

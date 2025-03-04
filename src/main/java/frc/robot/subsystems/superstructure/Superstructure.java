@@ -510,8 +510,7 @@ public class Superstructure extends SubsystemBase {
   }
 
   private boolean isAtGoal() {
-    return elevator.isAtGoal()
-        && (dispenser.isAtGoal() || Constants.getRobotType() == Constants.RobotType.DEVBOT);
+    return elevator.isAtGoal() && dispenser.isAtGoal();
   }
 
   public static boolean willSlam(SuperstructureState from, SuperstructureState to) {

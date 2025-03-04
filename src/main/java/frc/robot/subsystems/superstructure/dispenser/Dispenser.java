@@ -20,7 +20,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants;
-import frc.robot.Constants.RobotType;
+import frc.robot.Constants.Mode;
 import frc.robot.RobotState;
 import frc.robot.subsystems.superstructure.SuperstructureState;
 import frc.robot.util.EqualsUtil;
@@ -147,13 +147,13 @@ public class Dispenser {
     Logger.processInputs("Dispenser/Tunnel", tunnelInputs);
 
     pivotMotorDisconnectedAlert.set(
-        !pivotInputs.motorConnected && Constants.getRobotType() == RobotType.COMPBOT);
+        !pivotInputs.motorConnected && Constants.getMode() == Mode.REAL);
     pivotEncoderDisconnectedAlert.set(
-        !pivotInputs.encoderConnected && Constants.getRobotType() == RobotType.COMPBOT);
+        !pivotInputs.encoderConnected && Constants.getMode() == Mode.REAL);
     talonDisconnectedAlert.set(!tunnelInputs.talonConnected);
     canRangeDisconnectedAlart.set(!tunnelInputs.CANRangeConnected);
 
-    if (Constants.getRobotType() != RobotType.SIMBOT) {
+    if (Constants.getMode() != Constants.Mode.SIM) {
       hasCoral = tunnelInputs.hasCoral;
     }
 
@@ -254,23 +254,22 @@ public class Dispenser {
 
     // Check gamePiece
 
-    if ((Constants.getRobotType() != Constants.RobotType.SIMBOT)
-        && !RobotState.getInstance().isAuto()) {
+    if ((Constants.getMode() != Constants.Mode.SIM) && !RobotState.getInstance().isAuto()) {
       if (gamePieceDebouncer.calculate(
           Math.abs(tunnelInputs.talonSupplyCurrentAmps) >= algaeIntakeCurrentThresh.get())) {
         hasAlgae = true;
       }
     }
 
-    if (Constants.getRobotType() == Constants.RobotType.SIMBOT) {
-      if (currentState.equals(SuperstructureState.ALGAE_L2_INTAKE)
+    if (Constants.getMode() == Constants.Mode.SIM) {
+      /*if (currentState.equals(SuperstructureState.ALGAE_L2_INTAKE)
           || currentState.equals(SuperstructureState.ALGAE_L3_INTAKE)
           || currentState.equals(SuperstructureState.ALGAE_FLOOR_INTAKE)) {
         hasAlgae = true;
-      }
-      if (currentState.equals(SuperstructureState.INTAKE)) {
+      } */
+      /*if (currentState.equals(SuperstructureState.INTAKE)) {
         hasCoral = true;
-      }
+      }*/
       if (currentState.equals(SuperstructureState.L1_CORAL_EJECT)
           || currentState.equals(SuperstructureState.L2_CORAL_EJECT)
           || currentState.equals(SuperstructureState.L3_CORAL_EJECT)

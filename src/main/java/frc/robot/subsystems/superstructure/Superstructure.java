@@ -304,10 +304,8 @@ public class Superstructure extends SubsystemBase {
     // E Stop Dispenser and Elevator if Necessary
     isEStopped =
         (isEStopped
-                || elevator.isShouldEStop()
-                || (dispenser.isShouldEStop()
-                    && Constants.getRobotType() != Constants.RobotType.DEVBOT))
-            && Constants.getMode() != Constants.Mode.SIM;
+            || elevator.isShouldEStop()
+            || dispenser.isShouldEStop() && Constants.getMode() != Constants.Mode.SIM);
     elevator.setEStopped(isEStopped);
     dispenser.setEStopped(isEStopped);
 
@@ -516,8 +514,7 @@ public class Superstructure extends SubsystemBase {
   }
 
   private boolean isAtGoal() {
-    return elevator.isAtGoal()
-        && (dispenser.isAtGoal() || Constants.getRobotType() == Constants.RobotType.DEVBOT);
+    return elevator.isAtGoal() && (dispenser.isAtGoal());
   }
 
   public static boolean willSlam(SuperstructureState from, SuperstructureState to) {

@@ -87,7 +87,6 @@ public class RobotContainer {
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
-        /*
         drive =
             new Drive(
                 new GyroIOPigeon2(),
@@ -95,32 +94,6 @@ public class RobotContainer {
                 new ModuleIOSpark(1),
                 new ModuleIOSpark(2),
                 new ModuleIOSpark(3));
-
-         */
-        drive =
-            new Drive(
-                new GyroIO() {},
-                new ModuleIOSim(),
-                new ModuleIOSim(),
-                new ModuleIOSim(),
-                new ModuleIOSim());
-
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                new VisionIOPhotonVisionSim(
-                    camera0Name,
-                    robotToCamera0,
-                    drive::getRotation,
-                    drive::getPose,
-                    RobotState.getInstance().isShouldTrigSolve()),
-                new VisionIOPhotonVisionSim(
-                    camera1Name,
-                    robotToCamera1,
-                    drive::getRotation,
-                    drive::getPose,
-                    RobotState.getInstance().isShouldTrigSolve()));
-        /*
         vision =
             new Vision(
                 drive::addVisionMeasurement,
@@ -135,9 +108,6 @@ public class RobotContainer {
                     robotToCamera1,
                     drive::getRotation,
                     robotState.isShouldTrigSolve()));
-
-         */
-
         elevator = new Elevator(new ElevatorIOFalcon());
         dispenser = new Dispenser(new PivotIOFalconIntegrated(), new TunnelIOFalcon());
         slam = new Slam(new SlamIO() {}, new TunnelIO() {});
@@ -186,6 +156,8 @@ public class RobotContainer {
                 new ModuleIO() {});
         vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         elevator = new Elevator(new ElevatorIO() {});
+        dispenser = new Dispenser(new PivotIO() {}, new TunnelIO() {});
+        slam = new Slam(new SlamIO() {}, new TunnelIO() {});
         break;
     }
     if (elevator == null) {

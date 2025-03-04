@@ -45,9 +45,9 @@ public class Dispenser {
   private static final LoggedTunableNumber kS = new LoggedTunableNumber("Dispenser/kS");
   private static final LoggedTunableNumber kG = new LoggedTunableNumber("Dispenser/kG");
   private static final LoggedTunableNumber maxVelocityDegPerSec =
-      new LoggedTunableNumber("Dispenser/MaxVelocityDegreesPerSec", 90);
+      new LoggedTunableNumber("Dispenser/MaxVelocityDegreesPerSec", 360);
   private static final LoggedTunableNumber maxAccelerationDegPerSec2 =
-      new LoggedTunableNumber("Dispenser/MaxAccelerationDegreesPerSec2", 360);
+      new LoggedTunableNumber("Dispenser/MaxAccelerationDegreesPerSec2", 1080);
   private static final LoggedTunableNumber staticVelocityThresh =
       new LoggedTunableNumber("Dispenser/staticVelocityThresh", 0.1);
   private static final LoggedTunableNumber algaeIntakeCurrentThresh =
@@ -57,7 +57,7 @@ public class Dispenser {
   public static final LoggedTunableNumber gripperDispenseCurrent =
       new LoggedTunableNumber("Dispenser/AlgaeDispenseCurrent", 30.0);
   public static final LoggedTunableNumber tunnelDispenseVolts =
-      new LoggedTunableNumber("Dispenser/TunnelDispenseVolts", 2.0);
+      new LoggedTunableNumber("Dispenser/TunnelDispenseVolts", 6.0);
   public static final LoggedTunableNumber tunnelIntakeVolts =
       new LoggedTunableNumber("Dispenser/TunnelIntakeVolts", 6.0);
   public static final LoggedTunableNumber tolerance =
@@ -72,7 +72,7 @@ public class Dispenser {
         kG.initDefault(0.0);
       }
       default -> {
-        kP.initDefault(1000);
+        kP.initDefault(1800);
         kD.initDefault(100);
         kS.initDefault(4);
         kG.initDefault(0);

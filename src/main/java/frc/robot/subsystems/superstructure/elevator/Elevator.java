@@ -57,11 +57,11 @@ public class Elevator {
   static {
     switch (Constants.getRobotType()) {
       case COMPBOT, DEVBOT -> {
-        kP.initDefault(350);
+        kP.initDefault(700);
         kI.initDefault(0);
-        kD.initDefault(50);
-        kS.initDefault(0);
-        kG.initDefault(0);
+        kD.initDefault(68);
+        kS.initDefault(1.3);
+        kG.initDefault(4.5);
       }
       case SIMBOT -> {
         kP.initDefault(3000);

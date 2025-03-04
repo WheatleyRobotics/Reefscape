@@ -32,7 +32,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoScore;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.climb.Climb;
-import frc.robot.subsystems.climb.ClimbIO;
+import frc.robot.subsystems.climb.ClimbIOFalcon;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.leds.LED;
 import frc.robot.subsystems.superstructure.Superstructure;
@@ -90,36 +90,26 @@ public class RobotContainer {
         // Real robot, instantiate hardware IO implementations
         drive =
             new Drive(
-                new GyroIO() {},
-                new ModuleIOSim(),
-                new ModuleIOSim(),
-                new ModuleIOSim(),
-                new ModuleIOSim());
-        /*
-               drive =
-                   new Drive(
-                       new GyroIOPigeon2(),
-                       new ModuleIOSpark(0),
-                       new ModuleIOSpark(1),
-                       new ModuleIOSpark(2),
-                       new ModuleIOSpark(3));
+                new GyroIOPigeon2(),
+                new ModuleIOSpark(0),
+                new ModuleIOSpark(1),
+                new ModuleIOSpark(2),
+                new ModuleIOSpark(3));
 
-               vision =
-                   new Vision(
-                       drive::addVisionMeasurement,
-                       new VisionIOLimelight("limelight", drive::getRotation),
-                       new VisionIOPhotonVision(
-                           camera0Name,
-                           robotToCamera0,
-                           drive::getRotation,
-                           robotState.isShouldTrigSolve()),
-                       new VisionIOPhotonVision(
-                           camera1Name,
-                           robotToCamera1,
-                           drive::getRotation,
-                           robotState.isShouldTrigSolve()));
-
-        */
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                new VisionIOLimelight("limelight", drive::getRotation),
+                new VisionIOPhotonVision(
+                    camera0Name,
+                    robotToCamera0,
+                    drive::getRotation,
+                    robotState.isShouldTrigSolve()),
+                new VisionIOPhotonVision(
+                    camera1Name,
+                    robotToCamera1,
+                    drive::getRotation,
+                    robotState.isShouldTrigSolve()));
 
         vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         elevator = new Elevator(new ElevatorIOFalcon());
@@ -127,7 +117,7 @@ public class RobotContainer {
         dispenser = new Dispenser(new PivotIOFalconIntegrated(), new TunnelIOFalcon());
         slam = new Slam(new SlamIO() {}, new TunnelIO() {});
 
-        climb = new Climb(new ClimbIO() {});
+        climb = new Climb(new ClimbIOFalcon());
 
         break;
 
@@ -543,6 +533,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return dynamicAuto.getAutoCommand();
+    // return dynamicAuto.getAutoCommand();
+    return autoChooser.get();
   }
 }

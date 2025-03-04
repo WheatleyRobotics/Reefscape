@@ -47,7 +47,7 @@ public class ClimbIOFalcon implements ClimbIO {
   private final VoltageOut voltageRequest = new VoltageOut(0.0).withUpdateFreqHz(0.0);
 
   public ClimbIOFalcon() {
-    climb = new TalonFX(13, "*");
+    climb = new TalonFX(13);
 
     // Configure motor
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;

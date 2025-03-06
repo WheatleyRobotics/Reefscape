@@ -47,7 +47,7 @@ public class WinchIOFalcon implements WinchIO {
   private final VoltageOut voltageRequest = new VoltageOut(0.0).withUpdateFreqHz(0.0);
 
   public WinchIOFalcon() {
-    climb = new TalonFX(13, "*");
+    climb = new TalonFX(13);
 
     // Configure motor
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;

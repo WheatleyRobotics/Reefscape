@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants;
 import frc.robot.RobotState;
 import frc.robot.subsystems.superstructure.dispenser.Dispenser;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
@@ -302,10 +301,8 @@ public class Superstructure extends SubsystemBase {
     elevator.setStowed(state == SuperstructureState.STOW);
 
     // E Stop Dispenser and Elevator if Necessary
-    isEStopped =
-        (isEStopped
-            || elevator.isShouldEStop()
-            || dispenser.isShouldEStop() && Constants.getMode() != Constants.Mode.SIM);
+    isEStopped = // (isEStopped || elevator.isShouldEStop() || dispenser.isShouldEStop());
+        false;
     elevator.setEStopped(isEStopped);
     dispenser.setEStopped(isEStopped);
 

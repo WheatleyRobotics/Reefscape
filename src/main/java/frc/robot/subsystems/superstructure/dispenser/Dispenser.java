@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
+import frc.robot.Robot;
 import frc.robot.RobotState;
 import frc.robot.subsystems.superstructure.SuperstructureState;
 import frc.robot.util.EqualsUtil;
@@ -47,11 +48,11 @@ public class Dispenser {
   private static final LoggedTunableNumber maxVelocityDegPerSec =
       new LoggedTunableNumber("Dispenser/MaxVelocityDegreesPerSec", 360);
   private static final LoggedTunableNumber maxAccelerationDegPerSec2 =
-      new LoggedTunableNumber("Dispenser/MaxAccelerationDegreesPerSec2", 1080);
+      new LoggedTunableNumber("Dispenser/MaxAccelerationDegreesPerSec2", 90);
   private static final LoggedTunableNumber staticVelocityThresh =
       new LoggedTunableNumber("Dispenser/staticVelocityThresh", 0.1);
   private static final LoggedTunableNumber algaeIntakeCurrentThresh =
-      new LoggedTunableNumber("Dispenser/AlgaeIntakeCurrentThreshold", 15.0);
+      new LoggedTunableNumber("Dispenser/AlgaeIntakeCurrentThreshold", 25.0);
   public static final LoggedTunableNumber gripperIntakeCurrent =
       new LoggedTunableNumber("Dispenser/AlgaeIntakeCurrent", -30.0);
   public static final LoggedTunableNumber gripperDispenseCurrent =
@@ -61,7 +62,7 @@ public class Dispenser {
   public static final LoggedTunableNumber tunnelIntakeVolts =
       new LoggedTunableNumber("Dispenser/TunnelIntakeVolts", 6.0);
   public static final LoggedTunableNumber tolerance =
-      new LoggedTunableNumber("Dispenser/Tolerance", 0.5);
+      new LoggedTunableNumber("Dispenser/Tolerance", 45);
 
   static {
     switch (Constants.getRobotType()) {
@@ -72,7 +73,7 @@ public class Dispenser {
         kG.initDefault(0.0);
       }
       default -> {
-        kP.initDefault(1800);
+        kP.initDefault(1600);
         kD.initDefault(100);
         kS.initDefault(4);
         kG.initDefault(0);
@@ -254,33 +255,37 @@ public class Dispenser {
 
     // Check gamePiece
 
-    if ((Constants.getMode() != Constants.Mode.SIM) && !RobotState.getInstance().isAuto()) {
-      if (gamePieceDebouncer.calculate(
-          Math.abs(tunnelInputs.talonSupplyCurrentAmps) >= algaeIntakeCurrentThresh.get())) {
-        hasAlgae = true;
+    if ((Robot.isReal()) && !RobotState.getInstance().isAuto()) {
+      if (currentState.equals(SuperstructureState.ALGAE_L2_INTAKE)
+          || currentState.equals(SuperstructureState.ALGAE_L3_INTAKE)) {
+        if (gamePieceDebouncer.calculate(
+            Math.abs(tunnelInputs.talonSupplyCurrentAmps) >= algaeIntakeCurrentThresh.get())) {
+          hasAlgae = true;
+        }
       }
     }
+    /*
+       if (Robot.isSimulation()) {
+         if (currentState.equals(SuperstructureState.ALGAE_L2_INTAKE)
+             || currentState.equals(SuperstructureState.ALGAE_L3_INTAKE)
+             || currentState.equals(SuperstructureState.ALGAE_FLOOR_INTAKE)) {
+           hasAlgae = true;
+         }
+         if (currentState.equals(SuperstructureState.INTAKE)) {
+           hasCoral = true;
+         }
+         if (currentState.equals(SuperstructureState.L1_CORAL_EJECT)
+             || currentState.equals(SuperstructureState.L2_CORAL_EJECT)
+             || currentState.equals(SuperstructureState.L3_CORAL_EJECT)
+             || currentState.equals(SuperstructureState.L4_CORAL_EJECT)) {
+           hasCoral = false;
+         }
+       }
 
-    if (Constants.getMode() == Constants.Mode.SIM) {
-      /*if (currentState.equals(SuperstructureState.ALGAE_L2_INTAKE)
-          || currentState.equals(SuperstructureState.ALGAE_L3_INTAKE)
-          || currentState.equals(SuperstructureState.ALGAE_FLOOR_INTAKE)) {
-        hasAlgae = true;
-      } */
-      /*if (currentState.equals(SuperstructureState.INTAKE)) {
-        hasCoral = true;
-      }*/
-      if (currentState.equals(SuperstructureState.L1_CORAL_EJECT)
-          || currentState.equals(SuperstructureState.L2_CORAL_EJECT)
-          || currentState.equals(SuperstructureState.L3_CORAL_EJECT)
-          || currentState.equals(SuperstructureState.L4_CORAL_EJECT)) {
-        hasCoral = false;
-      }
-      // }
-      if (currentState.equals(SuperstructureState.PROCESSING_EJECT)
-          || currentState.equals(SuperstructureState.BARGE_EJECT)) {
-        hasAlgae = false;
-      }
+    */
+    if (currentState.equals(SuperstructureState.PROCESSING_EJECT)
+        || currentState.equals(SuperstructureState.BARGE_EJECT)) {
+      hasAlgae = false;
     }
     // Log state
     Logger.recordOutput("Dispenser/CoastOverride", coastOverride.getAsBoolean());

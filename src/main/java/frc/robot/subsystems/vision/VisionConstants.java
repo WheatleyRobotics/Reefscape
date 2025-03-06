@@ -32,18 +32,18 @@ public class VisionConstants {
   // (Not used by Limelight, configure in web UI instead)
   public static Transform3d robotToCamera0 =
       new Transform3d(
-          Units.inchesToMeters(12.75),
-          Units.inchesToMeters(8.2),
-          Units.inchesToMeters(7.7),
+          Units.inchesToMeters(12.935),
+          Units.inchesToMeters(6.375),
+          Units.inchesToMeters(7.5),
           new Rotation3d(
               0,
               Units.degreesToRadians(-15),
               Units.degreesToRadians(-15))); // pitch of -15 and yaw of -15
   public static Transform3d robotToCamera1 =
       new Transform3d(
-          Units.inchesToMeters(12.75),
-          Units.inchesToMeters(-8.2),
-          Units.inchesToMeters(7.7),
+          Units.inchesToMeters(12.935),
+          Units.inchesToMeters(-6.375),
+          Units.inchesToMeters(7.5),
           new Rotation3d(
               0,
               Units.degreesToRadians(-15),

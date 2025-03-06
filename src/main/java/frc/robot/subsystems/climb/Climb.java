@@ -13,7 +13,6 @@ public class Climb extends SubsystemBase {
     this.winchIO = winchIO;
     this.servo = new Servo(1);
     servo.setBoundsMicroseconds(2000, 1800, 1500, 1200, 1000);
-    servo.set(1);
   }
 
   @Override

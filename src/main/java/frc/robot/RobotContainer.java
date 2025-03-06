@@ -31,7 +31,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoScore;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.climb.Climb;
-import frc.robot.subsystems.climb.WinchIO;
+import frc.robot.subsystems.climb.WinchIOFalcon;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.leds.LED;
 import frc.robot.subsystems.superstructure.Superstructure;
@@ -112,7 +112,7 @@ public class RobotContainer {
         dispenser = new Dispenser(new PivotIOFalconIntegrated(), new TunnelIOFalcon());
         slam = new Slam(new SlamIO() {}, new TunnelIO() {});
 
-        climb = new Climb(new WinchIO() {});
+        climb = new Climb(new WinchIOFalcon());
 
         break;
 
@@ -257,16 +257,12 @@ public class RobotContainer {
 
     driveController
         .povLeft()
-        .whileTrue(
-            Commands.run(() -> climb.runVolts(8))
-                .alongWith(Commands.runOnce(() -> climb.setServoPosition(0.0))))
+        .whileTrue(Commands.run(() -> climb.runVolts(8)))
         .onFalse(Commands.runOnce(climb::stop));
 
     driveController
         .povRight()
-        .whileTrue(
-            Commands.run(() -> climb.runVolts(-8))
-                .alongWith(Commands.runOnce(() -> climb.setServoPosition(0.0))))
+        .whileTrue(Commands.run(() -> climb.runVolts(-8)))
         .onFalse(Commands.runOnce(climb::stop));
 
     driveController
@@ -287,9 +283,9 @@ public class RobotContainer {
         .rightBumper()
         .whileTrue(superstructure.runGoal(RobotState.getInstance()::getDesiredState));
 
-    driveController.povDown().whileTrue(Commands.runOnce(() -> climb.setServoPosition(0.0)));
+    driveController.start().whileTrue(Commands.runOnce(() -> climb.setServoPosition(0.0)));
 
-    driveController.povUp().whileTrue(Commands.runOnce(() -> climb.setServoPosition(1)));
+    driveController.back().whileTrue(Commands.runOnce(() -> climb.setServoPosition(1)));
 
     operatorController
         .x()

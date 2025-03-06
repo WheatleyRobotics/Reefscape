@@ -52,14 +52,14 @@ public class Elevator {
   private static final LoggedTunableNumber staticCharacterizationVelocityThresh =
       new LoggedTunableNumber("Elevator/StaticCharacterizationVelocityThresh", 0.1);
   private static final LoggedTunableNumber tolerance =
-      new LoggedTunableNumber("Elevator/Tolerance", 0.5);
+      new LoggedTunableNumber("Elevator/Tolerance", 1);
 
   static {
     switch (Constants.getRobotType()) {
       case COMPBOT, DEVBOT -> {
-        kP.initDefault(700);
+        kP.initDefault(650);
         kI.initDefault(0);
-        kD.initDefault(68);
+        kD.initDefault(63);
         kS.initDefault(1.3);
         kG.initDefault(4.5);
       }

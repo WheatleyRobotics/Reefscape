@@ -240,7 +240,20 @@ public class Superstructure extends SubsystemBase {
         false,
         AlgaeEdge.ALGAE,
         true);
+    addEdge.accept(
+        SuperstructureState.ALGAE_L2_INTAKE,
+        SuperstructureState.ALGAE_STOW,
+        false,
+        AlgaeEdge.ALGAE,
+        false);
 
+    // Also add the same for ALGAE_L3_INTAKE for consistency
+    addEdge.accept(
+        SuperstructureState.ALGAE_L3_INTAKE,
+        SuperstructureState.ALGAE_STOW,
+        false,
+        AlgaeEdge.ALGAE,
+        false);
     addEdge.accept(
         SuperstructureState.PROCESSING,
         SuperstructureState.PROCESSING_EJECT,

@@ -278,10 +278,11 @@ public class Dispenser {
           || currentState.equals(SuperstructureState.L4_CORAL_EJECT)) {
         hasCoral = false;
       }
-    }
-    if (currentState.equals(SuperstructureState.PROCESSING_EJECT)
-        || currentState.equals(SuperstructureState.BARGE_EJECT)) {
-      hasAlgae = false;
+      if (currentState.equals(SuperstructureState.PROCESSING_EJECT)
+          || currentState.equals(SuperstructureState.BARGE_EJECT)
+          || currentState.equals(SuperstructureState.INTAKE)) {
+        hasAlgae = false;
+      }
     }
     // Log state
     Logger.recordOutput("Dispenser/CoastOverride", coastOverride.getAsBoolean());

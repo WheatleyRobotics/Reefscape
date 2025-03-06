@@ -330,7 +330,10 @@ public class RobotContainer {
 
     operatorController.povDown().onTrue(superstructure.runGoal(SuperstructureState.PROCESSING));
 
-    operatorController.start().whileTrue(Commands.run(() -> superstructure.runVoltsPivot(-0.5)));
+    operatorController
+        .start()
+        .whileTrue(Commands.run(() -> superstructure.runVoltsPivot(-0.5)))
+        .onFalse(Commands.run(() -> superstructure.runVoltsPivot(0.0)));
     operatorController.back().onTrue(Commands.runOnce(() -> superstructure.setPositionPivot(18)));
 
     new Trigger(

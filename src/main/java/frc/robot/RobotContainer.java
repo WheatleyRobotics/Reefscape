@@ -320,11 +320,13 @@ public class RobotContainer {
 
     operatorController
         .y()
-        .onTrue(superstructure.runGoal(SuperstructureState.ALGAE_L3_INTAKE).withName("L3 Algae"));
+        .whileTrue(
+            superstructure.runGoal(SuperstructureState.ALGAE_L3_INTAKE).withName("L3 Algae"));
 
     operatorController
         .a()
-        .onTrue(superstructure.runGoal(SuperstructureState.ALGAE_L2_INTAKE).withName("L2 Algae"));
+        .whileTrue(
+            superstructure.runGoal(SuperstructureState.ALGAE_L2_INTAKE).withName("L2 Algae"));
 
     operatorController.povUp().onTrue(superstructure.runGoal(SuperstructureState.BARGE));
 

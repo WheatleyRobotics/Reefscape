@@ -14,11 +14,11 @@ import java.util.function.Supplier;
 public class AutoScore {
 
   public static final LoggedTunableNumber minClearReefDistance =
-      new LoggedTunableNumber("AutoScore/MinClearReefDistance", 0.725);
+      new LoggedTunableNumber("AutoScore/MinClearReefDistance", 0.65);
   public static final LoggedTunableNumber l4Offset =
-      new LoggedTunableNumber("AutoScore/L4Offset", 0.66);
+      new LoggedTunableNumber("AutoScore/L4Offset", 0.525);
   public static final LoggedTunableNumber coralOffset =
-      new LoggedTunableNumber("AutoScore/coralOffset", 0.57);
+      new LoggedTunableNumber("AutoScore/coralOffset", 0.505);
 
   public static Command getAutoScoreCommand(
       Supplier<SuperstructureState> state,
@@ -50,13 +50,14 @@ public class AutoScore {
                                 RobotState.getInstance().getCurrentZone(), right),
                             -minClearReefDistance.get()))),
         new DriveToPose(
-            drive,
-            () ->
-                FieldConstants.addOffset(
-                    FieldConstants.getBranch(RobotState.getInstance().getCurrentZone(), right),
-                    state.get().equals(SuperstructureState.L4_CORAL)
-                        ? -l4Offset.get()
-                        : -coralOffset.get())),
+                drive,
+                () ->
+                    FieldConstants.addOffset(
+                        FieldConstants.getBranch(RobotState.getInstance().getCurrentZone(), right),
+                        state.get().equals(SuperstructureState.L4_CORAL)
+                            ? -l4Offset.get()
+                            : -coralOffset.get()))
+            .withTimeout(3),
         superstructure.runGoal(() -> state.get().getEject()).withTimeout(0.5),
         superstructure.runGoal(() -> SuperstructureState.STOW).withTimeout(0.2),
         getClearReefCommand(drive));

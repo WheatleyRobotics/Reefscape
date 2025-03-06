@@ -35,8 +35,8 @@ public record SuperstructurePose(DoubleSupplier elevatorHeight, Supplier<Rotatio
   @Getter
   enum Preset {
     START("Start", 0.0, 18.0),
-    STOW("Stow", 0.02, 45.0),
-    L1("L1", 0.02, 18.0),
+    STOW("Stow", 0.0, 45.0),
+    L1("L1", 0.0, 18.0),
     L2("L2", Units.inchesToMeters(3.4), L2Angle + 5),
     L3("L3", Units.inchesToMeters(8.819), L3Angle + 8),
     L4("L4", Units.inchesToMeters(18.9), L4Angle),
@@ -48,7 +48,7 @@ public record SuperstructurePose(DoubleSupplier elevatorHeight, Supplier<Rotatio
         algaeIntakeAngle),
     ALGAE_L2_INTAKE("AlgaeL2Intake", Units.inchesToMeters(6.5), 165),
     ALGAE_L3_INTAKE("AlgaeL3Intake", Units.inchesToMeters(11.5), 165),
-    THROW(() -> elevatorMaxTravel, () -> -40.0),
+    THROW(() -> elevatorMaxTravel, () -> 90),
     PROCESSING("Processing", 0.0, 180),
     ALGAE_STOW("AlgaeStow", 0.0, 100),
     ALGAE_STOW_FRONT("AlgaeStowFront", 0.1, pivotSafeAngle.getDegrees());

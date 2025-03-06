@@ -33,10 +33,10 @@ public class DynamicAuto {
     this.drive = drive;
     this.superstructure = superstructure;
     startingChooser.addOption("Left", "LEFT");
-    startingChooser.addOption("Center", "MIDDLE");
+    startingChooser.setDefaultOption("Center", "MIDDLE");
     startingChooser.addOption("Right", "RIGHT");
     sourceChooser.addOption("Left", "LSOURCE");
-    sourceChooser.addOption("Right", "RSOURCE");
+    sourceChooser.setDefaultOption("Right", "RSOURCE");
     for (int i = 0; i < 4; i++) {
       SendableChooser<Integer> chooser = new SendableChooser<>();
       for (int j = 0; j < 12; j++) {
@@ -44,6 +44,7 @@ public class DynamicAuto {
         chooser.addOption("Branch " + j, j);
       }
       coralChooser.add(chooser);
+      chooser.setDefaultOption("Branch 5", 5);
     }
 
     for (int i = 0; i < 4; i++) {
@@ -57,7 +58,9 @@ public class DynamicAuto {
     Command s1;
     try {
       int target = coralChooser.get(0).getSelected();
+      String source = sourceChooser.getSelected();
       boolean right = !(coralChooser.get(0).getSelected() % 2 == 0);
+
       PathPlannerPath startPath =
           isChoreo
               ? PathPlannerPath.fromChoreoTrajectory(
@@ -102,10 +105,17 @@ public class DynamicAuto {
       System.out.println("No target selected");
       return Commands.none();
     }
+    if (sourceChooser.getSelected() == null) {
+      System.out.println("No source selected");
+      return Commands.none();
+    }
     int target = chooser.getSelected();
     try {
       String targetString = getCoralZone(target);
       if (targetString.equals("NONE")) {
+        return Commands.none();
+      }
+      if (sourceChooser.getSelected().equals("NONE")) {
         return Commands.none();
       }
       boolean right = !(target % 2 == 0);

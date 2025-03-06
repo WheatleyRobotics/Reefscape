@@ -8,6 +8,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.commands.AutoScore;
@@ -80,6 +81,7 @@ public class RobotState {
   public void update() {
     updateZone();
     updateIsClearedReef();
+    updateShouldTrigSolve();
   }
 
   public void resetPose(Pose2d pose) {
@@ -130,5 +132,30 @@ public class RobotState {
     clearedReef =
         !(distanceToLeft < AutoScore.minClearReefDistance.get())
             && !(distanceToRight < AutoScore.minClearReefDistance.get());
+  }
+
+  private void updateShouldTrigSolve() {
+    Translation2d reefCenter =
+        AllianceFlipUtil.shouldFlip()
+            ? AllianceFlipUtil.apply(FieldConstants.Reef.center)
+            : FieldConstants.Reef.center;
+
+    double distanceToReef = reefCenter.getDistance(pose.getTranslation());
+
+    double angleToReef =
+        new Rotation2d(reefCenter.getX() - pose.getX(), reefCenter.getY() - pose.getY())
+            .getDegrees();
+
+    double headingDifference = Math.abs(pose.getRotation().getDegrees() - angleToReef);
+
+    // Normalize to 0-180
+    if (headingDifference > 180) {
+      headingDifference = 360 - headingDifference;
+    }
+
+    boolean isCloseEnough = distanceToReef <= 2.25;
+    boolean isFacingReef = headingDifference <= Math.toDegrees(Math.PI / 6.0);
+
+    shouldTrigSolve = isCloseEnough && isFacingReef;
   }
 }

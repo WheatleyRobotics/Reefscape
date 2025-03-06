@@ -275,9 +275,10 @@ public class Superstructure extends SubsystemBase {
               // Check if should intake
               if (!dispenser.isHasCoral()
                   && !dispenser.isHasAlgae()
-                  && robot.getX() < FieldConstants.fieldLength / 5.0
-                  && (robot.getY() < FieldConstants.fieldWidth / 5.0
-                      || robot.getY() > FieldConstants.fieldWidth * 4.0 / 5.0)) {
+                  && (robot.getX() < FieldConstants.fieldLength / 5.0 && robot.getX() > 0)
+                  && ((robot.getY() < FieldConstants.fieldWidth / 5.0
+                      || robot.getY() > FieldConstants.fieldWidth * 4.0 / 5.0))
+                  && robot.getY() > 0) {
                 return SuperstructureState.INTAKE;
               }
               return dispenser.isHasAlgae()

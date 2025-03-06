@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.15,
-        "y": 0.95
+        "x": 1.7,
+        "y": 1.25
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.132899760838131,
-        "y": 2.930410928982621
+        "x": 4.507137981324014,
+        "y": 3.0150425473858506
       },
       "isLocked": false,
       "linkedName": "RSOURCE"
@@ -20,8 +20,8 @@
         "y": 2.7
       },
       "prevControl": {
-        "x": 1.320179541967836,
-        "y": 1.0984215178263108
+        "x": 1.1178066119104257,
+        "y": 1.0932436045800162
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,8 +33,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 1.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 2.0,
+    "maxAcceleration": 4.5,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,

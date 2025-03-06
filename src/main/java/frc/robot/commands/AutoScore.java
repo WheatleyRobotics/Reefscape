@@ -26,13 +26,16 @@ public class AutoScore {
       Drive drive,
       Superstructure superstructure) {
     return Commands.sequence(
+        Commands.runOnce(() -> RobotState.getInstance().setShouldTrigSolve(true)),
+        /*
         superstructure
             .runGoal(SuperstructureState.INTAKE)
             .onlyIf(() -> !superstructure.isHasCoral()),
+
+             */
         superstructure
             .runGoal(
                 () -> {
-                  RobotState.getInstance().setHasDesiredState(false);
                   if (state.get().equals(SuperstructureState.STOW))
                     return SuperstructureState.L1_CORAL;
                   else return state.get();
@@ -55,13 +58,14 @@ public class AutoScore {
                         ? -l4Offset.get()
                         : -coralOffset.get())),
         superstructure.runGoal(() -> state.get().getEject()).withTimeout(0.5),
+        superstructure.runGoal(() -> SuperstructureState.STOW).withTimeout(0.2),
         getClearReefCommand(drive),
-        superstructure.runGoal(() -> SuperstructureState.STOW).until(superstructure::atGoal));
+        Commands.runOnce(() -> RobotState.getInstance().setShouldTrigSolve(false)));
   }
 
   public static Command getClearReefCommand(Drive drive) {
     return Commands.sequence(
-        Commands.run(() -> drive.runVelocity(new ChassisSpeeds(-2.5, 0, 0)))
+        Commands.run(() -> drive.runVelocity(new ChassisSpeeds(-2.0, 0, 0)))
             .until(() -> RobotState.getInstance().isClearedReef()),
         Commands.runOnce(() -> drive.runVelocity(new ChassisSpeeds(0, 0, 0))));
   }

@@ -2,9 +2,9 @@ package frc.robot.subsystems.climb;
 
 import org.littletonrobotics.junction.AutoLog;
 
-public interface ClimbIO {
+public interface WinchIO {
   @AutoLog
-  class ClimbIOInputs {
+  class WinchIOInputs {
     public boolean ClimbConncected = true;
     public double positionRad = 0.0;
     public double velocityRadPerSec = 0.0;
@@ -15,7 +15,7 @@ public interface ClimbIO {
     public boolean motorConnected;
   }
 
-  default void updateInputs(ClimbIOInputs climb) {}
+  default void updateInputs(WinchIOInputs climb) {}
 
   default void runOpenLoop(double output) {}
 

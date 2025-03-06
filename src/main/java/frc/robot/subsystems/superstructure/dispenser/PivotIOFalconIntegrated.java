@@ -155,4 +155,9 @@ public class PivotIOFalconIntegrated implements PivotIO {
             })
         .start();
   }
+
+  @Override
+  public void setPosition(double degrees) {
+    talon.setPosition(degrees);
+  }
 }

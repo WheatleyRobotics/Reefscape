@@ -8,16 +8,17 @@
 package frc.robot.subsystems.superstructure;
 
 import edu.wpi.first.math.Pair;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants;
 import frc.robot.RobotState;
 import frc.robot.subsystems.superstructure.dispenser.Dispenser;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.superstructure.slam.Slam;
+import frc.robot.util.FieldConstants;
 import java.util.*;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -240,15 +241,9 @@ public class Superstructure extends SubsystemBase {
     addEdge.accept(
         SuperstructureState.ALGAE_STOW, SuperstructureState.BARGE, true, AlgaeEdge.ALGAE, false);
     addEdge.accept(
-        SuperstructureState.ALGAE_STOW,
-        SuperstructureState.BARGE_EJECT,
-        true,
-        AlgaeEdge.ALGAE,
-        false);
+        SuperstructureState.BARGE, SuperstructureState.BARGE_EJECT, true, AlgaeEdge.ALGAE, false);
     addEdge.accept(
         SuperstructureState.ALGAE_STOW, SuperstructureState.TOSS, true, AlgaeEdge.NONE, false);
-    addEdge.accept(
-        SuperstructureState.BARGE, SuperstructureState.ALGAE_STOW, false, AlgaeEdge.ALGAE, false);
     addEdge.accept(
         SuperstructureState.TOSS, SuperstructureState.ALGAE_STOW, false, AlgaeEdge.ALGAE, false);
     addEdge.accept(
@@ -258,10 +253,20 @@ public class Superstructure extends SubsystemBase {
 
     setDefaultCommand(
         runGoal(
-            () ->
-                dispenser.isHasAlgae()
-                    ? SuperstructureState.ALGAE_STOW
-                    : SuperstructureState.STOW));
+            () -> {
+              Pose2d robot = RobotState.getInstance().getPose();
+              // Check if should intake
+              if (!dispenser.isHasCoral()
+                  && !dispenser.isHasAlgae()
+                  && robot.getX() < FieldConstants.fieldLength / 5.0
+                  && (robot.getY() < FieldConstants.fieldWidth / 5.0
+                      || robot.getY() > FieldConstants.fieldWidth * 4.0 / 5.0)) {
+                return SuperstructureState.INTAKE;
+              }
+              return dispenser.isHasAlgae()
+                  ? SuperstructureState.ALGAE_STOW
+                  : SuperstructureState.STOW;
+            }));
   }
 
   @Override
@@ -296,12 +301,8 @@ public class Superstructure extends SubsystemBase {
     elevator.setStowed(state == SuperstructureState.STOW);
 
     // E Stop Dispenser and Elevator if Necessary
-    isEStopped =
-        (isEStopped
-                || elevator.isShouldEStop()
-                || (dispenser.isShouldEStop()
-                    && Constants.getRobotType() != Constants.RobotType.DEVBOT))
-            && Constants.getMode() != Constants.Mode.SIM;
+    isEStopped = // (isEStopped || elevator.isShouldEStop() || dispenser.isShouldEStop());
+        false;
     elevator.setEStopped(isEStopped);
     dispenser.setEStopped(isEStopped);
 
@@ -510,7 +511,7 @@ public class Superstructure extends SubsystemBase {
   }
 
   private boolean isAtGoal() {
-    return elevator.isAtGoal() && dispenser.isAtGoal();
+    return elevator.isAtGoal() && (dispenser.isAtGoal());
   }
 
   public static boolean willSlam(SuperstructureState from, SuperstructureState to) {
@@ -532,6 +533,10 @@ public class Superstructure extends SubsystemBase {
 
   public void runVoltsTunnel(double volts) {
     dispenser.runVoltsTunnel(volts);
+  }
+
+  public void setPositionPivot(double degrees) {
+    dispenser.setPositionPivot(degrees);
   }
 
   /** All edge commands should finish and exit properly. */

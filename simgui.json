@@ -15,6 +15,20 @@
       "/SmartDashboard/Source Position": "String Chooser",
       "/SmartDashboard/Starting Position": "String Chooser",
       "/SmartDashboard/VisionSystemSim-main/Sim Field": "Field2d"
+    },
+    "windows": {
+      "/FMSInfo": {
+        "window": {
+          "visible": true
+        }
+      }
+    }
+  },
+  "NetworkTables": {
+    "transitory": {
+      "FMSInfo": {
+        "open": true
+      }
     }
   },
   "NetworkTables Info": {

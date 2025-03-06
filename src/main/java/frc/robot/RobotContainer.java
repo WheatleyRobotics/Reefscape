@@ -16,7 +16,6 @@ package frc.robot;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -32,7 +31,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoScore;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.climb.Climb;
-import frc.robot.subsystems.climb.ClimbIOFalcon;
+import frc.robot.subsystems.climb.WinchIOFalcon;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.leds.LED;
 import frc.robot.subsystems.superstructure.Superstructure;
@@ -95,7 +94,6 @@ public class RobotContainer {
                 new ModuleIOSpark(1),
                 new ModuleIOSpark(2),
                 new ModuleIOSpark(3));
-
         vision =
             new Vision(
                 drive::addVisionMeasurement,
@@ -110,14 +108,11 @@ public class RobotContainer {
                     robotToCamera1,
                     drive::getRotation,
                     robotState.isShouldTrigSolve()));
-
-        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         elevator = new Elevator(new ElevatorIOFalcon());
-
         dispenser = new Dispenser(new PivotIOFalconIntegrated(), new TunnelIOFalcon());
         slam = new Slam(new SlamIO() {}, new TunnelIO() {});
 
-        climb = new Climb(new ClimbIOFalcon());
+        climb = new Climb(new WinchIOFalcon());
 
         break;
 
@@ -161,6 +156,8 @@ public class RobotContainer {
                 new ModuleIO() {});
         vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         elevator = new Elevator(new ElevatorIO() {});
+        dispenser = new Dispenser(new PivotIO() {}, new TunnelIO() {});
+        slam = new Slam(new SlamIO() {}, new TunnelIO() {});
         break;
     }
     if (elevator == null) {
@@ -173,18 +170,6 @@ public class RobotContainer {
       slam = new Slam(new SlamIO() {}, new TunnelIO() {});
     }
     superstructure = new Superstructure(elevator, dispenser, slam);
-
-    NamedCommands.registerCommand(
-        "INTAKE", superstructure.runGoal(SuperstructureState.INTAKE).withTimeout(1));
-
-    NamedCommands.registerCommand(
-        "SCORE_L4_RIGHT",
-        AutoScore.getAutoScoreCommand(
-            () -> SuperstructureState.L4_CORAL, true, drive, superstructure));
-    NamedCommands.registerCommand(
-        "SCORE_L4_LEFT",
-        AutoScore.getAutoScoreCommand(
-            () -> SuperstructureState.L4_CORAL, false, drive, superstructure));
 
     // Set up auto routines
     dynamicAuto = new DynamicAuto(drive, superstructure);
@@ -245,10 +230,10 @@ public class RobotContainer {
                 () -> -driveController.getLeftX(),
                 () ->
                     switch (RobotState.getInstance().getCurrentZone()) {
-                      case Z6 -> AllianceFlipUtil.getCorrected(
+                      case Z5 -> AllianceFlipUtil.getCorrected(
                               new Pose2d(0, 0, Rotation2d.fromDegrees(55)))
                           .getRotation();
-                      case Z2 -> AllianceFlipUtil.getCorrected(
+                      case Z1 -> AllianceFlipUtil.getCorrected(
                               new Pose2d(0, 0, Rotation2d.fromDegrees(-55)))
                           .getRotation();
                       default -> RobotState.getInstance().getPose().getRotation();
@@ -274,6 +259,7 @@ public class RobotContainer {
         .povLeft()
         .whileTrue(Commands.run(() -> climb.runVolts(8)))
         .onFalse(Commands.runOnce(climb::stop));
+
     driveController
         .povRight()
         .whileTrue(Commands.run(() -> climb.runVolts(-8)))
@@ -296,6 +282,10 @@ public class RobotContainer {
     driveController
         .rightBumper()
         .whileTrue(superstructure.runGoal(RobotState.getInstance()::getDesiredState));
+
+    driveController.start().whileTrue(Commands.runOnce(() -> climb.setServoPosition(0.0)));
+
+    driveController.back().whileTrue(Commands.runOnce(() -> climb.setServoPosition(1)));
 
     operatorController
         .x()
@@ -335,12 +325,13 @@ public class RobotContainer {
     operatorController
         .a()
         .onTrue(superstructure.runGoal(SuperstructureState.ALGAE_L2_INTAKE).withName("L2 Algae"));
-    /*
-       operatorController.povUp().onTrue(superstructure.runGoal(SuperstructureState.BARGE));
 
-    */
+    operatorController.povUp().onTrue(superstructure.runGoal(SuperstructureState.BARGE));
 
     operatorController.povDown().onTrue(superstructure.runGoal(SuperstructureState.PROCESSING));
+
+    operatorController.start().whileTrue(Commands.run(() -> superstructure.runVoltsPivot(-0.5)));
+    operatorController.back().onTrue(Commands.runOnce(() -> superstructure.setPositionPivot(18)));
 
     new Trigger(
             () ->
@@ -402,10 +393,10 @@ public class RobotContainer {
                 () -> -driveController.getLeftX(),
                 () ->
                     switch (RobotState.getInstance().getCurrentZone()) {
-                      case Z6 -> AllianceFlipUtil.getCorrected(
+                      case Z5 -> AllianceFlipUtil.getCorrected(
                               new Pose2d(0, 0, Rotation2d.fromDegrees(55)))
                           .getRotation();
-                      case Z2 -> AllianceFlipUtil.getCorrected(
+                      case Z1 -> AllianceFlipUtil.getCorrected(
                               new Pose2d(0, 0, Rotation2d.fromDegrees(-55)))
                           .getRotation();
                       default -> RobotState.getInstance().getPose().getRotation();
@@ -430,13 +421,8 @@ public class RobotContainer {
         .whileTrue(
             AutoScore.getAutoScoreCommand(
                     () -> RobotState.getInstance().getDesiredState(), true, drive, superstructure)
-                .alongWith(Commands.runOnce(() -> leds.autoScoring = true))
-                .alongWith(
-                    Commands.runOnce(() -> RobotState.getInstance().setShouldTrigSolve(true))))
-        .onFalse(
-            Commands.runOnce(() -> leds.autoScoring = false)
-                .alongWith(
-                    Commands.runOnce(() -> RobotState.getInstance().setShouldTrigSolve(false))));
+                .alongWith(Commands.runOnce(() -> leds.autoScoring = true)))
+        .onFalse(Commands.runOnce(() -> leds.autoScoring = false));
 
     driveController
         .y()
@@ -448,14 +434,15 @@ public class RobotContainer {
 
     driveController
         .b()
-        .whileTrue(superstructure.runGoal(RobotState.getInstance().getDesiredState().getEject()));
+        .whileTrue(
+            superstructure.runGoal(() -> RobotState.getInstance().getDesiredState().getEject()));
 
     operatorController
         .x()
         .onTrue(
             Commands.runOnce(
                 () -> {
-                  RobotState.getInstance().setDesiredState(SuperstructureState.ALGAE_L2);
+                  RobotState.getInstance().setDesiredState(SuperstructureState.L3_CORAL);
                 }));
 
     operatorController
@@ -463,20 +450,16 @@ public class RobotContainer {
         .onTrue(
             Commands.runOnce(
                 () -> {
-                  RobotState.getInstance().setDesiredState(SuperstructureState.PROCESSING);
+                  RobotState.getInstance().setDesiredState(SuperstructureState.L2_CORAL);
                 }));
-    /*
-       operatorController
-           .y()
-           .onTrue(
-               Commands.runOnce(
-                   () -> {
-                     RobotState.getInstance().setDesiredState(SuperstructureState.BARGE);
-                   }));
 
-    */
-
-    operatorController.a().onTrue(superstructure.runGoal(SuperstructureState.L4_CORAL));
+    operatorController
+        .a()
+        .onTrue(
+            Commands.runOnce(
+                () -> {
+                  RobotState.getInstance().setDesiredState(SuperstructureState.L4_CORAL);
+                }));
 
     /*
        var random = new Random();
@@ -533,7 +516,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // return dynamicAuto.getAutoCommand();
-    return autoChooser.get();
+    return dynamicAuto.getAutoCommand();
   }
 }

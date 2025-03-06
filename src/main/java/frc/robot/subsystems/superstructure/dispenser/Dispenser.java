@@ -48,7 +48,7 @@ public class Dispenser {
   private static final LoggedTunableNumber maxVelocityDegPerSec =
       new LoggedTunableNumber("Dispenser/MaxVelocityDegreesPerSec", 360);
   private static final LoggedTunableNumber maxAccelerationDegPerSec2 =
-      new LoggedTunableNumber("Dispenser/MaxAccelerationDegreesPerSec2", 90);
+      new LoggedTunableNumber("Dispenser/MaxAccelerationDegreesPerSec2", 1080);
   private static final LoggedTunableNumber staticVelocityThresh =
       new LoggedTunableNumber("Dispenser/staticVelocityThresh", 0.1);
   private static final LoggedTunableNumber algaeIntakeCurrentThresh =

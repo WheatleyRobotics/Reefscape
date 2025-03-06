@@ -8,7 +8,6 @@
 package frc.robot.subsystems.superstructure;
 
 import edu.wpi.first.math.Pair;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -18,7 +17,6 @@ import frc.robot.RobotState;
 import frc.robot.subsystems.superstructure.dispenser.Dispenser;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.superstructure.slam.Slam;
-import frc.robot.util.FieldConstants;
 import java.util.*;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -267,23 +265,31 @@ public class Superstructure extends SubsystemBase {
         SuperstructureState.STOW, SuperstructureState.ALGAE_STOW, false, AlgaeEdge.ALGAE, false);
     addEdge.accept(
         SuperstructureState.ALGAE_STOW, SuperstructureState.STOW, false, AlgaeEdge.NO_ALGAE, false);
+    /*
+       setDefaultCommand(
+           runGoal(
+               () -> {
+                 Pose2d robot = RobotState.getInstance().getPose();
+                 // Check if should intake
+                 if (!dispenser.isHasCoral()
+                     && !dispenser.isHasAlgae()
+                     && robot.getX() < FieldConstants.fieldLength / 5.0
+                     && (robot.getY() < FieldConstants.fieldWidth / 5.0
+                         || robot.getY() > FieldConstants.fieldWidth * 4.0 / 5.0)) {
+                   return SuperstructureState.INTAKE;
+                 }
+                 return dispenser.isHasAlgae()
+                     ? SuperstructureState.ALGAE_STOW
+                     : SuperstructureState.STOW;
+               }));
 
+    */
     setDefaultCommand(
         runGoal(
-            () -> {
-              Pose2d robot = RobotState.getInstance().getPose();
-              // Check if should intake
-              if (!dispenser.isHasCoral()
-                  && !dispenser.isHasAlgae()
-                  && robot.getX() < FieldConstants.fieldLength / 5.0
-                  && (robot.getY() < FieldConstants.fieldWidth / 5.0
-                      || robot.getY() > FieldConstants.fieldWidth * 4.0 / 5.0)) {
-                return SuperstructureState.INTAKE;
-              }
-              return dispenser.isHasAlgae()
-                  ? SuperstructureState.ALGAE_STOW
-                  : SuperstructureState.STOW;
-            }));
+            () ->
+                dispenser.isHasAlgae()
+                    ? SuperstructureState.ALGAE_STOW
+                    : SuperstructureState.STOW));
   }
 
   @Override

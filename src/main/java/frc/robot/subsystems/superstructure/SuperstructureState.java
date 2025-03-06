@@ -85,7 +85,7 @@ public enum SuperstructureState {
   BARGE_EJECT(
       SuperstructureStateData.builder()
           .pose(SuperstructurePose.Preset.THROW.getPose())
-          .tunnelVolts(Dispenser.gripperDispenseCurrent)
+          .gripperCurrent(Dispenser.gripperDispenseCurrent)
           .build()),
 
   ALGAE_STOW(

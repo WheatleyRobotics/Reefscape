@@ -234,10 +234,9 @@ public class Dispenser {
           || currentState.equals(SuperstructureState.ALGAE_L3_INTAKE)
           || currentState.equals(SuperstructureState.ALGAE_STOW)
           || currentState.equals(SuperstructureState.ALGAE_FLOOR_INTAKE)
-          || currentState.equals(SuperstructureState.PROCESSING)) {
+          || currentState.equals(SuperstructureState.PROCESSING)
+          || currentState.equals(SuperstructureState.BARGE_EJECT)) {
         tunnelIO.runTorqueCurrent(gripperCurrent);
-      } else if (currentState.equals(SuperstructureState.PROCESSING_EJECT)) {
-        tunnelIO.runTorqueCurrent(gripperDispenseCurrent.get());
       } else if (currentState.equals(SuperstructureState.INTAKE) && !hasCoral) {
         tunnelIO.runVolts(tunnelIntakeVolts.get());
       } else if (currentState.equals(SuperstructureState.L1_CORAL_EJECT)

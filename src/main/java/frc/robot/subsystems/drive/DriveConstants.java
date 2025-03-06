@@ -93,7 +93,7 @@ public class DriveConstants {
   public static final int backRightTurnCancoderId = 34;
 
   // Drive motor configuration
-  public static final int driveMotorCurrentLimit = 40;
+  public static final int driveMotorCurrentLimit = 60;
   public static final double wheelRadiusMeters = Units.inchesToMeters(1.935);
 
   public static final double driveMotorReduction = 6.12; // MK4i L3
@@ -117,7 +117,7 @@ public class DriveConstants {
 
   // Turn motor configuration
   public static final boolean turnInverted = false;
-  public static final int turnMotorCurrentLimit = 20;
+  public static final int turnMotorCurrentLimit = 30;
   public static final double turnMotorReduction = 150.0 / 7;
   public static final DCMotor turnGearbox = DCMotor.getNeo550(1);
 

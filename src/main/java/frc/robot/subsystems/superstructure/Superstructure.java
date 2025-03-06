@@ -535,6 +535,10 @@ public class Superstructure extends SubsystemBase {
     dispenser.runVoltsTunnel(volts);
   }
 
+  public void setPositionPivot(double degrees) {
+    dispenser.setPositionPivot(degrees);
+  }
+
   /** All edge commands should finish and exit properly. */
   @Builder(toBuilder = true)
   @Getter

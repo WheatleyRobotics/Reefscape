@@ -354,4 +354,8 @@ public class Dispenser {
   public void runOpenLoopPivot(double amps) {
     pivotIO.runOpenLoop(amps);
   }
+
+  public void setPositionPivot(double degrees) {
+    pivotIO.setPosition(degrees);
+  }
 }

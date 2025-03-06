@@ -330,6 +330,9 @@ public class RobotContainer {
 
     operatorController.povDown().onTrue(superstructure.runGoal(SuperstructureState.PROCESSING));
 
+    operatorController.start().whileTrue(Commands.run(() -> superstructure.runVoltsPivot(-0.5)));
+    operatorController.back().onTrue(Commands.runOnce(() -> superstructure.setPositionPivot(18)));
+
     new Trigger(
             () ->
                 DriverStation.isTeleopEnabled()

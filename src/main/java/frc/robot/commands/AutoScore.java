@@ -14,11 +14,11 @@ import java.util.function.Supplier;
 public class AutoScore {
 
   public static final LoggedTunableNumber minClearReefDistance =
-      new LoggedTunableNumber("AutoScore/MinClearReefDistance", 0.6);
+      new LoggedTunableNumber("AutoScore/MinClearReefDistance", 0.725);
   public static final LoggedTunableNumber l4Offset =
-      new LoggedTunableNumber("AutoScore/L4Offset", 0.505);
+      new LoggedTunableNumber("AutoScore/L4Offset", 0.66);
   public static final LoggedTunableNumber coralOffset =
-      new LoggedTunableNumber("AutoScore/coralOffset", 0.55);
+      new LoggedTunableNumber("AutoScore/coralOffset", 0.57);
 
   public static Command getAutoScoreCommand(
       Supplier<SuperstructureState> state,
@@ -26,6 +26,7 @@ public class AutoScore {
       Drive drive,
       Superstructure superstructure) {
     return Commands.sequence(
+        Commands.runOnce(() -> RobotState.getInstance().setShouldTrigSolve(true)),
         /*
         superstructure
             .runGoal(SuperstructureState.INTAKE)
@@ -58,7 +59,8 @@ public class AutoScore {
                         : -coralOffset.get())),
         superstructure.runGoal(() -> state.get().getEject()).withTimeout(0.5),
         superstructure.runGoal(() -> SuperstructureState.STOW).withTimeout(0.2),
-        getClearReefCommand(drive));
+        getClearReefCommand(drive),
+        Commands.runOnce(() -> RobotState.getInstance().setShouldTrigSolve(false)));
   }
 
   public static Command getClearReefCommand(Drive drive) {

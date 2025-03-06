@@ -98,6 +98,27 @@ public class Superstructure extends SubsystemBase {
                         Commands.waitUntil(this::isAtGoal),
                         runSuperstructureExtras(SuperstructureState.STOW)))
             .build());
+    graph.addEdge(
+        SuperstructureState.BARGE_EJECT,
+        SuperstructureState.STOW,
+        getEdgeCommand(SuperstructureState.BARGE_EJECT, SuperstructureState.STOW).toBuilder()
+            .algaeEdgeType(AlgaeEdge.NO_ALGAE)
+            .build());
+    graph.addEdge(
+        SuperstructureState.ALGAE_STOW,
+        SuperstructureState.PROCESSING,
+        getEdgeCommand(SuperstructureState.ALGAE_STOW, SuperstructureState.PROCESSING).toBuilder()
+            .restricted(false)
+            .algaeEdgeType(AlgaeEdge.ALGAE)
+            .build());
+    graph.addEdge(
+        SuperstructureState.PROCESSING,
+        SuperstructureState.PROCESSING_EJECT,
+        getEdgeCommand(SuperstructureState.PROCESSING, SuperstructureState.PROCESSING_EJECT)
+            .toBuilder()
+            .restricted(false)
+            .algaeEdgeType(AlgaeEdge.NONE)
+            .build());
 
     final Set<SuperstructureState> freeNoAlgaeStates =
         Set.of(
@@ -114,9 +135,7 @@ public class Superstructure extends SubsystemBase {
         Set.of(
             SuperstructureState.ALGAE_STOW,
             SuperstructureState.ALGAE_L2,
-            SuperstructureState.ALGAE_L3,
-            SuperstructureState.PROCESSING,
-            SuperstructureState.PROCESSING_EJECT);
+            SuperstructureState.ALGAE_L3);
 
     final Set<SuperstructureState> algaeIntakeStates =
         Set.of(
@@ -199,7 +218,6 @@ public class Superstructure extends SubsystemBase {
             SuperstructureState.ALGAE_STOW,
             SuperstructureState.PROCESSING,
             SuperstructureState.BARGE,
-            SuperstructureState.BARGE_EJECT,
             SuperstructureState.TOSS)) {
       for (var to : freeNoAlgaeStates) {
         graph.addEdge(
@@ -225,7 +243,6 @@ public class Superstructure extends SubsystemBase {
         AlgaeEdge.ALGAE,
         true);
 
-    // Add bidirectional edge between PROCESSING and PROCESSING_EJECT
     addEdge.accept(
         SuperstructureState.PROCESSING,
         SuperstructureState.PROCESSING_EJECT,

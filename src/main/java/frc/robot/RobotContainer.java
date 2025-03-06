@@ -434,32 +434,13 @@ public class RobotContainer {
 
     driveController
         .b()
-        .whileTrue(
-            superstructure.runGoal(() -> RobotState.getInstance().getDesiredState().getEject()));
+        .whileTrue(superstructure.runGoal(() -> superstructure.getState().getEject()));
 
-    operatorController
-        .x()
-        .onTrue(
-            Commands.runOnce(
-                () -> {
-                  RobotState.getInstance().setDesiredState(SuperstructureState.L3_CORAL);
-                }));
+    operatorController.x().whileTrue(superstructure.runGoal(SuperstructureState.ALGAE_L2_INTAKE));
 
-    operatorController
-        .b()
-        .onTrue(
-            Commands.runOnce(
-                () -> {
-                  RobotState.getInstance().setDesiredState(SuperstructureState.L2_CORAL);
-                }));
+    operatorController.b().onTrue(superstructure.runGoal(SuperstructureState.PROCESSING));
 
-    operatorController
-        .a()
-        .onTrue(
-            Commands.runOnce(
-                () -> {
-                  RobotState.getInstance().setDesiredState(SuperstructureState.L4_CORAL);
-                }));
+    operatorController.a().onTrue(superstructure.runGoal(SuperstructureState.BARGE));
 
     /*
        var random = new Random();

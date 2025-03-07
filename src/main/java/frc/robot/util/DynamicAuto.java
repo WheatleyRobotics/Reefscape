@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.commands.AutoScore;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.superstructure.Superstructure;
@@ -18,7 +17,7 @@ import java.util.ArrayList;
 import org.littletonrobotics.junction.AutoLogOutput;
 
 public class DynamicAuto {
-  private static final double intakeTime = .5;
+  private static final double intakeTime = 1.0;
   private final Alert errorAlert = new Alert("Invalid dynamic auto", Alert.AlertType.kError);
 
   private final SendableChooser<String> startingChooser = new SendableChooser<>();
@@ -120,7 +119,10 @@ public class DynamicAuto {
       }
       boolean right = !(target % 2 == 0);
       return Commands.sequence(
-          new WaitCommand(intakeTime),
+          superstructure
+              .runGoal(SuperstructureState.INTAKE)
+              .until(() -> superstructure.isHasCoral())
+              .withTimeout(1),
           AutoBuilder.followPath(
                   isChoreo
                       ? PathPlannerPath.fromChoreoTrajectory(

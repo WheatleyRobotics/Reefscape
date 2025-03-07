@@ -30,18 +30,18 @@ public class VisionConstants {
 
   // Robot to camera transforms
   // (Not used by Limelight, configure in web UI instead)
-  public static Transform3d robotToCamera0 =
+  public static Transform3d robotToCamera0 = // Left Camera
       new Transform3d(
-          Units.inchesToMeters(12.935),
+          Units.inchesToMeters(12.635),
           Units.inchesToMeters(6.375),
           Units.inchesToMeters(7.5),
           new Rotation3d(
               0,
               Units.degreesToRadians(-15),
               Units.degreesToRadians(-15))); // pitch of -15 and yaw of -15
-  public static Transform3d robotToCamera1 =
+  public static Transform3d robotToCamera1 = // Right Camera
       new Transform3d(
-          Units.inchesToMeters(12.935),
+          Units.inchesToMeters(12.635),
           Units.inchesToMeters(-6.375),
           Units.inchesToMeters(7.5),
           new Rotation3d(
@@ -62,8 +62,8 @@ public class VisionConstants {
   // (Adjust to trust some cameras more than others)
   public static double[] cameraStdDevFactors =
       new double[] {
-        0.5, // Camera 0
-        1.5 // Camera 1
+        10, // Left Camera
+        1 // Right Camera
       };
 
   // Multipliers to apply for MegaTag 2 observations

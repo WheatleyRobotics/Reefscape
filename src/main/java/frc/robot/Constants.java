@@ -27,6 +27,7 @@ public final class Constants {
   public static final double loopPeriodSecs = 0.02;
   @Getter private static RobotType robotType = RobotType.COMPBOT;
   public static final boolean tuningMode = true;
+  public static final boolean autoIntake = false;
 
   public static Mode getMode() {
     return switch (robotType) {

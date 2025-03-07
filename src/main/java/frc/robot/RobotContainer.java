@@ -220,24 +220,26 @@ public class RobotContainer {
                 () -> -driveController.getLeftY() * 0.4,
                 () -> -driveController.getLeftX() * 0.4,
                 () -> -driveController.getRightX() * 0.3));
+    /*
+       driveController
+           .a()
+           .whileTrue(
+               DriveCommands.joystickDriveAtAngle(
+                   drive,
+                   () -> -driveController.getLeftY(),
+                   () -> -driveController.getLeftX(),
+                   () ->
+                       switch (RobotState.getInstance().getCurrentZone()) {
+                         case Z5 -> AllianceFlipUtil.getCorrected(
+                                 new Pose2d(0, 0, Rotation2d.fromDegrees(55)))
+                             .getRotation();
+                         case Z1 -> AllianceFlipUtil.getCorrected(
+                                 new Pose2d(0, 0, Rotation2d.fromDegrees(-55)))
+                             .getRotation();
+                         default -> RobotState.getInstance().getPose().getRotation();
+                       }));
 
-    driveController
-        .a()
-        .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -driveController.getLeftY(),
-                () -> -driveController.getLeftX(),
-                () ->
-                    switch (RobotState.getInstance().getCurrentZone()) {
-                      case Z5 -> AllianceFlipUtil.getCorrected(
-                              new Pose2d(0, 0, Rotation2d.fromDegrees(55)))
-                          .getRotation();
-                      case Z1 -> AllianceFlipUtil.getCorrected(
-                              new Pose2d(0, 0, Rotation2d.fromDegrees(-55)))
-                          .getRotation();
-                      default -> RobotState.getInstance().getPose().getRotation();
-                    }));
+    */
 
     driveController
         .b()
@@ -256,12 +258,12 @@ public class RobotContainer {
         .whileTrue(superstructure.runGoal(() -> superstructure.getState().getEject()));
 
     driveController
-        .povLeft()
+        .x()
         .whileTrue(Commands.run(() -> climb.runVolts(8)))
         .onFalse(Commands.runOnce(climb::stop));
 
     driveController
-        .povRight()
+        .a()
         .whileTrue(Commands.run(() -> climb.runVolts(-8)))
         .onFalse(Commands.runOnce(climb::stop));
 

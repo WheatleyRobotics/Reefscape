@@ -4,18 +4,18 @@
  "type":"Swerve",
  "variables":{
   "expressions":{
-   "LEFTY":{
+   "RIGHTY":{
     "dimension":"Number",
     "var":{
-     "exp":"6.4",
-     "val":6.4
+     "exp":"2",
+     "val":2.0
     }
    },
-   "RSOURCETHETA":{
+   "RSOURCEX":{
     "dimension":"Number",
     "var":{
-     "exp":"55",
-     "val":55.0
+     "exp":"1.2",
+     "val":1.2
     }
    },
    "LEFTX":{
@@ -32,18 +32,18 @@
      "val":1.0
     }
    },
-   "MIDY":{
+   "LSOURCEY":{
     "dimension":"Number",
     "var":{
-     "exp":"4",
-     "val":4.0
+     "exp":"7",
+     "val":7.0
     }
    },
-   "RIGHTY":{
+   "RSOURCETHETA":{
     "dimension":"Number",
     "var":{
-     "exp":"2",
-     "val":2.0
+     "exp":"55",
+     "val":55.0
     }
    },
    "LSOURCETHETA":{
@@ -53,11 +53,11 @@
      "val":305.0
     }
    },
-   "MIDX":{
+   "LEFTY":{
     "dimension":"Number",
     "var":{
-     "exp":"7.2",
-     "val":7.2
+     "exp":"6.4",
+     "val":6.4
     }
    },
    "STARTTHETA":{
@@ -67,20 +67,6 @@
      "val":180.0
     }
    },
-   "RIGHTX":{
-    "dimension":"Number",
-    "var":{
-     "exp":"7.5",
-     "val":7.5
-    }
-   },
-   "LSOURCEY":{
-    "dimension":"Number",
-    "var":{
-     "exp":"7",
-     "val":7.0
-    }
-   },
    "RSOURCEY":{
     "dimension":"Number",
     "var":{
@@ -88,23 +74,37 @@
      "val":1.7
     }
    },
-   "RSOURCEX":{
+   "MIDY":{
     "dimension":"Number",
     "var":{
-     "exp":"1.2",
-     "val":1.2
+     "exp":"4",
+     "val":4.0
+    }
+   },
+   "MIDX":{
+    "dimension":"Number",
+    "var":{
+     "exp":"7.2",
+     "val":7.2
+    }
+   },
+   "RIGHTX":{
+    "dimension":"Number",
+    "var":{
+     "exp":"7.5",
+     "val":7.5
     }
    }
   },
   "poses":{
-   "Z3":{
+   "Z4":{
     "x":{
-     "exp":"6.32 m",
-     "val":6.32
+     "exp":"5.4 m",
+     "val":5.4
     },
     "y":{
-     "exp":"4.03 m",
-     "val":4.03
+     "exp":"2.44 m",
+     "val":2.44
     },
     "heading":{
      "exp":"-120 deg",
@@ -119,6 +119,20 @@
     "y":{
      "exp":"2.44 m",
      "val":2.44
+    },
+    "heading":{
+     "exp":"-120 deg",
+     "val":-2.0943951023931953
+    }
+   },
+   "Z3":{
+    "x":{
+     "exp":"6.32 m",
+     "val":6.32
+    },
+    "y":{
+     "exp":"4.03 m",
+     "val":4.03
     },
     "heading":{
      "exp":"-120 deg",
@@ -153,28 +167,14 @@
      "val":-2.0943951023931953
     }
    },
-   "Z4":{
-    "x":{
-     "exp":"5.4 m",
-     "val":5.4
-    },
-    "y":{
-     "exp":"2.44 m",
-     "val":2.44
-    },
-    "heading":{
-     "exp":"-120 deg",
-     "val":-2.0943951023931953
-    }
-   },
    "RSOURCE":{
     "x":{
-     "exp":"1.68 m",
-     "val":1.68
+     "exp":"1.62 m",
+     "val":1.62
     },
     "y":{
-     "exp":"0.8 m",
-     "val":0.8
+     "exp":"0.62 m",
+     "val":0.62
     },
     "heading":{
      "exp":"0 rad",

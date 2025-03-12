@@ -121,8 +121,7 @@ public class DynamicAuto {
       return Commands.sequence(
           superstructure
               .runGoal(SuperstructureState.INTAKE)
-              .until(() -> superstructure.isHasCoral())
-              .withTimeout(1),
+              .until(() -> superstructure.isHasCoral()),
           AutoBuilder.followPath(
                   isChoreo
                       ? PathPlannerPath.fromChoreoTrajectory(

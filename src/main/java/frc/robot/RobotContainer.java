@@ -259,12 +259,14 @@ public class RobotContainer {
 
     driveController
         .x()
-        .whileTrue(Commands.run(() -> climb.runVolts(8)))
+        .whileTrue(Commands.run(() -> climb.runVolts(12)))
         .onFalse(Commands.runOnce(climb::stop));
 
     driveController
         .a()
-        .whileTrue(Commands.run(() -> climb.runVolts(-8)))
+        .whileTrue(
+            Commands.run(() -> climb.runVolts(-12))
+                .alongWith(Commands.runOnce(() -> climb.setServoPosition(0.0))))
         .onFalse(Commands.runOnce(climb::stop));
 
     driveController
@@ -504,6 +506,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return dynamicAuto.getAutoCommand();
+    // return dynamicAuto.getAutoCommand();
+    return autoChooser.get();
   }
 }

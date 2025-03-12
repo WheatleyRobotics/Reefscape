@@ -48,7 +48,7 @@ public class RobotState {
 
   @Getter
   @AutoLogOutput(key = "RobotState/shouldTrigSolve")
-  private boolean shouldTrigSolve = false;
+  private boolean shouldTrigSolve = true;
 
   @Getter
   @AutoLogOutput(key = "RobotState/RobotVelocity")
@@ -81,7 +81,7 @@ public class RobotState {
   public void update() {
     updateZone();
     updateIsClearedReef();
-    updateShouldTrigSolve();
+    // updateShouldTrigSolve();
   }
 
   public void resetPose(Pose2d pose) {

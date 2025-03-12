@@ -80,7 +80,11 @@ public enum SuperstructureState {
           .height(Height.FIRST_STAGE)
           .build()),
 
-  BARGE(SuperstructureStateData.builder().pose(SuperstructurePose.Preset.THROW.getPose()).build()),
+  BARGE(
+      SuperstructureStateData.builder()
+          .pose(SuperstructurePose.Preset.BARGE.getPose())
+          .gripperCurrent(Dispenser.gripperIntakeCurrent)
+          .build()),
 
   BARGE_EJECT(
       SuperstructureStateData.builder()

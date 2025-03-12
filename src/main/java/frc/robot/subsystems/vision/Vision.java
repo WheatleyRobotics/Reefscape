@@ -133,10 +133,10 @@ public class Vision extends SubsystemBase {
         double linearStdDev = linearStdDevBaseline * stdDevFactor;
         double angularStdDev = angularStdDevBaseline * stdDevFactor;
         if (observation.type() == PoseObservationType.MEGATAG_2) {
-          if(RobotState.getInstance().isShouldTrigSolve()){
+          if (RobotState.getInstance().isShouldTrigSolve()) {
             linearStdDev = Double.POSITIVE_INFINITY;
             angularStdDev = Double.POSITIVE_INFINITY;
-          }else {
+          } else {
             linearStdDev *= linearStdDevMegatag2Factor;
             angularStdDev *= angularStdDevMegatag2Factor;
           }

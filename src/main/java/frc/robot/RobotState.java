@@ -153,7 +153,7 @@ public class RobotState {
       headingDifference = 360 - headingDifference;
     }
 
-    boolean isCloseEnough = distanceToReef <= 0.75;
+    boolean isCloseEnough = distanceToReef <= 2.5;
     boolean isFacingReef = headingDifference <= Math.toDegrees(Math.PI / 6.0);
 
     shouldTrigSolve = isCloseEnough && isFacingReef;

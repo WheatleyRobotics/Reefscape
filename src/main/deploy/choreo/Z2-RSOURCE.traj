@@ -16,7 +16,7 @@
   "waypoints":[
     {"x":{"exp":"Z2.x", "val":5.4}, "y":{"exp":"Z2.y", "val":5.62}, "heading":{"exp":"240 deg", "val":4.1887902047863905}, "intervals":49, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
     {"x":{"exp":"2.6531598567962646 m", "val":2.6531598567962646}, "y":{"exp":"4.994617938995361 m", "val":4.994617938995361}, "heading":{"exp":"0 deg", "val":0.0}, "intervals":49, "split":false, "fixTranslation":true, "fixHeading":false, "overrideIntervals":false},
-    {"x":{"exp":"RSOURCE.x", "val":1.2}, "y":{"exp":"RSOURCE.y", "val":1.3}, "heading":{"exp":"RSOURCETHETA deg", "val":0.9599310885968813}, "intervals":28, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false}],
+    {"x":{"exp":"RSOURCE.x", "val":1.1}, "y":{"exp":"RSOURCE.y", "val":1.4}, "heading":{"exp":"RSOURCETHETA deg", "val":0.9599310885968813}, "intervals":28, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false}],
   "constraints":[
     {"from":"first", "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},
     {"from":"last", "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},

@@ -437,14 +437,14 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command runGoal(SuperstructureState goal) {
-    if(goal.equals(SuperstructureState.INTAKE)) {
+    if (goal.equals(SuperstructureState.INTAKE)) {
       dispenser.setHadCoral(false);
     }
     return runOnce(() -> setGoal(goal)).andThen(Commands.idle(this));
   }
 
   public Command runGoal(Supplier<SuperstructureState> goal) {
-    if(goal.get().equals(SuperstructureState.INTAKE)) {
+    if (goal.get().equals(SuperstructureState.INTAKE)) {
       dispenser.setHadCoral(false);
     }
     return run(() -> setGoal(goal.get()));

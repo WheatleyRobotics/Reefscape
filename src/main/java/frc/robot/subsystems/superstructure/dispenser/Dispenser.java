@@ -120,7 +120,8 @@ public class Dispenser {
   private Debouncer gamePieceDebouncer = new Debouncer(0.1);
   private Debouncer toleranceDebouncer = new Debouncer(0.25, DebounceType.kRising);
 
-  @AutoLogOutput(key = "Dispenser/Profile/HadCoral") @Setter
+  @AutoLogOutput(key = "Dispenser/Profile/HadCoral")
+  @Setter
   private boolean hadCoral = false;
 
   // Disconnected alerts

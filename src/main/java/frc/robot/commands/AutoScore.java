@@ -3,6 +3,7 @@ package frc.robot.commands;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.RobotState;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.superstructure.Superstructure;
@@ -14,7 +15,7 @@ import java.util.function.Supplier;
 public class AutoScore {
 
   public static final LoggedTunableNumber minClearReefDistance =
-      new LoggedTunableNumber("AutoScore/MinClearReefDistance", 0.7);
+      new LoggedTunableNumber("AutoScore/MinClearReefDistance", 0.6);
   public static final LoggedTunableNumber l4Offset =
       new LoggedTunableNumber("AutoScore/L4Offset", 0.515);
   public static final LoggedTunableNumber coralOffset =
@@ -26,10 +27,12 @@ public class AutoScore {
       Drive drive,
       Superstructure superstructure) {
     return Commands.sequence(
-        // Commands.runOnce(() -> RobotState.getInstance().setShouldTrigSolve(true)),
+        /*
         superstructure
             .runGoal(SuperstructureState.INTAKE)
             .onlyIf(() -> !superstructure.isHasCoral()),
+
+             */
         superstructure
             .runGoal(
                 () -> {
@@ -37,7 +40,8 @@ public class AutoScore {
                     return SuperstructureState.L1_CORAL;
                   else return state.get();
                 })
-            .until(superstructure::atGoal)
+            .withTimeout(0.6)
+            // .until(superstructure::atGoal)
             .deadlineFor(
                 new DriveToPose(
                     drive,
@@ -46,19 +50,30 @@ public class AutoScore {
                             FieldConstants.getBranch(
                                 RobotState.getInstance().getCurrentZone(), right),
                             -minClearReefDistance.get()))),
-        new DriveToPose(
-                drive,
-                () ->
-                    FieldConstants.addOffset(
-                        FieldConstants.getBranch(RobotState.getInstance().getCurrentZone(), right),
-                        state.get().equals(SuperstructureState.L4_CORAL)
-                            ? -l4Offset.get()
-                            : -coralOffset.get()))
-            .withTimeout(2),
-        superstructure.runGoal(() -> state.get().getEject()).withTimeout(0.5),
-        getClearReefCommand(drive),
-        superstructure.runGoal(() -> SuperstructureState.STOW).withTimeout(0.2));
-    // Commands.runOnce(() -> RobotState.getInstance().setShouldTrigSolve(false)));
+        Commands.parallel(
+            new DriveToPose(
+                    drive,
+                    () ->
+                        FieldConstants.addOffset(
+                            FieldConstants.getBranch(
+                                RobotState.getInstance().getCurrentZone(), right),
+                            state.get().equals(SuperstructureState.L4_CORAL)
+                                ? -l4Offset.get()
+                                : -coralOffset.get()))
+                .withTimeout(2),
+            superstructure
+                .runGoal(
+                    () -> {
+                      if (state.get().equals(SuperstructureState.STOW))
+                        return SuperstructureState.L1_CORAL;
+                      else return state.get();
+                    })
+                .until(superstructure::atGoal)),
+        superstructure.runGoal(() -> state.get().getEject()).until(() -> !superstructure.atGoal()),
+        Commands.parallel(
+            getClearReefCommand(drive),
+            new WaitCommand(0.2)
+                .andThen(superstructure.runGoal(() -> SuperstructureState.STOW).withTimeout(0.2))));
   }
 
   public static Command getClearReefCommand(Drive drive) {

@@ -32,8 +32,8 @@ public class DynamicAuto {
     this.drive = drive;
     this.superstructure = superstructure;
     startingChooser.addOption("Left", "LEFT");
-    startingChooser.setDefaultOption("Center", "MIDDLE");
-    startingChooser.addOption("Right", "RIGHT");
+    startingChooser.addOption("Center", "MIDDLE");
+    startingChooser.setDefaultOption("Right", "RIGHT");
     sourceChooser.addOption("Left", "LSOURCE");
     sourceChooser.setDefaultOption("Right", "RSOURCE");
     for (int i = 0; i < 4; i++) {
@@ -57,7 +57,7 @@ public class DynamicAuto {
     Command s1;
     try {
       int target = coralChooser.get(0).getSelected();
-      String source = sourceChooser.getSelected();
+      // String source = sourceChooser.getSelected();
       boolean right = !(coralChooser.get(0).getSelected() % 2 == 0);
 
       PathPlannerPath startPath =
@@ -72,12 +72,17 @@ public class DynamicAuto {
               AutoBuilder.followPath(startPath),
               AutoScore.getAutoScoreCommand(
                   () -> SuperstructureState.L4_CORAL, right, drive, superstructure),
-              AutoBuilder.followPath(
-                  isChoreo
-                      ? PathPlannerPath.fromChoreoTrajectory(
-                          getCoralZone(target) + "-" + sourceChooser.getSelected())
-                      : PathPlannerPath.fromPathFile(
-                          getCoralZone(target) + "-" + sourceChooser.getSelected())));
+              Commands.parallel(
+                  AutoBuilder.followPath(
+                      isChoreo
+                          ? PathPlannerPath.fromChoreoTrajectory(
+                              getCoralZone(target) + "-" + sourceChooser.getSelected())
+                          : PathPlannerPath.fromPathFile(
+                              getCoralZone(target) + "-" + sourceChooser.getSelected())),
+                  superstructure
+                      .runGoal(SuperstructureState.INTAKE)
+                      .until(() -> superstructure.isHasCoral())));
+
     } catch (Exception e) {
       System.out.println(e.toString());
       System.out.println(
@@ -134,14 +139,18 @@ public class DynamicAuto {
                       .until(() -> superstructure.isHasCoral())),
           AutoScore.getAutoScoreCommand(
               () -> SuperstructureState.L4_CORAL, right, drive, superstructure),
-          isLast
-              ? Commands.none()
-              : AutoBuilder.followPath(
-                  isChoreo
-                      ? PathPlannerPath.fromChoreoTrajectory(
-                          targetString + "-" + sourceChooser.getSelected())
-                      : PathPlannerPath.fromPathFile(
-                          targetString + "-" + sourceChooser.getSelected())));
+          Commands.parallel(
+              superstructure
+                  .runGoal(SuperstructureState.INTAKE)
+                  .until(() -> superstructure.isHasCoral()),
+              isLast
+                  ? Commands.none()
+                  : AutoBuilder.followPath(
+                      isChoreo
+                          ? PathPlannerPath.fromChoreoTrajectory(
+                              targetString + "-" + sourceChooser.getSelected())
+                          : PathPlannerPath.fromPathFile(
+                              targetString + "-" + sourceChooser.getSelected()))));
     } catch (Exception e) {
       System.out.println("Error in section " + target);
       errorAlert.set(true);

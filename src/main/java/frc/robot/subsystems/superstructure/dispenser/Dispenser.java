@@ -120,6 +120,9 @@ public class Dispenser {
   private Debouncer gamePieceDebouncer = new Debouncer(0.1);
   private Debouncer toleranceDebouncer = new Debouncer(0.25, DebounceType.kRising);
 
+  @AutoLogOutput(key = "Dispenser/Profile/HadCoral") @Setter
+  private boolean hadCoral = false;
+
   // Disconnected alerts
   private final Alert pivotMotorDisconnectedAlert =
       new Alert("Dispenser pivot motor disconnected!", Alert.AlertType.kWarning);
@@ -239,12 +242,20 @@ public class Dispenser {
           || currentState.equals(SuperstructureState.PROCESSING_EJECT)
           || currentState.equals(SuperstructureState.BARGE)) {
         tunnelIO.runTorqueCurrent(gripperCurrent);
-      } else if (currentState.equals(SuperstructureState.INTAKE) && !hasCoral) {
-        tunnelIO.runVolts(tunnelIntakeVolts.get());
+      } else if (currentState.equals(SuperstructureState.INTAKE)) {
+        if (!hasCoral && !hadCoral) {
+          tunnelIO.runVolts(tunnelIntakeVolts.get());
+        } else if (hasCoral && !hadCoral) {
+          tunnelIO.runVolts(tunnelIntakeVolts.get() / 5.0);
+          hadCoral = true;
+        } else if (!hasCoral) {
+          tunnelIO.runVolts(-tunnelIntakeVolts.get() / 5.0);
+        }
       } else if (currentState.equals(SuperstructureState.L1_CORAL_EJECT)
           || currentState.equals(SuperstructureState.L2_CORAL_EJECT)
           || currentState.equals(SuperstructureState.L3_CORAL_EJECT)
           || currentState.equals(SuperstructureState.L4_CORAL_EJECT)) {
+        hadCoral = false;
         tunnelIO.runVolts(tunnelDispenseVolts.get());
       } else {
         tunnelIO.stop();

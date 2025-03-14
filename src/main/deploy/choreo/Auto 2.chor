@@ -4,20 +4,6 @@
  "type":"Swerve",
  "variables":{
   "expressions":{
-   "RIGHTY":{
-    "dimension":"Number",
-    "var":{
-     "exp":"2",
-     "val":2.0
-    }
-   },
-   "RSOURCEX":{
-    "dimension":"Number",
-    "var":{
-     "exp":"1.2",
-     "val":1.2
-    }
-   },
    "LEFTX":{
     "dimension":"Number",
     "var":{
@@ -25,25 +11,11 @@
      "val":7.2
     }
    },
-   "LSOURCEX":{
+   "MIDX":{
     "dimension":"Number",
     "var":{
-     "exp":"1",
-     "val":1.0
-    }
-   },
-   "LSOURCEY":{
-    "dimension":"Number",
-    "var":{
-     "exp":"7",
-     "val":7.0
-    }
-   },
-   "RSOURCETHETA":{
-    "dimension":"Number",
-    "var":{
-     "exp":"55",
-     "val":55.0
+     "exp":"7.2",
+     "val":7.2
     }
    },
    "LSOURCETHETA":{
@@ -60,20 +32,6 @@
      "val":6.4
     }
    },
-   "STARTTHETA":{
-    "dimension":"Number",
-    "var":{
-     "exp":"180",
-     "val":180.0
-    }
-   },
-   "RSOURCEY":{
-    "dimension":"Number",
-    "var":{
-     "exp":"1.7",
-     "val":1.7
-    }
-   },
    "MIDY":{
     "dimension":"Number",
     "var":{
@@ -81,11 +39,18 @@
      "val":4.0
     }
    },
-   "MIDX":{
+   "RSOURCEX":{
     "dimension":"Number",
     "var":{
-     "exp":"7.2",
-     "val":7.2
+     "exp":"1.2",
+     "val":1.2
+    }
+   },
+   "RIGHTY":{
+    "dimension":"Number",
+    "var":{
+     "exp":"2",
+     "val":2.0
     }
    },
    "RIGHTX":{
@@ -94,51 +59,44 @@
      "exp":"7.5",
      "val":7.5
     }
+   },
+   "STARTTHETA":{
+    "dimension":"Number",
+    "var":{
+     "exp":"180",
+     "val":180.0
+    }
+   },
+   "RSOURCETHETA":{
+    "dimension":"Number",
+    "var":{
+     "exp":"55",
+     "val":55.0
+    }
+   },
+   "LSOURCEY":{
+    "dimension":"Number",
+    "var":{
+     "exp":"7",
+     "val":7.0
+    }
+   },
+   "LSOURCEX":{
+    "dimension":"Number",
+    "var":{
+     "exp":"1",
+     "val":1.0
+    }
+   },
+   "RSOURCEY":{
+    "dimension":"Number",
+    "var":{
+     "exp":"1.7",
+     "val":1.7
+    }
    }
   },
   "poses":{
-   "Z4":{
-    "x":{
-     "exp":"5.4 m",
-     "val":5.4
-    },
-    "y":{
-     "exp":"2.44 m",
-     "val":2.44
-    },
-    "heading":{
-     "exp":"-120 deg",
-     "val":-2.0943951023931953
-    }
-   },
-   "Z5":{
-    "x":{
-     "exp":"3.57 m",
-     "val":3.57
-    },
-    "y":{
-     "exp":"2.44 m",
-     "val":2.44
-    },
-    "heading":{
-     "exp":"-120 deg",
-     "val":-2.0943951023931953
-    }
-   },
-   "Z3":{
-    "x":{
-     "exp":"6.32 m",
-     "val":6.32
-    },
-    "y":{
-     "exp":"4.03 m",
-     "val":4.03
-    },
-    "heading":{
-     "exp":"-120 deg",
-     "val":-2.0943951023931953
-    }
-   },
    "Z1":{
     "x":{
      "exp":"3.57 m",
@@ -167,18 +125,46 @@
      "val":-2.0943951023931953
     }
    },
-   "RSOURCE":{
+   "Z3":{
     "x":{
-     "exp":"1.62 m",
-     "val":1.62
+     "exp":"6.32 m",
+     "val":6.32
     },
     "y":{
-     "exp":"0.62 m",
-     "val":0.62
+     "exp":"4.03 m",
+     "val":4.03
+    },
+    "heading":{
+     "exp":"-120 deg",
+     "val":-2.0943951023931953
+    }
+   },
+   "RSOURCE":{
+    "x":{
+     "exp":"1.1 m",
+     "val":1.1
+    },
+    "y":{
+     "exp":"1.4 m",
+     "val":1.4
     },
     "heading":{
      "exp":"0 rad",
      "val":0.0
+    }
+   },
+   "Z4":{
+    "x":{
+     "exp":"5.4 m",
+     "val":5.4
+    },
+    "y":{
+     "exp":"2.44 m",
+     "val":2.44
+    },
+    "heading":{
+     "exp":"-120 deg",
+     "val":-2.0943951023931953
     }
    },
    "Z0":{
@@ -189,6 +175,20 @@
     "y":{
      "exp":"4.03 m",
      "val":4.03
+    },
+    "heading":{
+     "exp":"-120 deg",
+     "val":-2.0943951023931953
+    }
+   },
+   "Z5":{
+    "x":{
+     "exp":"3.57 m",
+     "val":3.57
+    },
+    "y":{
+     "exp":"2.44 m",
+     "val":2.44
     },
     "heading":{
      "exp":"-120 deg",
@@ -239,8 +239,8 @@
    "val":523.5987755982989
   },
   "tmax":{
-   "exp":"0.5 N * m",
-   "val":0.5
+   "exp":"0.6 N * m",
+   "val":0.6
   },
   "cof":{
    "exp":"1.5",

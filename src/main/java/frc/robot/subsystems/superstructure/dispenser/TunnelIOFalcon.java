@@ -70,6 +70,7 @@ public class TunnelIOFalcon implements TunnelIO {
     CANrangeConfiguration canRangeConfig = new CANrangeConfiguration();
     ProximityParamsConfigs proximityParamsConfigs = new ProximityParamsConfigs();
     proximityParamsConfigs.withProximityThreshold(0.2);
+    proximityParamsConfigs.withMinSignalStrengthForValidMeasurement(10000);
     canRangeConfig.withProximityParams(proximityParamsConfigs);
     tryUntilOk(5, () -> canRange.getConfigurator().apply(canRangeConfig));
 

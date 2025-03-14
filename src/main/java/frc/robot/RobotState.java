@@ -81,7 +81,7 @@ public class RobotState {
   public void update() {
     updateZone();
     updateIsClearedReef();
-    // updateShouldTrigSolve();
+    updateShouldTrigSolve();
   }
 
   public void resetPose(Pose2d pose) {
@@ -153,7 +153,7 @@ public class RobotState {
       headingDifference = 360 - headingDifference;
     }
 
-    boolean isCloseEnough = distanceToReef <= 1.75;
+    boolean isCloseEnough = distanceToReef <= 0.75;
     boolean isFacingReef = headingDifference <= Math.toDegrees(Math.PI / 6.0);
 
     shouldTrigSolve = isCloseEnough && isFacingReef;

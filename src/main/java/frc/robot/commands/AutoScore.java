@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 public class AutoScore {
 
   public static final LoggedTunableNumber minClearReefDistance =
-      new LoggedTunableNumber("AutoScore/MinClearReefDistance", 0.6);
+      new LoggedTunableNumber("AutoScore/MinClearReefDistance", 0.65);
   public static final LoggedTunableNumber l4Offset =
       new LoggedTunableNumber("AutoScore/L4Offset", 0.515);
   public static final LoggedTunableNumber coralOffset =
@@ -27,12 +27,9 @@ public class AutoScore {
       Drive drive,
       Superstructure superstructure) {
     return Commands.sequence(
-        /*
         superstructure
             .runGoal(SuperstructureState.INTAKE)
             .onlyIf(() -> !superstructure.isHasCoral()),
-
-             */
         superstructure
             .runGoal(
                 () -> {
@@ -69,7 +66,10 @@ public class AutoScore {
                       else return state.get();
                     })
                 .until(superstructure::atGoal)),
-        superstructure.runGoal(() -> state.get().getEject()).until(() -> !superstructure.atGoal()),
+        new WaitCommand(0.1),
+        superstructure
+            .runGoal(() -> state.get().getEject())
+            .until(() -> !superstructure.isHasCoral()),
         Commands.parallel(
             getClearReefCommand(drive),
             new WaitCommand(0.2)
@@ -78,7 +78,7 @@ public class AutoScore {
 
   public static Command getClearReefCommand(Drive drive) {
     return Commands.sequence(
-        Commands.run(() -> drive.runVelocity(new ChassisSpeeds(-2.0, 0, 0)))
+        Commands.run(() -> drive.runVelocity(new ChassisSpeeds(-1.75, 0, 0)))
             .until(() -> RobotState.getInstance().isClearedReef()),
         Commands.runOnce(() -> drive.runVelocity(new ChassisSpeeds(0, 0, 0))));
   }

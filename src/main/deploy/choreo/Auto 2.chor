@@ -4,6 +4,27 @@
  "type":"Swerve",
  "variables":{
   "expressions":{
+   "RSOURCEX":{
+    "dimension":"Number",
+    "var":{
+     "exp":"1.2",
+     "val":1.2
+    }
+   },
+   "LEFTX":{
+    "dimension":"Number",
+    "var":{
+     "exp":"7.2",
+     "val":7.2
+    }
+   },
+   "MIDX":{
+    "dimension":"Number",
+    "var":{
+     "exp":"7.2",
+     "val":7.2
+    }
+   },
    "RSOURCETHETA":{
     "dimension":"Number",
     "var":{
@@ -11,11 +32,25 @@
      "val":55.0
     }
    },
-   "LSOURCEX":{
+   "RIGHTY":{
     "dimension":"Number",
     "var":{
-     "exp":"1",
-     "val":1.0
+     "exp":"2",
+     "val":2.0
+    }
+   },
+   "LSOURCEY":{
+    "dimension":"Number",
+    "var":{
+     "exp":"7",
+     "val":7.0
+    }
+   },
+   "LSOURCETHETA":{
+    "dimension":"Number",
+    "var":{
+     "exp":"305",
+     "val":305.0
     }
    },
    "STARTTHETA":{
@@ -32,60 +67,11 @@
      "val":1.7
     }
    },
-   "MIDX":{
-    "dimension":"Number",
-    "var":{
-     "exp":"7.2",
-     "val":7.2
-    }
-   },
-   "LEFTX":{
-    "dimension":"Number",
-    "var":{
-     "exp":"7.2",
-     "val":7.2
-    }
-   },
-   "LSOURCETHETA":{
-    "dimension":"Number",
-    "var":{
-     "exp":"305",
-     "val":305.0
-    }
-   },
-   "LSOURCEY":{
-    "dimension":"Number",
-    "var":{
-     "exp":"7",
-     "val":7.0
-    }
-   },
    "RIGHTX":{
     "dimension":"Number",
     "var":{
      "exp":"7.5",
      "val":7.5
-    }
-   },
-   "RSOURCEX":{
-    "dimension":"Number",
-    "var":{
-     "exp":"1.2",
-     "val":1.2
-    }
-   },
-   "RIGHTY":{
-    "dimension":"Number",
-    "var":{
-     "exp":"2",
-     "val":2.0
-    }
-   },
-   "LEFTY":{
-    "dimension":"Number",
-    "var":{
-     "exp":"6.4",
-     "val":6.4
     }
    },
    "MIDY":{
@@ -94,45 +80,31 @@
      "exp":"4",
      "val":4.0
     }
+   },
+   "LSOURCEX":{
+    "dimension":"Number",
+    "var":{
+     "exp":"1",
+     "val":1.0
+    }
+   },
+   "LEFTY":{
+    "dimension":"Number",
+    "var":{
+     "exp":"6.4",
+     "val":6.4
+    }
    }
   },
   "poses":{
-   "RSOURCE":{
-    "x":{
-     "exp":"1.1 m",
-     "val":1.1
-    },
-    "y":{
-     "exp":"1.4 m",
-     "val":1.4
-    },
-    "heading":{
-     "exp":"0 rad",
-     "val":0.0
-    }
-   },
-   "Z2":{
-    "x":{
-     "exp":"5.4 m",
-     "val":5.4
-    },
-    "y":{
-     "exp":"5.62 m",
-     "val":5.62
-    },
-    "heading":{
-     "exp":"-120 deg",
-     "val":-2.0943951023931953
-    }
-   },
    "Z4":{
     "x":{
-     "exp":"5.4 m",
-     "val":5.4
+     "exp":"5.43 m",
+     "val":5.43
     },
     "y":{
-     "exp":"2.44 m",
-     "val":2.44
+     "exp":"2.5 m",
+     "val":2.5
     },
     "heading":{
      "exp":"-120 deg",
@@ -147,20 +119,6 @@
     "y":{
      "exp":"2.44 m",
      "val":2.44
-    },
-    "heading":{
-     "exp":"-120 deg",
-     "val":-2.0943951023931953
-    }
-   },
-   "Z3":{
-    "x":{
-     "exp":"6.32 m",
-     "val":6.32
-    },
-    "y":{
-     "exp":"4.03 m",
-     "val":4.03
     },
     "heading":{
      "exp":"-120 deg",
@@ -193,6 +151,48 @@
     "heading":{
      "exp":"-120 deg",
      "val":-2.0943951023931953
+    }
+   },
+   "Z2":{
+    "x":{
+     "exp":"5.4 m",
+     "val":5.4
+    },
+    "y":{
+     "exp":"5.62 m",
+     "val":5.62
+    },
+    "heading":{
+     "exp":"-120 deg",
+     "val":-2.0943951023931953
+    }
+   },
+   "Z3":{
+    "x":{
+     "exp":"6.32 m",
+     "val":6.32
+    },
+    "y":{
+     "exp":"4.03 m",
+     "val":4.03
+    },
+    "heading":{
+     "exp":"-120 deg",
+     "val":-2.0943951023931953
+    }
+   },
+   "RSOURCE":{
+    "x":{
+     "exp":"1.17887 m",
+     "val":1.17887
+    },
+    "y":{
+     "exp":"1.241 m",
+     "val":1.241
+    },
+    "heading":{
+     "exp":"0 rad",
+     "val":0.0
     }
    }
   }
@@ -231,16 +231,16 @@
    "val":6.12
   },
   "radius":{
-   "exp":"2 in",
-   "val":0.0508
+   "exp":"1.935 in",
+   "val":0.049149
   },
   "vmax":{
    "exp":"5000 RPM",
    "val":523.5987755982989
   },
   "tmax":{
-   "exp":"0.6 N * m",
-   "val":0.6
+   "exp":"0.8 N * m",
+   "val":0.8
   },
   "cof":{
    "exp":"1.5",
@@ -248,16 +248,16 @@
   },
   "bumper":{
    "front":{
-    "exp":"18 in",
-    "val":0.4572
+    "exp":"17.5 in",
+    "val":0.4445
    },
    "side":{
-    "exp":"18 in",
-    "val":0.4572
+    "exp":"17.5 in",
+    "val":0.4445
    },
    "back":{
-    "exp":"18 in",
-    "val":0.4572
+    "exp":"17.5 in",
+    "val":0.4445
    }
   },
   "differentialTrackWidth":{

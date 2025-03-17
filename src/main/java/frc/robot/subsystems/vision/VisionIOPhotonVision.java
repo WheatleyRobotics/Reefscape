@@ -99,7 +99,7 @@ public class VisionIOPhotonVision implements VisionIO {
                   0.0, // Ambiguity
                   estimatedRobotPose.targetsUsed.size(), // Tag count
                   totalTagDistance / result.targets.size(), // Average tag distance
-                  PoseObservationType.PHOTONVISIONTRIG)); // Observation type
+                  PoseObservationType.PHOTON_TRIG)); // Observation type
         } else if (result.multitagResult.isPresent()) {
           var multitagResult = result.multitagResult.get();
           // Calculate robot pose
@@ -124,7 +124,7 @@ public class VisionIOPhotonVision implements VisionIO {
                   multitagResult.estimatedPose.ambiguity, // Ambiguity
                   multitagResult.fiducialIDsUsed.size(), // Tag count
                   totalTagDistance / result.targets.size(), // Average tag distance
-                  PoseObservationType.PHOTONVISION)); // Observation type
+                  PoseObservationType.PHOTON_MULTI_TAG)); // Observation type
         } else {
           var estimatedRobotPose = singleEstimator.update(result).get();
           Pose3d robotPose = estimatedRobotPose.estimatedPose;
@@ -142,7 +142,7 @@ public class VisionIOPhotonVision implements VisionIO {
                   estimatedRobotPose.targetsUsed.get(0).poseAmbiguity, // Ambiguity
                   estimatedRobotPose.targetsUsed.size(), // Tag count
                   totalTagDistance / result.targets.size(), // Average tag distance
-                  PoseObservationType.PHOTONVISION)); // Observation type
+                  PoseObservationType.PHOTON_MULTI_TAG)); // Observation type
         }
       }
     }

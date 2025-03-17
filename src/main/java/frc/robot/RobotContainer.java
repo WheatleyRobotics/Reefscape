@@ -154,7 +154,12 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                new VisionIO() {},
+                new VisionIO() {},
+                new VisionIO() {});
         elevator = new Elevator(new ElevatorIO() {});
         dispenser = new Dispenser(new PivotIO() {}, new TunnelIO() {});
         slam = new Slam(new SlamIO() {}, new TunnelIO() {});

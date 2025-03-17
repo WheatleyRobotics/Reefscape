@@ -120,7 +120,7 @@ public class Dispenser {
   private Debouncer gamePieceDebouncer = new Debouncer(0.1);
   private Debouncer toleranceDebouncer = new Debouncer(0.25, DebounceType.kRising);
 
-  @AutoLogOutput(key = "Dispenser/Profile/HadCoral")
+  @AutoLogOutput(key = "Dispenser/HadCoral")
   @Setter
   private boolean hadCoral = false;
 
@@ -271,10 +271,7 @@ public class Dispenser {
     if ((Robot.isReal()) && !RobotState.getInstance().isAuto()) {
       if (currentState.equals(SuperstructureState.ALGAE_L2_INTAKE)
           || currentState.equals(SuperstructureState.ALGAE_L3_INTAKE)) {
-        if (gamePieceDebouncer.calculate(
-            Math.abs(tunnelInputs.talonSupplyCurrentAmps) >= algaeIntakeCurrentThresh.get())) {
-          hasAlgae = true;
-        }
+        hasAlgae = true;
       }
     }
     if (Robot.isSimulation()) {

@@ -293,7 +293,10 @@ public class RobotContainer {
 
     operatorController
         .x()
-        .whileTrue(superstructure.runGoal(SuperstructureState.INTAKE).withName("Running Intake"));
+        .whileTrue(
+            Commands.runOnce(() -> RobotState.getInstance().setHadCoral(false))
+                .andThen(
+                    superstructure.runGoal(SuperstructureState.INTAKE).withName("Running Intake")));
 
     operatorController
         .b()

@@ -30,6 +30,7 @@ public class AutoScore {
         superstructure
             .runGoal(SuperstructureState.INTAKE)
             .onlyIf(() -> !superstructure.isHasCoral()),
+        Commands.runOnce(() -> RobotState.getInstance().setSide(right ? 1 : 0)),
         superstructure
             .runGoal(
                 () -> {
@@ -37,18 +38,19 @@ public class AutoScore {
                     return SuperstructureState.L1_CORAL;
                   else return state.get();
                 })
-            .withTimeout(0.6)
+            .withTimeout(0.8)
             // .until(superstructure::atGoal)
             .deadlineFor(
                 new DriveToPose(
                     drive,
                     () ->
                         FieldConstants.addOffset(
-                            FieldConstants.getBranch(
-                                RobotState.getInstance().getCurrentZone(), right),
-                            -minClearReefDistance.get()))),
+                                FieldConstants.getBranch(
+                                    RobotState.getInstance().getCurrentZone(), right),
+                                -minClearReefDistance.get())
+                            .interpolate(RobotState.getInstance().getPose(), 0.5))),
         Commands.parallel(
-            new DriveToPose(
+                new DriveToPose(
                     drive,
                     () ->
                         FieldConstants.addOffset(
@@ -56,24 +58,28 @@ public class AutoScore {
                                 RobotState.getInstance().getCurrentZone(), right),
                             state.get().equals(SuperstructureState.L4_CORAL)
                                 ? -l4Offset.get()
-                                : -coralOffset.get()))
-                .withTimeout(2),
-            superstructure
-                .runGoal(
-                    () -> {
-                      if (state.get().equals(SuperstructureState.STOW))
-                        return SuperstructureState.L1_CORAL;
-                      else return state.get();
-                    })
-                .until(superstructure::atGoal)),
+                                : -coralOffset.get())),
+                superstructure
+                    .runGoal(
+                        () -> {
+                          if (state.get().equals(SuperstructureState.STOW))
+                            return SuperstructureState.L1_CORAL;
+                          else return state.get();
+                        })
+                    .until(superstructure::atGoal))
+            .withTimeout(2),
         new WaitCommand(0.1),
         superstructure
             .runGoal(() -> state.get().getEject())
-            .until(() -> !superstructure.isHasCoral()),
-        Commands.parallel(
-            getClearReefCommand(drive),
-            new WaitCommand(0.2)
-                .andThen(superstructure.runGoal(() -> SuperstructureState.STOW).withTimeout(0.2))));
+            .until(() -> !superstructure.isHasCoral())
+            .andThen(new WaitCommand(0.1)),
+        new WaitCommand(0.2)
+            .andThen(superstructure.runGoal(() -> SuperstructureState.STOW).withTimeout(0.1))
+            .deadlineFor(
+                RobotState.getInstance().isAuto()
+                    ? Commands.runOnce(() -> drive.runVelocity(new ChassisSpeeds(-1, 0, 0)))
+                    : getClearReefCommand(drive)),
+        Commands.runOnce(() -> RobotState.getInstance().setSide(-1)));
   }
 
   public static Command getClearReefCommand(Drive drive) {

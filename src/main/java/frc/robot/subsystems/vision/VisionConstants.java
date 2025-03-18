@@ -53,24 +53,17 @@ public class VisionConstants {
   public static double maxAmbiguity = 0.3;
   public static double maxZError = 0.1;
 
-  // Standard deviation baselines, for 1 meter distance and 1 tag
-  // (Adjusted automatically based on distance and # of tags)
-  public static double linearStdDevBaseline = 2.0; // Meters .02
-  public static double angularStdDevBaseline = Double.POSITIVE_INFINITY; // Radians .06
-
   // Standard deviation multipliers for each camera
   // (Adjust to trust some cameras more than others)
   public static double[] cameraStdDevFactors =
       new double[] {
-        1, // Left Camera
-        1 // Right Camera
+        1.5, // Left Camera
+        1.5 // Right Camera
       };
 
   // Multipliers to apply for MegaTag 2 observations
-  public static double linearStdDevMegatag2Factor = 3; // More stable than full 3D solve
-  public static double angularStdDevMegatag2Factor =
-      Double.POSITIVE_INFINITY; // No rotation data available
-
-  public static double linearStdDevPhotonTrig = 0.5;
-  public static double angularStdDevPhotonTrig = Double.POSITIVE_INFINITY;
+  public static double linearStdDevMegatagFactor = 1.5; // More stable than full 3D solve
+  public static double linearStdDevPhotonMultiTag = 0.8;
+  public static double linearStdDevPhotonTrig = 0.25;
+  public static double linearStdDevPhotonSingleTag = 2.0;
 }

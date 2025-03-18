@@ -1,10 +1,3 @@
-// Copyright (c) 2025 FRC 6328
-// http://github.com/Mechanical-Advantage
-//
-// Use of this source code is governed by an MIT-style
-// license that can be found in the LICENSE file at
-// the root directory of this project.
-
 package frc.robot.commands;
 
 import edu.wpi.first.math.MathUtil;
@@ -19,10 +12,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.RobotState;
 import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.util.GeomUtil;
 import frc.robot.util.LoggedTunableNumber;
-import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
@@ -34,8 +25,6 @@ public class DriveToPose extends Command {
   private static final LoggedTunableNumber thetakD = new LoggedTunableNumber("DriveToPose/ThetakD");
   private static final LoggedTunableNumber driveMaxVelocity =
       new LoggedTunableNumber("DriveToPose/DriveMaxVelocity");
-  private static final LoggedTunableNumber driveMaxVelocitySlow =
-      new LoggedTunableNumber("DriveToPose/DriveMaxVelocitySlow");
   private static final LoggedTunableNumber driveMaxAcceleration =
       new LoggedTunableNumber("DriveToPose/DriveMaxAcceleration");
   private static final LoggedTunableNumber thetaMaxVelocity =
@@ -46,24 +35,24 @@ public class DriveToPose extends Command {
       new LoggedTunableNumber("DriveToPose/DriveTolerance");
   private static final LoggedTunableNumber thetaTolerance =
       new LoggedTunableNumber("DriveToPose/ThetaTolerance");
-  private static final LoggedTunableNumber ffMinRadius =
-      new LoggedTunableNumber("DriveToPose/FFMinRadius");
-  private static final LoggedTunableNumber ffMaxRadius =
-      new LoggedTunableNumber("DriveToPose/FFMaxRadius");
+  private static final LoggedTunableNumber approachDistanceThreshold =
+      new LoggedTunableNumber("DriveToPose/ApproachDistanceThreshold");
+  private static final LoggedTunableNumber approachVelocityScale =
+      new LoggedTunableNumber("DriveToPose/ApproachVelocityScale");
 
   static {
-    drivekP.initDefault(2.05);
-    drivekD.initDefault(0.15);
-    thetakP.initDefault(4.0);
-    thetakD.initDefault(0.0);
-    driveMaxVelocity.initDefault(1.5);
-    driveMaxAcceleration.initDefault(3);
-    thetaMaxVelocity.initDefault(Units.degreesToRadians(360.0));
-    thetaMaxAcceleration.initDefault(Units.degreesToRadians(720.0));
+    drivekP.initDefault(2.0); // Reduced from 2.05
+    drivekD.initDefault(0.2); // Increased from 0.15
+    thetakP.initDefault(3.0); // Reduced from 4.0
+    thetakD.initDefault(0.1); // Increased from 0.0
+    driveMaxVelocity.initDefault(1.2); // Reduced from 1.5
+    driveMaxAcceleration.initDefault(2.0); // Reduced from 3.0
+    thetaMaxVelocity.initDefault(Units.degreesToRadians(300.0)); // Reduced from 360.0
+    thetaMaxAcceleration.initDefault(Units.degreesToRadians(540.0)); // Reduced from 720.0
     driveTolerance.initDefault(0.01);
     thetaTolerance.initDefault(Units.degreesToRadians(1.0));
-    ffMinRadius.initDefault(0.15);
-    ffMaxRadius.initDefault(1.0);
+    approachDistanceThreshold.initDefault(0.1); // Distance threshold for gentle approach
+    approachVelocityScale.initDefault(0.85); // Scale factor for velocity during approach
   }
 
   private final Drive drive;
@@ -81,9 +70,6 @@ public class DriveToPose extends Command {
   private double thetaErrorAbs = 0.0;
   @Getter private boolean running = false;
 
-  private Supplier<Translation2d> linearFF = () -> Translation2d.kZero;
-  private DoubleSupplier omegaFF = () -> 0.0;
-
   public DriveToPose(Drive drive, Supplier<Pose2d> target) {
     this.drive = drive;
     this.target = target;
@@ -92,16 +78,6 @@ public class DriveToPose extends Command {
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
     addRequirements(drive);
-  }
-
-  public DriveToPose(
-      Drive drive,
-      Supplier<Pose2d> target,
-      Supplier<Translation2d> linearFF,
-      DoubleSupplier omegaFF) {
-    this(drive, target);
-    this.linearFF = linearFF;
-    this.omegaFF = omegaFF;
   }
 
   @Override
@@ -135,7 +111,6 @@ public class DriveToPose extends Command {
 
     // Update from tunable numbers
     if (driveMaxVelocity.hasChanged(hashCode())
-        || driveMaxVelocitySlow.hasChanged(hashCode())
         || driveMaxAcceleration.hasChanged(hashCode())
         || driveTolerance.hasChanged(hashCode())
         || thetaMaxVelocity.hasChanged(hashCode())
@@ -144,7 +119,9 @@ public class DriveToPose extends Command {
         || drivekP.hasChanged(hashCode())
         || drivekD.hasChanged(hashCode())
         || thetakP.hasChanged(hashCode())
-        || thetakD.hasChanged(hashCode())) {
+        || thetakD.hasChanged(hashCode())
+        || approachDistanceThreshold.hasChanged(hashCode())
+        || approachVelocityScale.hasChanged(hashCode())) {
       driveController.setP(drivekP.get());
       driveController.setD(drivekD.get());
       driveController.setConstraints(
@@ -163,18 +140,21 @@ public class DriveToPose extends Command {
 
     // Calculate drive speed
     double currentDistance = currentPose.getTranslation().getDistance(targetPose.getTranslation());
-    double ffScaler =
-        MathUtil.clamp(
-            (currentDistance - ffMinRadius.get()) / (ffMaxRadius.get() - ffMinRadius.get()),
-            0.0,
-            1.0);
     driveErrorAbs = currentDistance;
     driveController.reset(
         lastSetpointTranslation.getDistance(targetPose.getTranslation()),
         driveController.getSetpoint().velocity);
-    double driveVelocityScalar =
-        driveController.getSetpoint().velocity * ffScaler
-            + driveController.calculate(driveErrorAbs, 0.0);
+    double driveVelocityScalar = driveController.calculate(driveErrorAbs, 0.0);
+
+    // Apply velocity scaling for gentle approach
+    boolean inApproachZone = currentDistance < approachDistanceThreshold.get();
+    if (inApproachZone) {
+      // Scale velocity based on distance to target
+      double approachFactor =
+          MathUtil.clamp(currentDistance / approachDistanceThreshold.get(), 0.1, 1.0);
+      driveVelocityScalar *= approachFactor * approachVelocityScale.get();
+    }
+
     if (currentDistance < driveController.getPositionTolerance()) driveVelocityScalar = 0.0;
     lastSetpointTranslation =
         new Pose2d(
@@ -183,13 +163,13 @@ public class DriveToPose extends Command {
             .transformBy(GeomUtil.toTransform2d(driveController.getSetpoint().position, 0.0))
             .getTranslation();
 
-    // Calculate theta speed
+    // Calculate theta speed - no additional slowing based on proximity
     double thetaVelocity =
-        thetaController.getSetpoint().velocity * ffScaler
-            + thetaController.calculate(
-                currentPose.getRotation().getRadians(), targetPose.getRotation().getRadians());
+        thetaController.calculate(
+            currentPose.getRotation().getRadians(), targetPose.getRotation().getRadians());
     thetaErrorAbs =
         Math.abs(currentPose.getRotation().minus(targetPose.getRotation()).getRadians());
+
     if (thetaErrorAbs < thetaController.getPositionTolerance()) thetaVelocity = 0.0;
 
     Translation2d driveVelocity =
@@ -198,16 +178,6 @@ public class DriveToPose extends Command {
                 currentPose.getTranslation().minus(targetPose.getTranslation()).getAngle())
             .transformBy(GeomUtil.toTransform2d(driveVelocityScalar, 0.0))
             .getTranslation();
-
-    // Scale feedback velocities by input ff
-    final double linearS = linearFF.get().getNorm();
-    final double thetaS = omegaFF.getAsDouble();
-    driveVelocity =
-        driveVelocity.interpolate(
-            linearFF.get().times(DriveConstants.maxSpeedMetersPerSec), linearS);
-    thetaVelocity =
-        MathUtil.interpolate(
-            thetaVelocity, omegaFF.getAsDouble() * DriveConstants.maxAngularSpeed, thetaS);
 
     // Command speeds
     drive.runVelocity(
@@ -219,6 +189,7 @@ public class DriveToPose extends Command {
     Logger.recordOutput("DriveToPose/DistanceSetpoint", driveController.getSetpoint().position);
     Logger.recordOutput("DriveToPose/ThetaMeasured", currentPose.getRotation().getRadians());
     Logger.recordOutput("DriveToPose/ThetaSetpoint", thetaController.getSetpoint().position);
+    Logger.recordOutput("DriveToPose/InApproachZone", inApproachZone);
     Logger.recordOutput(
         "DriveToPose/Setpoint",
         new Pose2d(

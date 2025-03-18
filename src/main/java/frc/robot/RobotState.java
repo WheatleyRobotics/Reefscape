@@ -17,6 +17,7 @@ import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
 import lombok.Data;
 import lombok.Getter;
+import lombok.Setter;
 import org.littletonrobotics.junction.AutoLogOutput;
 
 @Data
@@ -30,6 +31,16 @@ public class RobotState {
 
   @AutoLogOutput(key = "RobotState/isAuto")
   private boolean isAuto = false;
+
+  @Getter
+  @Setter
+  @AutoLogOutput(key = "RobotState/HadCoral")
+  private boolean isHadCoral = false;
+
+  @Getter
+  @Setter
+  @AutoLogOutput(key = "RobotState/AutoAlignSide")
+  private int side = -1; // 0 = left, 1 = right
 
   @AutoLogOutput(key = "RobotState/Superstructure")
   private SuperstructureState superstructureState = SuperstructureState.START;
@@ -153,7 +164,7 @@ public class RobotState {
       headingDifference = 360 - headingDifference;
     }
 
-    boolean isCloseEnough = distanceToReef <= 2.5;
+    boolean isCloseEnough = distanceToReef <= 2.0;
     boolean isFacingReef = headingDifference <= Math.toDegrees(Math.PI / 6.0);
 
     shouldTrigSolve = isCloseEnough && isFacingReef;

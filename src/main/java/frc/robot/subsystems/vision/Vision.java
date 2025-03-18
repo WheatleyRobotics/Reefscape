@@ -126,7 +126,7 @@ public class Vision extends SubsystemBase {
         if (rejectPose) {
           continue;
         }
-
+        /*
         // Calculate standard deviations
         double stdDevFactor =
             Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount();
@@ -149,11 +149,35 @@ public class Vision extends SubsystemBase {
           angularStdDev *= Double.POSITIVE_INFINITY;
         }
 
+         */
+        double linearStdDev = Double.POSITIVE_INFINITY;
+        if (observation.type() == PoseObservationType.MEGATAG_2
+            || observation.type() == PoseObservationType.MEGATAG_1) {
+          if (shouldTrigSolve) {
+            continue;
+          }
+          linearStdDev =
+              linearStdDevMegatagFactor * Math.pow(observation.averageTagDistance(), 2.0);
+        } else if (observation.type() == PoseObservationType.PHOTON_TRIG) {
+          if (RobotState.getInstance().getSide() == 1) { // TODO: Add camera STDEV
+            linearStdDev = cameraIndex == 1 ? linearStdDevPhotonTrig : linearStdDevPhotonTrig * 3;
+          } else if (RobotState.getInstance().getSide() == 0) {
+            linearStdDev = cameraIndex == 1 ? linearStdDevPhotonTrig * 3 : linearStdDevPhotonTrig;
+          } else {
+            linearStdDev = linearStdDevPhotonTrig;
+          }
+        } else if (observation.type() == PoseObservationType.PHOTON_MULTI_TAG) {
+          linearStdDev =
+              linearStdDevPhotonMultiTag * Math.pow(observation.averageTagDistance(), 3.0);
+        } else if (observation.type() == PoseObservationType.PHOTON_SINGLE_TAG) {
+          linearStdDev = linearStdDevPhotonSingleTag;
+        }
+
         // Send vision observation
         consumer.accept(
             observation.pose().toPose2d(),
             observation.timestamp(),
-            VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev));
+            VecBuilder.fill(linearStdDev, linearStdDev, Double.POSITIVE_INFINITY));
       }
 
       // Log camera datadata
@@ -194,13 +218,5 @@ public class Vision extends SubsystemBase {
         Pose2d visionRobotPoseMeters,
         double timestampSeconds,
         Matrix<N3, N1> visionMeasurementStdDevs);
-  }
-
-  public boolean getShouldTrigSolve() {
-    return shouldTrigSolve;
-  }
-
-  public void setShouldTrigSolve(boolean state) {
-    shouldTrigSolve = state;
   }
 }

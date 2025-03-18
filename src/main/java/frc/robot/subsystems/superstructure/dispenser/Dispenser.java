@@ -60,7 +60,7 @@ public class Dispenser {
   public static final LoggedTunableNumber tunnelDispenseVolts =
       new LoggedTunableNumber("Dispenser/TunnelDispenseVolts", 6.0);
   public static final LoggedTunableNumber tunnelIntakeVolts =
-      new LoggedTunableNumber("Dispenser/TunnelIntakeVolts", 10.8);
+      new LoggedTunableNumber("Dispenser/TunnelIntakeVolts", 12.0);
   public static final LoggedTunableNumber tolerance =
       new LoggedTunableNumber("Dispenser/Tolerance", 45);
 
@@ -119,10 +119,6 @@ public class Dispenser {
 
   private Debouncer gamePieceDebouncer = new Debouncer(0.1);
   private Debouncer toleranceDebouncer = new Debouncer(0.25, DebounceType.kRising);
-
-  @AutoLogOutput(key = "Dispenser/Profile/HadCoral")
-  @Setter
-  private boolean hadCoral = false;
 
   // Disconnected alerts
   private final Alert pivotMotorDisconnectedAlert =
@@ -244,11 +240,11 @@ public class Dispenser {
           || currentState.equals(SuperstructureState.BARGE)) {
         tunnelIO.runTorqueCurrent(gripperCurrent);
       } else if (currentState.equals(SuperstructureState.INTAKE)) {
-        if (!hasCoral && !hadCoral) {
+        if (!hasCoral && !RobotState.getInstance().isHadCoral()) {
           tunnelIO.runVolts(tunnelIntakeVolts.get());
-        } else if (hasCoral && !hadCoral) {
+        } else if (hasCoral && !RobotState.getInstance().isHadCoral()) {
           tunnelIO.runVolts(tunnelIntakeVolts.get() / 5.0);
-          hadCoral = true;
+          RobotState.getInstance().setHadCoral(true);
         } else if (!hasCoral) {
           tunnelIO.runVolts(-tunnelIntakeVolts.get() / 5.0);
         }
@@ -256,7 +252,7 @@ public class Dispenser {
           || currentState.equals(SuperstructureState.L2_CORAL_EJECT)
           || currentState.equals(SuperstructureState.L3_CORAL_EJECT)
           || currentState.equals(SuperstructureState.L4_CORAL_EJECT)) {
-        hadCoral = false;
+        RobotState.getInstance().setHadCoral(false);
         tunnelIO.runVolts(tunnelDispenseVolts.get());
       } else {
         tunnelIO.stop();

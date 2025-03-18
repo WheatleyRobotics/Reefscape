@@ -48,7 +48,6 @@ public class TunnelIOFalcon implements TunnelIO {
   private final NeutralOut neutralOut = new NeutralOut();
 
   private final Debouncer connectedDebouncer = new Debouncer(0.5);
-  private final Debouncer hasCoralDebouncer = new Debouncer(0.1);
 
   public TunnelIOFalcon() {
     talon = new TalonFX(5, "*");
@@ -70,8 +69,8 @@ public class TunnelIOFalcon implements TunnelIO {
 
     CANrangeConfiguration canRangeConfig = new CANrangeConfiguration();
     ProximityParamsConfigs proximityParamsConfigs = new ProximityParamsConfigs();
-    proximityParamsConfigs.withProximityThreshold(0.4);
-    proximityParamsConfigs.withMinSignalStrengthForValidMeasurement(5000);
+    proximityParamsConfigs.withProximityThreshold(0.2);
+    proximityParamsConfigs.withMinSignalStrengthForValidMeasurement(15000);
     canRangeConfig.withProximityParams(proximityParamsConfigs);
     tryUntilOk(5, () -> canRange.getConfigurator().apply(canRangeConfig));
 
@@ -106,7 +105,7 @@ public class TunnelIOFalcon implements TunnelIO {
     inputs.CANRangeConnected =
         connectedDebouncer.calculate(BaseStatusSignal.refreshAll(distance, isDetected).isOK());
     inputs.measuredTimestamp = measureTimestamp.getValueAsDouble();
-    inputs.hasCoral = hasCoralDebouncer.calculate(isDetected.getValue());
+    inputs.hasCoral = isDetected.getValue();
     inputs.talonPositionRads = Units.rotationsToRadians(position.getValueAsDouble());
     inputs.talonVelocityRadsPerSec = Units.rotationsToRadians(velocity.getValueAsDouble());
     inputs.talonAppliedVoltage = appliedVoltage.getValueAsDouble();

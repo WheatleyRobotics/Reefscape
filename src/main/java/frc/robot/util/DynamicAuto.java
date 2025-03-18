@@ -78,13 +78,10 @@ public class DynamicAuto {
                           ? PathPlannerPath.fromChoreoTrajectory(
                               getCoralZone(target) + "-" + sourceChooser.getSelected())
                           : PathPlannerPath.fromPathFile(
-                              getCoralZone(target) + "-" + sourceChooser.getSelected()))));
-      /*
-      superstructure
-          .runGoal(SuperstructureState.INTAKE)
-          .until(() -> superstructure.isHasCoral())));
-
-       */
+                              getCoralZone(target) + "-" + sourceChooser.getSelected())),
+                  superstructure
+                      .runGoal(SuperstructureState.INTAKE)
+                      .until(() -> superstructure.isHasCoral())));
 
     } catch (Exception e) {
       System.out.println(e.toString());
@@ -127,12 +124,9 @@ public class DynamicAuto {
       }
       boolean right = !(target % 2 == 0);
       return Commands.sequence(
-          /*
           superstructure
               .runGoal(SuperstructureState.INTAKE)
               .until(() -> superstructure.isHasCoral()),
-
-               */
           AutoBuilder.followPath(
                   isChoreo
                       ? PathPlannerPath.fromChoreoTrajectory(

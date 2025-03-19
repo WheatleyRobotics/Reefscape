@@ -4,6 +4,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.Robot;
 import frc.robot.RobotState;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.superstructure.Superstructure;
@@ -29,7 +30,8 @@ public class AutoScore {
     return Commands.sequence(
         superstructure
             .runGoal(SuperstructureState.INTAKE)
-            .onlyIf(() -> !superstructure.isHasCoral()),
+            .until(superstructure::isHasCoral)
+            .onlyIf(() -> !Robot.isSimulation()),
         Commands.runOnce(() -> RobotState.getInstance().setSide(right ? 1 : 0)),
         superstructure
             .runGoal(
@@ -41,14 +43,22 @@ public class AutoScore {
             .withTimeout(0.8)
             // .until(superstructure::atGoal)
             .deadlineFor(
-                new DriveToPose(
-                    drive,
-                    () ->
-                        FieldConstants.addOffset(
+                RobotState.getInstance().isClearedReef()
+                    ? new DriveToPose(
+                        drive,
+                        () ->
+                            FieldConstants.addOffset(
+                                    FieldConstants.getBranch(
+                                        RobotState.getInstance().getCurrentZone(), right),
+                                    -minClearReefDistance.get())
+                                .interpolate(RobotState.getInstance().getPose(), 0.5))
+                    : new DriveToPose(
+                        drive,
+                        () ->
+                            FieldConstants.addOffset(
                                 FieldConstants.getBranch(
                                     RobotState.getInstance().getCurrentZone(), right),
-                                -minClearReefDistance.get())
-                            .interpolate(RobotState.getInstance().getPose(), 0.5))),
+                                -minClearReefDistance.get()))),
         Commands.parallel(
                 new DriveToPose(
                     drive,

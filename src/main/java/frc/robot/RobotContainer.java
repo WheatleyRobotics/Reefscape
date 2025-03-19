@@ -15,7 +15,6 @@ package frc.robot;
 
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
-import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -46,7 +45,6 @@ import frc.robot.subsystems.superstructure.slam.SlamIO;
 import frc.robot.subsystems.vision.*;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.DynamicAuto;
-import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /**
@@ -80,7 +78,7 @@ public class RobotContainer {
       new LoggedNetworkNumber("/SmartDashboard/Endgame Alert #2", 15.0);
 
   // Dashboard inputs
-  private final LoggedDashboardChooser<Command> autoChooser;
+  // private final LoggedDashboardChooser<Command> autoChooser;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -173,6 +171,7 @@ public class RobotContainer {
 
     // Set up auto routines
     dynamicAuto = new DynamicAuto(drive, superstructure);
+    /*
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
     // Set up SysId routines
@@ -180,7 +179,6 @@ public class RobotContainer {
         "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
     autoChooser.addOption(
         "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
-    /*
     autoChooser.addOption(
         "Drive SysId (Quasistatic Forward)",
         drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
@@ -192,9 +190,11 @@ public class RobotContainer {
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
-     */
+
     autoChooser.addOption("Elevator static", elevator.staticCharacterization(2.0));
     autoChooser.addOption("Pivot static", dispenser.staticCharacterization(2.0));
+
+     */
 
     // Configure the button bindings
     if (Robot.isReal()) {

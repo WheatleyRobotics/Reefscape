@@ -157,7 +157,7 @@ public class Vision extends SubsystemBase {
             continue;
           }
           linearStdDev =
-              linearStdDevMegatagFactor * Math.pow(observation.averageTagDistance(), 2.0);
+              linearStdDevMegatagFactor * Math.pow(observation.averageTagDistance(), 3.0);
         } else if (observation.type() == PoseObservationType.PHOTON_TRIG) {
           if (RobotState.getInstance().getSide() == 1) { // TODO: Add camera STDEV
             linearStdDev = cameraIndex == 1 ? linearStdDevPhotonTrig : linearStdDevPhotonTrig * 3;
@@ -170,7 +170,8 @@ public class Vision extends SubsystemBase {
           linearStdDev =
               linearStdDevPhotonMultiTag * Math.pow(observation.averageTagDistance(), 3.0);
         } else if (observation.type() == PoseObservationType.PHOTON_SINGLE_TAG) {
-          linearStdDev = linearStdDevPhotonSingleTag;
+          linearStdDev =
+              linearStdDevPhotonSingleTag * Math.pow(observation.averageTagDistance(), 3.0);
         }
 
         // Send vision observation

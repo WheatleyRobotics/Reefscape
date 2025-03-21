@@ -41,7 +41,7 @@ public class DriveToPose extends Command {
       new LoggedTunableNumber("DriveToPose/ApproachVelocityScale");
 
   static {
-    drivekP.initDefault(2.0); // Reduced from 2.05
+    drivekP.initDefault(2.1); // Reduced from 2.05
     drivekD.initDefault(0.2); // Increased from 0.15
     thetakP.initDefault(3.0); // Reduced from 4.0
     thetakD.initDefault(0.1); // Increased from 0.0

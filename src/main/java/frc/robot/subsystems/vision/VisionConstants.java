@@ -62,7 +62,7 @@ public class VisionConstants {
       };
 
   // Multipliers to apply for MegaTag 2 observations
-  public static double linearStdDevMegatagFactor = 1.5; // More stable than full 3D solve
+  public static double linearStdDevMegatagFactor = 4; // More stable than full 3D solve
   public static double linearStdDevPhotonMultiTag = 0.8;
   public static double linearStdDevPhotonTrig = 0.25;
   public static double linearStdDevPhotonSingleTag = 2.0;

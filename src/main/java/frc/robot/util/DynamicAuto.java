@@ -166,7 +166,7 @@ public class DynamicAuto {
                   () -> SuperstructureState.L4_CORAL, isRightSide, drive, superstructure),
               AutoBuilder.followPath(secondPath)
                   .deadlineFor(superstructure.runGoal(SuperstructureState.INTAKE)),
-              superstructure.runGoal(SuperstructureState.INTAKE).withTimeout(SOURCE_WAIT_TIME));
+              superstructure.runGoal(SuperstructureState.INTAKE).until(superstructure::isHasCoral));
     } catch (Exception e) {
       logError("Error in first section", e);
       return Commands.none();
@@ -244,7 +244,7 @@ public class DynamicAuto {
                           .onlyIf(() -> !superstructure.isHasCoral()));
 
           Command waitAtSource =
-              superstructure.runGoal(SuperstructureState.INTAKE).withTimeout(SOURCE_WAIT_TIME);
+              superstructure.runGoal(SuperstructureState.INTAKE).until(superstructure::isHasCoral);
 
           sectionCommand = Commands.sequence(sectionCommand, pathBackToSource, waitAtSource);
         }

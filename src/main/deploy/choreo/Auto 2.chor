@@ -70,8 +70,8 @@
    "RSOURCETHETA":{
     "dimension":"Number",
     "var":{
-     "exp":"55",
-     "val":55.0
+     "exp":"100",
+     "val":100.0
     }
    },
    "RSOURCEX":{
@@ -99,12 +99,12 @@
   "poses":{
    "RSOURCE":{
     "x":{
-     "exp":"1.17887 m",
-     "val":1.17887
+     "exp":"1.46 m",
+     "val":1.46
     },
     "y":{
-     "exp":"1.241 m",
-     "val":1.241
+     "exp":"0.725 m",
+     "val":0.725
     },
     "heading":{
      "exp":"0 rad",

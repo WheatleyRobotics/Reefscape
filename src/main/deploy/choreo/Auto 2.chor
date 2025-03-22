@@ -21,22 +21,22 @@
    "LSOURCETHETA":{
     "dimension":"Number",
     "var":{
-     "exp":"305",
-     "val":305.0
+     "exp":"306",
+     "val":306.0
     }
    },
    "LSOURCEX":{
     "dimension":"Number",
     "var":{
-     "exp":"1",
-     "val":1.0
+     "exp":"1.5",
+     "val":1.5
     }
    },
    "LSOURCEY":{
     "dimension":"Number",
     "var":{
-     "exp":"7",
-     "val":7.0
+     "exp":"7.35",
+     "val":7.35
     }
    },
    "MIDX":{
@@ -70,8 +70,8 @@
    "RSOURCETHETA":{
     "dimension":"Number",
     "var":{
-     "exp":"100",
-     "val":100.0
+     "exp":"54",
+     "val":54.0
     }
    },
    "RSOURCEX":{

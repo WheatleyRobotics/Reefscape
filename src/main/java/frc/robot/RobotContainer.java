@@ -15,6 +15,7 @@ package frc.robot;
 
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
+import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -32,7 +33,8 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.climb.WinchIOFalcon;
 import frc.robot.subsystems.drive.*;
-import frc.robot.subsystems.leds.LED;
+import frc.robot.subsystems.leds.BlinkinLED;
+import frc.robot.subsystems.leds.BlinkinLED.BlinkinPattern;
 import frc.robot.subsystems.superstructure.Superstructure;
 import frc.robot.subsystems.superstructure.SuperstructureState;
 import frc.robot.subsystems.superstructure.dispenser.*;
@@ -45,6 +47,7 @@ import frc.robot.subsystems.superstructure.slam.SlamIO;
 import frc.robot.subsystems.vision.*;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.DynamicAuto;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /**
@@ -63,7 +66,7 @@ public class RobotContainer {
   Dispenser dispenser;
   Slam slam;
   Climb climb;
-  private final LED leds = LED.getInstance();
+  private final BlinkinLED blinkinLED = BlinkinLED.getInstance();
   private final Superstructure superstructure;
   // Controller
   private final CommandXboxController driveController = new CommandXboxController(0);
@@ -78,7 +81,7 @@ public class RobotContainer {
       new LoggedNetworkNumber("/SmartDashboard/Endgame Alert #2", 15.0);
 
   // Dashboard inputs
-  // private final LoggedDashboardChooser<Command> autoChooser;
+  private final LoggedDashboardChooser<Command> autoChooser;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -171,7 +174,6 @@ public class RobotContainer {
 
     // Set up auto routines
     dynamicAuto = new DynamicAuto(drive, superstructure);
-    /*
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
     // Set up SysId routines
@@ -179,6 +181,7 @@ public class RobotContainer {
         "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
     autoChooser.addOption(
         "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
+    /*
     autoChooser.addOption(
         "Drive SysId (Quasistatic Forward)",
         drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
@@ -190,11 +193,9 @@ public class RobotContainer {
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
-
+     */
     autoChooser.addOption("Elevator static", elevator.staticCharacterization(2.0));
     autoChooser.addOption("Pivot static", dispenser.staticCharacterization(2.0));
-
-     */
 
     // Configure the button bindings
     if (Robot.isReal()) {
@@ -273,15 +274,23 @@ public class RobotContainer {
         .leftTrigger(0.8)
         .whileTrue(
             AutoScore.getAutoScoreCommand(
-                () -> RobotState.getInstance().getDesiredState(), false, drive, superstructure))
-        .onFalse(AutoScore.getClearReefCommand(drive));
+                    () -> RobotState.getInstance().getDesiredState(), false, drive, superstructure)
+                .alongWith(
+                    Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.STROBE_WHITE))))
+        .onFalse(
+            AutoScore.getClearReefCommand(drive)
+                .alongWith(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.RED))));
 
     driveController
         .rightTrigger(0.8)
         .whileTrue(
             AutoScore.getAutoScoreCommand(
-                () -> RobotState.getInstance().getDesiredState(), true, drive, superstructure))
-        .onFalse(AutoScore.getClearReefCommand(drive));
+                    () -> RobotState.getInstance().getDesiredState(), true, drive, superstructure)
+                .alongWith(
+                    Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.STROBE_WHITE))))
+        .onFalse(
+            AutoScore.getClearReefCommand(drive)
+                .alongWith(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.RED))));
 
     driveController
         .rightBumper()
@@ -294,9 +303,11 @@ public class RobotContainer {
     operatorController
         .x()
         .whileTrue(
-            Commands.runOnce(() -> RobotState.getInstance().setHadCoral(false))
-                .andThen(
-                    superstructure.runGoal(SuperstructureState.INTAKE).withName("Running Intake")));
+            superstructure
+                .runGoal(SuperstructureState.INTAKE)
+                .withName("Running Intake")
+                .alongWith(
+                    Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.STROBE_GOLD))));
 
     operatorController
         .b()
@@ -341,8 +352,8 @@ public class RobotContainer {
 
     operatorController
         .start()
-        .whileTrue(Commands.run(() -> superstructure.runVoltsPivot(-0.5)))
-        .onFalse(Commands.run(() -> superstructure.runVoltsPivot(0.0)));
+        .whileTrue(Commands.runOnce(() -> superstructure.runVoltsPivot(-0.5)))
+        .onFalse(Commands.runOnce(() -> superstructure.runVoltsPivot(0.0)));
     operatorController.back().onTrue(Commands.runOnce(() -> superstructure.setPositionPivot(18)));
 
     new Trigger(
@@ -353,8 +364,9 @@ public class RobotContainer {
         .onTrue(
             controllerRumbleCommand()
                 .withTimeout(0.5)
-                .beforeStarting(() -> leds.endgameAlert = true)
-                .finallyDo(() -> leds.endgameAlert = false));
+                .beforeStarting(() -> blinkinLED.setPattern(BlinkinPattern.STROBE_WHITE))
+                .finallyDo(() -> blinkinLED.setPattern(BlinkinPattern.RED)));
+
     new Trigger(
             () ->
                 DriverStation.isTeleopEnabled()
@@ -366,16 +378,24 @@ public class RobotContainer {
                 .andThen(Commands.waitSeconds(0.1))
                 .repeatedly()
                 .withTimeout(0.9)
-                .beforeStarting(() -> leds.endgameAlert = true)
-                .finallyDo(() -> leds.endgameAlert = false)); // Rumble three times
+                .beforeStarting(() -> blinkinLED.setPattern(BlinkinPattern.STROBE_WHITE))
+                .finallyDo(() -> blinkinLED.setPattern(BlinkinPattern.RED))); // Rumble three times
+
     new Trigger(
             () ->
                 DriverStation.isDisabled()
                     && dynamicAuto.getStartPose().equals(RobotState.getInstance().getPose()))
+        .onTrue(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.GREEN)))
+        .onFalse(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.RED)));
+
+    new Trigger(superstructure::isHasCoral)
+        .onTrue(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.GREEN)))
+        .onFalse(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.DARK_RED)));
+
+    new Trigger(() -> drive.getPitch().getDegrees() > 10)
         .onTrue(
-            Commands.run(() -> leds.autoAligned = true).andThen(() -> leds.autoUnaligned = false))
-        .onFalse(
-            Commands.run(() -> leds.autoUnaligned = true).andThen(() -> leds.autoAligned = false));
+            Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.STROBE_BLUE))
+                .alongWith(controllerRumbleCommand()));
   }
 
   private void configureButtonBindingsSIM() {
@@ -427,22 +447,24 @@ public class RobotContainer {
                    .ignoringDisable(true));
 
     */
+    /*
+       driveController
+               .x()
+               .whileTrue(
+                       AutoScore.getAutoScoreCommand(
+                                       () -> RobotState.getInstance().getDesiredState(), true, drive, superstructure)
+                               .alongWith(Commands.runOnce(() -> leds.autoScoring = true)))
+               .onFalse(Commands.runOnce(() -> leds.autoScoring = false));
 
-    driveController
-        .x()
-        .whileTrue(
-            AutoScore.getAutoScoreCommand(
-                    () -> RobotState.getInstance().getDesiredState(), true, drive, superstructure)
-                .alongWith(Commands.runOnce(() -> leds.autoScoring = true)))
-        .onFalse(Commands.runOnce(() -> leds.autoScoring = false));
+       driveController
+               .y()
+               .whileTrue(
+                       AutoScore.getAutoScoreCommand(
+                                       () -> RobotState.getInstance().getDesiredState(), false, drive, superstructure)
+                               .alongWith(Commands.runOnce(() -> leds.autoScoring = true)))
+               .onFalse(Commands.runOnce(() -> leds.autoScoring = false));
 
-    driveController
-        .y()
-        .whileTrue(
-            AutoScore.getAutoScoreCommand(
-                    () -> RobotState.getInstance().getDesiredState(), false, drive, superstructure)
-                .alongWith(Commands.runOnce(() -> leds.autoScoring = true)))
-        .onFalse(Commands.runOnce(() -> leds.autoScoring = false));
+    */
 
     driveController
         .b()

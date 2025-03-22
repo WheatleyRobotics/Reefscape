@@ -375,7 +375,7 @@ public class Drive extends SubsystemBase {
     return maxSpeedMetersPerSec / driveBaseRadius;
   }
 
-  public Rotation2d getPitch(){
+  public Rotation2d getPitch() {
     return gyroInputs.pitchPosition;
   }
 }

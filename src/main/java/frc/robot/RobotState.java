@@ -39,6 +39,11 @@ public class RobotState {
 
   @Getter
   @Setter
+  @AutoLogOutput(key = "RobotState/HasCoral")
+  private boolean hasCoral = false;
+
+  @Getter
+  @Setter
   @AutoLogOutput(key = "RobotState/AutoAlignSide")
   private int side = -1; // 0 = left, 1 = right
 

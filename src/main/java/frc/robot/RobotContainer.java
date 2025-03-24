@@ -45,7 +45,6 @@ import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
 import frc.robot.subsystems.superstructure.slam.Slam;
 import frc.robot.subsystems.superstructure.slam.SlamIO;
 import frc.robot.subsystems.vision.*;
-import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.DynamicAuto;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
@@ -415,62 +414,50 @@ public class RobotContainer {
                 () -> -driveController.getRightX() * 0.3));
 
     driveController
-        .a()
+        .b()
+        .onTrue(
+            Commands.runOnce(
+                    () -> {
+                      drive.setPose(new Pose2d(drive.getPose().getTranslation(), new Rotation2d()));
+                      drive.setYaw(new Rotation2d());
+                      RobotState.getInstance().resetPose(drive.getPose());
+                    },
+                    drive)
+                .ignoringDisable(true));
+
+    driveController
+        .x()
         .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -driveController.getLeftY(),
-                () -> -driveController.getLeftX(),
-                () ->
-                    switch (RobotState.getInstance().getCurrentZone()) {
-                      case Z5 -> AllianceFlipUtil.getCorrected(
-                              new Pose2d(0, 0, Rotation2d.fromDegrees(55)))
-                          .getRotation();
-                      case Z1 -> AllianceFlipUtil.getCorrected(
-                              new Pose2d(0, 0, Rotation2d.fromDegrees(-55)))
-                          .getRotation();
-                      default -> RobotState.getInstance().getPose().getRotation();
-                    }));
-    /*
-       driveController
-           .b()
-           .onTrue(
-               Commands.runOnce(
-                       () -> {
-                         drive.setPose(new Pose2d(drive.getPose().getTranslation(), new Rotation2d()));
-                         drive.setYaw(new Rotation2d());
-                         RobotState.getInstance().resetPose(drive.getPose());
-                       },
-                       drive)
-                   .ignoringDisable(true));
+            AutoScore.getAutoScoreCommand(
+                    () -> RobotState.getInstance().getDesiredState(), false, drive, superstructure)
+                .alongWith(
+                    Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.STROBE_WHITE))))
+        .onFalse(
+            AutoScore.getClearReefCommand(drive)
+                .alongWith(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.RED))));
 
-    */
-    /*
-       driveController
-               .x()
-               .whileTrue(
-                       AutoScore.getAutoScoreCommand(
-                                       () -> RobotState.getInstance().getDesiredState(), true, drive, superstructure)
-                               .alongWith(Commands.runOnce(() -> leds.autoScoring = true)))
-               .onFalse(Commands.runOnce(() -> leds.autoScoring = false));
-
-       driveController
-               .y()
-               .whileTrue(
-                       AutoScore.getAutoScoreCommand(
-                                       () -> RobotState.getInstance().getDesiredState(), false, drive, superstructure)
-                               .alongWith(Commands.runOnce(() -> leds.autoScoring = true)))
-               .onFalse(Commands.runOnce(() -> leds.autoScoring = false));
-
-    */
+    driveController
+        .y()
+        .whileTrue(
+            AutoScore.getAutoScoreCommand(
+                    () -> RobotState.getInstance().getDesiredState(), true, drive, superstructure)
+                .alongWith(
+                    Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.STROBE_WHITE))))
+        .onFalse(
+            AutoScore.getClearReefCommand(drive)
+                .alongWith(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.RED))));
 
     driveController
         .b()
         .whileTrue(superstructure.runGoal(() -> superstructure.getState().getEject()));
 
-    operatorController.x().whileTrue(superstructure.runGoal(SuperstructureState.ALGAE_L2_INTAKE));
+    operatorController
+        .x()
+        .onTrue(
+            Commands.runOnce(
+                () -> RobotState.getInstance().setDesiredState(SuperstructureState.L4_CORAL)));
 
-    operatorController.b().onTrue(superstructure.runGoal(SuperstructureState.PROCESSING));
+    operatorController.b().onTrue(superstructure.runGoal(SuperstructureState.ALGAE_L2_INTAKE));
 
     operatorController.a().onTrue(superstructure.runGoal(SuperstructureState.BARGE));
 

@@ -3,14 +3,17 @@ package frc.robot.util;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.commands.AutoScore;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.superstructure.Superstructure;
 import frc.robot.subsystems.superstructure.SuperstructureState;
 import java.util.ArrayList;
@@ -144,6 +147,7 @@ public class DynamicAuto {
       if (startPath == null) {
         return Commands.none();
       }
+      Time pathTime = startPath.getIdealTrajectory(DriveConstants.ppConfig).get().getTotalTime();
 
       SourcePosition sourcePosition = sourcePositionChooser.getSelected();
       if (sourcePosition == null) {
@@ -161,7 +165,10 @@ public class DynamicAuto {
       section1 =
           Commands.sequence(
               AutoBuilder.resetOdom(startPath.getStartingHolonomicPose().get()),
-              AutoBuilder.followPath(startPath),
+              AutoBuilder.followPath(startPath)
+                  .deadlineFor(
+                      new WaitCommand(pathTime.times(0.2))
+                          .andThen(superstructure.runGoal(SuperstructureState.L4_CORAL))),
               AutoScore.getAutoScoreCommand(
                   () -> SuperstructureState.L4_CORAL, isRightSide, drive, superstructure),
               AutoBuilder.followPath(secondPath)
@@ -218,14 +225,14 @@ public class DynamicAuto {
       if (pathToCoral == null) {
         return Commands.none();
       }
+      Time pathTime = pathToCoral.getIdealTrajectory(DriveConstants.ppConfig).get().getTotalTime();
 
       Command sectionCommand =
           Commands.sequence(
               AutoBuilder.followPath(pathToCoral)
                   .deadlineFor(
-                      superstructure
-                          .runGoal(SuperstructureState.INTAKE)
-                          .onlyIf(() -> !superstructure.isHasCoral())),
+                      new WaitCommand(pathTime.times(0.2))
+                          .andThen(superstructure.runGoal(SuperstructureState.L4_CORAL))),
 
               // Score the coral
               AutoScore.getAutoScoreCommand(

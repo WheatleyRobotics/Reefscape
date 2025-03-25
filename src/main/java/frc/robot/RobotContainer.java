@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoScore;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.DriveToPose;
 import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.climb.WinchIOFalcon;
 import frc.robot.subsystems.drive.*;
@@ -199,8 +200,10 @@ public class RobotContainer {
     // Configure the button bindings
     if (Robot.isReal()) {
       configureButtonBindingsREAL();
+      bindTriggers();
     } else {
       configureButtonBindingsSIM();
+      bindTriggers();
     }
   }
 
@@ -299,6 +302,8 @@ public class RobotContainer {
 
     driveController.back().whileTrue(Commands.runOnce(() -> climb.setServoPosition(1)));
 
+    driveController.povRight().whileTrue(new DriveToPose(drive, ()-> new Pose2d(7.156, 2, Rotation2d.fromDegrees(180))));
+
     operatorController
         .x()
         .whileTrue(
@@ -349,50 +354,11 @@ public class RobotContainer {
 
     operatorController.povDown().onTrue(superstructure.runGoal(SuperstructureState.PROCESSING));
 
-    operatorController.start().onTrue(elevator.homingSequence());
-    // operatorController.back().onTrue(Commands.runOnce(() ->
-    // superstructure.setPositionPivot(18)));
-
-    new Trigger(
-            () ->
-                DriverStation.isTeleopEnabled()
-                    && DriverStation.getMatchTime() > 0
-                    && DriverStation.getMatchTime() <= Math.round(endgameAlert1.get()))
-        .onTrue(
-            controllerRumbleCommand()
-                .withTimeout(0.5)
-                .beforeStarting(() -> blinkinLED.setPattern(BlinkinPattern.STROBE_WHITE))
-                .finallyDo(() -> blinkinLED.setPattern(BlinkinPattern.RED)));
-
-    new Trigger(
-            () ->
-                DriverStation.isTeleopEnabled()
-                    && DriverStation.getMatchTime() > 0
-                    && DriverStation.getMatchTime() <= Math.round(endgameAlert2.get()))
-        .onTrue(
-            controllerRumbleCommand()
-                .withTimeout(0.2)
-                .andThen(Commands.waitSeconds(0.1))
-                .repeatedly()
-                .withTimeout(0.9)
-                .beforeStarting(() -> blinkinLED.setPattern(BlinkinPattern.STROBE_WHITE))
-                .finallyDo(() -> blinkinLED.setPattern(BlinkinPattern.RED))); // Rumble three times
-
-    new Trigger(
-            () ->
-                DriverStation.isDisabled()
-                    && dynamicAuto.getStartPose().equals(RobotState.getInstance().getPose()))
-        .onTrue(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.GREEN)))
-        .onFalse(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.RED)));
-
-    new Trigger(superstructure::isHasCoral)
-        .onTrue(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.GREEN)))
-        .onFalse(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.DARK_RED)));
-
-    new Trigger(() -> drive.getPitch().getDegrees() > 10)
-        .onTrue(
-            Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.STROBE_BLUE))
-                .alongWith(controllerRumbleCommand()));
+    operatorController
+        .start()
+        .whileTrue(Commands.runOnce(() -> superstructure.runVoltsPivot(-0.5)))
+        .onFalse(Commands.runOnce(() -> superstructure.runVoltsPivot(0.0)));
+    operatorController.back().onTrue(Commands.runOnce(() -> superstructure.setPositionPivot(18)));
   }
 
   private void configureButtonBindingsSIM() {
@@ -484,6 +450,52 @@ public class RobotContainer {
 
   }
 
+  private void bindTriggers(){
+
+    new Trigger(
+            () ->
+                    DriverStation.isTeleopEnabled()
+                            && DriverStation.getMatchTime() > 0
+                            && DriverStation.getMatchTime() <= Math.round(endgameAlert1.get()))
+            .onTrue(
+                    controllerRumbleCommand()
+                            .withTimeout(0.5)
+                            .beforeStarting(() -> blinkinLED.setPattern(BlinkinPattern.STROBE_WHITE))
+                            .finallyDo(() -> blinkinLED.setPattern(BlinkinPattern.RED)));
+
+    new Trigger(
+            () ->
+                    DriverStation.isTeleopEnabled()
+                            && DriverStation.getMatchTime() > 0
+                            && DriverStation.getMatchTime() <= Math.round(endgameAlert2.get()))
+            .onTrue(
+                    controllerRumbleCommand()
+                            .withTimeout(0.2)
+                            .andThen(Commands.waitSeconds(0.1))
+                            .repeatedly()
+                            .withTimeout(0.9)
+                            .beforeStarting(() -> blinkinLED.setPattern(BlinkinPattern.STROBE_WHITE))
+                            .finallyDo(() -> blinkinLED.setPattern(BlinkinPattern.RED))); // Rumble three times
+
+    new Trigger(
+            () ->
+                    DriverStation.isDisabled()
+                            && dynamicAuto.getStartPose().equals(RobotState.getInstance().getPose()))
+            .onTrue(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.GREEN)))
+            .onFalse(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.RED)));
+
+    new Trigger(superstructure::isHasCoral)
+            .onTrue(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.GREEN)))
+            .onFalse(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.DARK_RED)));
+
+    new Trigger(() -> drive.getPitch().getDegrees() > 10)
+            .onTrue(
+                    Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.STROBE_BLUE))
+                            .alongWith(controllerRumbleCommand()));
+
+    new Trigger(()-> elevator.isAtGoal() && (elevator.getPositionMeters() > 0.02) && (elevator.getSetpoint().position == 0)).onTrue(elevator.homingSequence());
+  }
+
   private Command controllerRumbleCommand() {
     return Commands.startEnd(
         () -> {
@@ -516,7 +528,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // return dynamicAuto.getAutoCommand();
-    return autoChooser.get();
+    return dynamicAuto.getAutoCommand();
+    // return autoChooser.get();
   }
 }

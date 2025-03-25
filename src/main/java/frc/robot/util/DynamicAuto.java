@@ -26,7 +26,8 @@ import org.littletonrobotics.junction.AutoLogOutput;
  */
 public class DynamicAuto {
   // Constants
-  private static final double SOURCE_WAIT_TIME = 0.5;
+  private static final LoggedTunableNumber raiseTimePercentage =
+          new LoggedTunableNumber("DynamicAuto/RaiseTimePercentage", 0.8);
   private static final int MAX_CORAL_SECTIONS = 4;
   private static final int MAX_CORAL_ZONES = 12;
   private static final boolean IS_CHOREO = true;
@@ -167,7 +168,7 @@ public class DynamicAuto {
               AutoBuilder.resetOdom(startPath.getStartingHolonomicPose().get()),
               AutoBuilder.followPath(startPath)
                   .deadlineFor(
-                      new WaitCommand(pathTime.times(0.2))
+                      new WaitCommand(pathTime.times(raiseTimePercentage.get()))
                           .andThen(superstructure.runGoal(SuperstructureState.L4_CORAL))),
               AutoScore.getAutoScoreCommand(
                   () -> SuperstructureState.L4_CORAL, isRightSide, drive, superstructure),
@@ -231,7 +232,7 @@ public class DynamicAuto {
           Commands.sequence(
               AutoBuilder.followPath(pathToCoral)
                   .deadlineFor(
-                      new WaitCommand(pathTime.times(0.2))
+                      new WaitCommand(pathTime.times(raiseTimePercentage.get()))
                           .andThen(superstructure.runGoal(SuperstructureState.L4_CORAL))),
 
               // Score the coral

@@ -22,8 +22,6 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.PathPlannerLogging;
-import com.pathplanner.lib.util.swerve.SwerveSetpoint;
-import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
@@ -52,8 +50,12 @@ import frc.robot.RobotState;
 import frc.robot.util.LocalADStarAK;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import frc.robot.util.swerve.SwerveSetpoint;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+
+import frc.robot.util.swerve.SwerveSetpointGenerator;
 
 public class Drive extends SubsystemBase {
   static final Lock odometryLock = new ReentrantLock();
@@ -69,9 +71,6 @@ public class Drive extends SubsystemBase {
 
   private boolean gyroHasDisconnected = false;
 
-  private final SwerveSetpointGenerator setpointGenerator;
-  private SwerveSetpoint previousSetpoint;
-
   private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
   private Rotation2d rawGyroRotation = new Rotation2d();
   private SwerveModulePosition[] lastModulePositions = // For delta tracking
@@ -81,8 +80,20 @@ public class Drive extends SubsystemBase {
         new SwerveModulePosition(),
         new SwerveModulePosition()
       };
+
+  private SwerveSetpoint currentSetpoint =
+          new SwerveSetpoint(
+                  new ChassisSpeeds(),
+                  new SwerveModuleState[] {
+                          new SwerveModuleState(),
+                          new SwerveModuleState(),
+                          new SwerveModuleState(),
+                          new SwerveModuleState()
+                  });
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
+
+  private final SwerveSetpointGenerator swerveSetpointGenerator;
 
   public Drive(
       GyroIO gyroIO,
@@ -95,6 +106,9 @@ public class Drive extends SubsystemBase {
     modules[1] = new Module(frModuleIO, 1);
     modules[2] = new Module(blModuleIO, 2);
     modules[3] = new Module(brModuleIO, 3);
+
+    swerveSetpointGenerator =
+            new SwerveSetpointGenerator(kinematics, DriveConstants.moduleTranslations);
 
     // Usage reporting for swerve template
     HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_AdvantageKit);
@@ -135,21 +149,10 @@ public class Drive extends SubsystemBase {
             new SysIdRoutine.Mechanism(
                 (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
 
-    setpointGenerator =
-        new SwerveSetpointGenerator(
-            ppConfig, // The robot configuration. This is the same config used for generating
-            // trajectories and running path following commands.
-            Units.rotationsToRadians(
-                264.88) // The max rotation velocity of a swerve module in radians per second. This
-            // should probably be stored in your Constants file
-            );
     ChassisSpeeds currentSpeeds =
         getChassisSpeeds(); // Method to get current robot-relative chassis speeds
     SwerveModuleState[] currentStates =
         getModuleStates(); // Method to get the current swerve module states
-    previousSetpoint =
-        new SwerveSetpoint(
-            currentSpeeds, currentStates, DriveFeedforwards.zeros(ppConfig.numModules));
   }
 
   @Override
@@ -221,38 +224,26 @@ public class Drive extends SubsystemBase {
    */
   public void runVelocity(ChassisSpeeds speeds) {
     // Calculate module setpoints
-    ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
-    SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
-    SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, maxSpeedMetersPerSec);
+    ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, Constants.loopPeriodSecs);
+    SwerveModuleState[] setpointStatesUnoptimized = kinematics.toSwerveModuleStates(discreteSpeeds);
+    currentSetpoint =
+            swerveSetpointGenerator.generateSetpoint(
+                    DriveConstants.moduleLimitsFree,
+                    currentSetpoint,
+                    discreteSpeeds,
+                    Constants.loopPeriodSecs);
+    SwerveModuleState[] setpointStates = currentSetpoint.moduleStates();
 
-    // Log unoptimized setpoints
-    Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
-    Logger.recordOutput("SwerveChassisSpeeds/Setpoints", discreteSpeeds);
+    // Log unoptimized setpoints and setpoint speeds
+    Logger.recordOutput("Drive/SwerveStates/SetpointsUnoptimized", setpointStatesUnoptimized);
+    Logger.recordOutput("Drive/SwerveStates/Setpoints", setpointStates);
+    Logger.recordOutput("Drive/SwerveChassisSpeeds/Setpoints", currentSetpoint.chassisSpeeds());
 
     // Send setpoints to modules
     for (int i = 0; i < 4; i++) {
       modules[i].runSetpoint(setpointStates[i]);
     }
-
-    // Log optimized setpoints (runSetpoint mutates each state)
-    Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
   }
-
-  /*
-    public void runVelocity(ChassisSpeeds speeds) {
-    previousSetpoint = setpointGenerator.generateSetpoint(previousSetpoint, speeds, 0.02);
-    // Log unoptimized setpoints and setpoint speeds
-    Logger.recordOutput("Drive/SwerveStates/SetpointsUnoptimized", speeds);
-    Logger.recordOutput("Drive/SwerveStates/Setpoints", previousSetpoint.toString());
-    Logger.recordOutput(
-        "Drive/SwerveChassisSpeeds/Setpoints", previousSetpoint.robotRelativeSpeeds());
-
-    // Send setpoints to modules
-    for (int i = 0; i < 4; i++) {
-      modules[i].runSetpoint(previousSetpoint.moduleStates()[i]);
-    }
-  }
-   */
 
   /** Runs the drive in a straight line with the specified drive output. */
   public void runCharacterization(double output) {

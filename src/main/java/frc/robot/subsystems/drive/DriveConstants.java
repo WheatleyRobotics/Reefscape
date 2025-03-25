@@ -20,6 +20,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
+import frc.robot.util.swerve.ModuleLimits;
 
 public class DriveConstants {
   public static final double odometryFrequency = 100; // Hz
@@ -27,6 +28,7 @@ public class DriveConstants {
   public static final double wheelBase = Units.inchesToMeters(28);
   public static final double driveBaseRadius = Math.hypot(trackWidth / 2.0, wheelBase / 2.0);
   public static final double maxSpeedMetersPerSec = Units.feetToMeters(19.3);
+  public static final double maxAccelerationMeters = 6.757;
   public static final double maxAngularSpeed = Units.feetToMeters(19.3) / driveBaseRadius;
   public static final Translation2d[] moduleTranslations =
       new Translation2d[] {
@@ -140,6 +142,8 @@ public class DriveConstants {
   public static final double robotMassKg = 58.967;
   public static final double robotMOI = 4.75;
   public static final double wheelCOF = 1.5;
+    public static final ModuleLimits moduleLimitsFree =
+            new ModuleLimits(maxSpeedMetersPerSec, maxAccelerationMeters, maxAngularSpeed);
   public static final RobotConfig ppConfig =
       new RobotConfig(
           robotMassKg,

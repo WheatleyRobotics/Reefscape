@@ -1,4 +1,4 @@
-// Copyright (c) 2024 FRC 6328
+// Copyright (c) 2025 FRC 6328
 // http://github.com/Mechanical-Advantage
 //
 // Use of this source code is governed by an MIT-style
@@ -22,8 +22,8 @@ public class EqualsUtil {
   public static class GeomExtensions {
     public static boolean epsilonEquals(Twist2d twist, Twist2d other) {
       return EqualsUtil.epsilonEquals(twist.dx, other.dx)
-          && EqualsUtil.epsilonEquals(twist.dy, other.dy)
-          && EqualsUtil.epsilonEquals(twist.dtheta, other.dtheta);
+              && EqualsUtil.epsilonEquals(twist.dy, other.dy)
+              && EqualsUtil.epsilonEquals(twist.dtheta, other.dtheta);
     }
   }
 }

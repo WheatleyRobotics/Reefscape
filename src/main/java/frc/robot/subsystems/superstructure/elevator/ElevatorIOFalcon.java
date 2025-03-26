@@ -65,9 +65,9 @@ public class ElevatorIOFalcon implements ElevatorIO {
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     config.Slot0 = new Slot0Configs().withKP(0).withKI(0).withKD(0);
     config.Feedback.SensorToMechanismRatio = reduction;
-    config.TorqueCurrent.PeakForwardTorqueCurrent = 80.0;
-    config.TorqueCurrent.PeakReverseTorqueCurrent = -80.0;
-    config.CurrentLimits.StatorCurrentLimit = 80.0;
+    config.TorqueCurrent.PeakForwardTorqueCurrent = 120.0;
+    config.TorqueCurrent.PeakReverseTorqueCurrent = -120.0;
+    config.CurrentLimits.StatorCurrentLimit = 120.0;
     config.CurrentLimits.StatorCurrentLimitEnable = true;
     config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     tryUntilOk(5, () -> talon.getConfigurator().apply(config, 0.25));

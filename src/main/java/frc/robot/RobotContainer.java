@@ -350,11 +350,9 @@ public class RobotContainer {
 
     operatorController.povDown().onTrue(superstructure.runGoal(SuperstructureState.PROCESSING));
 
-    operatorController
-        .start()
-        .whileTrue(Commands.runOnce(() -> superstructure.runVoltsPivot(-0.5)))
-        .onFalse(Commands.runOnce(() -> superstructure.runVoltsPivot(0.0)));
-    operatorController.back().onTrue(Commands.runOnce(() -> superstructure.setPositionPivot(18)));
+    operatorController.start().onTrue(elevator.homingSequence());
+    // operatorController.back().onTrue(Commands.runOnce(() ->
+    // superstructure.setPositionPivot(18)));
 
     new Trigger(
             () ->
@@ -531,7 +529,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return dynamicAuto.getAutoCommand();
-    // return autoChooser.get();
+    // return dynamicAuto.getAutoCommand();
+    return autoChooser.get();
   }
 }

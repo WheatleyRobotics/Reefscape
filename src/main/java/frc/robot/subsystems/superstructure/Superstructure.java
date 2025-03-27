@@ -10,6 +10,7 @@ package frc.robot.subsystems.superstructure;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.*;
@@ -272,7 +273,7 @@ public class Superstructure extends SubsystemBase {
     addEdge.accept(
         SuperstructureState.ALGAE_STOW, SuperstructureState.BARGE, true, AlgaeEdge.ALGAE, false);
     addEdge.accept(
-        SuperstructureState.BARGE, SuperstructureState.BARGE_EJECT, true, AlgaeEdge.ALGAE, false);
+        SuperstructureState.BARGE, SuperstructureState.BARGE_EJECT, true, AlgaeEdge.NONE, false);
     addEdge.accept(
         SuperstructureState.ALGAE_STOW, SuperstructureState.TOSS, true, AlgaeEdge.NONE, false);
     addEdge.accept(
@@ -285,13 +286,32 @@ public class Superstructure extends SubsystemBase {
       setDefaultCommand(
           runGoal(
               () -> {
-                Pose2d robot = RobotState.getInstance().getPose();
                 // Check if should intake
                 if (!dispenser.isHasCoral()
                     && !dispenser.isHasAlgae()
-                    && robot.getX() < FieldConstants.fieldLength / 5.0
-                    && (robot.getY() < FieldConstants.fieldWidth / 5.0
-                        || robot.getY() > FieldConstants.fieldWidth * 4.0 / 5.0)) {
+                    && ((RobotState.getInstance()
+                                    .getPose()
+                                    .getTranslation()
+                                    .getDistance(
+                                        FieldConstants.CoralStation.leftCenterFace.getTranslation())
+                                < 1.5
+                            && isWithinAngleBound(
+                                RobotState.getInstance().getPose(),
+                                FieldConstants.CoralStation.leftCenterFace,
+                                0,
+                                Math.PI / 2))
+                        || (RobotState.getInstance()
+                                    .getPose()
+                                    .getTranslation()
+                                    .getDistance(
+                                        FieldConstants.CoralStation.rightCenterFace
+                                            .getTranslation())
+                                < 1.5
+                            && isWithinAngleBound(
+                                RobotState.getInstance().getPose(),
+                                FieldConstants.CoralStation.rightCenterFace,
+                                Math.PI / 2,
+                                Math.PI)))) {
                   return SuperstructureState.INTAKE;
                 }
                 return dispenser.isHasAlgae()
@@ -557,6 +577,25 @@ public class Superstructure extends SubsystemBase {
   public static boolean willSlam(SuperstructureState from, SuperstructureState to) {
     return from.getValue().getHeight().lowerThan(SuperstructureStateData.Height.INTAKE)
         != to.getValue().getHeight().lowerThan(SuperstructureStateData.Height.INTAKE);
+  }
+
+  private boolean isWithinAngleBound(
+      Pose2d robotPose, Pose2d stationPose, double minAngle, double maxAngle) {
+    // Calculate the angle between the robot and the station
+    Translation2d robotTranslation = robotPose.getTranslation();
+    Translation2d stationTranslation = stationPose.getTranslation();
+
+    // Calculate the vector from station to robot
+    Translation2d vectorToRobot = robotTranslation.minus(stationTranslation);
+
+    // Calculate the angle of this vector
+    double angle = Math.atan2(vectorToRobot.getY(), vectorToRobot.getX());
+
+    // Normalize angle to be between 0 and 2π
+    angle = (angle + 2 * Math.PI) % (2 * Math.PI);
+
+    // Check if the angle is within the specified bounds
+    return angle >= minAngle && angle <= maxAngle;
   }
 
   public void runVoltsElevator(double volts) {

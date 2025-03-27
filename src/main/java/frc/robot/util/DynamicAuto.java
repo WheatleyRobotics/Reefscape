@@ -27,7 +27,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
 public class DynamicAuto {
   // Constants
   private static final LoggedTunableNumber raiseTimePercentage =
-          new LoggedTunableNumber("DynamicAuto/RaiseTimePercentage", 0.8);
+      new LoggedTunableNumber("DynamicAuto/RaiseTimePercentage", 0.30);
   private static final int MAX_CORAL_SECTIONS = 4;
   private static final int MAX_CORAL_ZONES = 12;
   private static final boolean IS_CHOREO = true;
@@ -174,7 +174,10 @@ public class DynamicAuto {
                   () -> SuperstructureState.L4_CORAL, isRightSide, drive, superstructure),
               AutoBuilder.followPath(secondPath)
                   .deadlineFor(superstructure.runGoal(SuperstructureState.INTAKE)),
-              superstructure.runGoal(SuperstructureState.INTAKE).until(superstructure::isHasCoral));
+              superstructure
+                  .runGoal(SuperstructureState.INTAKE)
+                  .until(superstructure::isHasCoral)
+                  .withTimeout(2));
     } catch (Exception e) {
       logError("Error in first section", e);
       return Commands.none();
@@ -252,7 +255,10 @@ public class DynamicAuto {
                           .onlyIf(() -> !superstructure.isHasCoral()));
 
           Command waitAtSource =
-              superstructure.runGoal(SuperstructureState.INTAKE).until(superstructure::isHasCoral);
+              superstructure
+                  .runGoal(SuperstructureState.INTAKE)
+                  .until(superstructure::isHasCoral)
+                  .withTimeout(2);
 
           sectionCommand = Commands.sequence(sectionCommand, pathBackToSource, waitAtSource);
         }

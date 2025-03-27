@@ -4,7 +4,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import frc.robot.Robot;
 import frc.robot.RobotState;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.superstructure.Superstructure;
@@ -28,7 +27,7 @@ public class AutoScore {
       Drive drive,
       Superstructure superstructure) {
     return Commands.sequence(
-            /*
+        /*
         superstructure
             .runGoal(SuperstructureState.INTAKE)
             .until(superstructure::isHasCoral)
@@ -88,11 +87,11 @@ public class AutoScore {
             .runGoal(() -> state.get().getEject())
             .until(() -> !superstructure.isHasCoral())
             .andThen(new WaitCommand(0.1)),
-        new WaitCommand(0.3)
-            .andThen(superstructure.runGoal(() -> SuperstructureState.STOW).withTimeout(0.1))
+        new WaitCommand(0.2)
+            .andThen(Commands.runOnce(() -> superstructure.runGoal(() -> SuperstructureState.STOW)))
             .deadlineFor(
                 RobotState.getInstance().isAuto()
-                    ? Commands.runOnce(() -> drive.runVelocity(new ChassisSpeeds(-0.5, 0, 0)))
+                    ? Commands.runOnce(() -> drive.runVelocity(new ChassisSpeeds(-0.75, 0, 0)))
                     : getClearReefCommand(drive)),
         Commands.runOnce(() -> RobotState.getInstance().setSide(-1)));
   }

@@ -126,6 +126,7 @@ public class RobotContainer {
                 new ModuleIOSim(),
                 new ModuleIOSim(),
                 new ModuleIOSim());
+        /*
         vision =
             new Vision(
                 drive::addVisionMeasurement,
@@ -141,6 +142,8 @@ public class RobotContainer {
                     drive::getRotation,
                     drive::getPose,
                     RobotState.getInstance().isShouldTrigSolve()));
+
+         */
         elevator = new Elevator(new ElevatorIOSim());
         dispenser =
             new Dispenser(new PivotIOSim(), new TunnelIOSim(DCMotor.getKrakenX60Foc(1), 1.0, 0.2));
@@ -302,7 +305,9 @@ public class RobotContainer {
 
     driveController.back().whileTrue(Commands.runOnce(() -> climb.setServoPosition(1)));
 
-    driveController.povRight().whileTrue(new DriveToPose(drive, ()-> new Pose2d(7.156, 2, Rotation2d.fromDegrees(180))));
+    driveController
+        .povRight()
+        .whileTrue(new DriveToPose(drive, () -> new Pose2d(7.156, 2, Rotation2d.fromDegrees(180))));
 
     operatorController
         .x()
@@ -450,50 +455,55 @@ public class RobotContainer {
 
   }
 
-  private void bindTriggers(){
+  private void bindTriggers() {
 
     new Trigger(
             () ->
-                    DriverStation.isTeleopEnabled()
-                            && DriverStation.getMatchTime() > 0
-                            && DriverStation.getMatchTime() <= Math.round(endgameAlert1.get()))
-            .onTrue(
-                    controllerRumbleCommand()
-                            .withTimeout(0.5)
-                            .beforeStarting(() -> blinkinLED.setPattern(BlinkinPattern.STROBE_WHITE))
-                            .finallyDo(() -> blinkinLED.setPattern(BlinkinPattern.RED)));
+                DriverStation.isTeleopEnabled()
+                    && DriverStation.getMatchTime() > 0
+                    && DriverStation.getMatchTime() <= Math.round(endgameAlert1.get()))
+        .onTrue(
+            controllerRumbleCommand()
+                .withTimeout(0.5)
+                .beforeStarting(() -> blinkinLED.setPattern(BlinkinPattern.STROBE_WHITE))
+                .finallyDo(() -> blinkinLED.setPattern(BlinkinPattern.RED)));
 
     new Trigger(
             () ->
-                    DriverStation.isTeleopEnabled()
-                            && DriverStation.getMatchTime() > 0
-                            && DriverStation.getMatchTime() <= Math.round(endgameAlert2.get()))
-            .onTrue(
-                    controllerRumbleCommand()
-                            .withTimeout(0.2)
-                            .andThen(Commands.waitSeconds(0.1))
-                            .repeatedly()
-                            .withTimeout(0.9)
-                            .beforeStarting(() -> blinkinLED.setPattern(BlinkinPattern.STROBE_WHITE))
-                            .finallyDo(() -> blinkinLED.setPattern(BlinkinPattern.RED))); // Rumble three times
+                DriverStation.isTeleopEnabled()
+                    && DriverStation.getMatchTime() > 0
+                    && DriverStation.getMatchTime() <= Math.round(endgameAlert2.get()))
+        .onTrue(
+            controllerRumbleCommand()
+                .withTimeout(0.2)
+                .andThen(Commands.waitSeconds(0.1))
+                .repeatedly()
+                .withTimeout(0.9)
+                .beforeStarting(() -> blinkinLED.setPattern(BlinkinPattern.STROBE_WHITE))
+                .finallyDo(() -> blinkinLED.setPattern(BlinkinPattern.RED))); // Rumble three times
 
     new Trigger(
             () ->
-                    DriverStation.isDisabled()
-                            && dynamicAuto.getStartPose().equals(RobotState.getInstance().getPose()))
-            .onTrue(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.GREEN)))
-            .onFalse(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.RED)));
+                DriverStation.isDisabled()
+                    && dynamicAuto.getStartPose().equals(RobotState.getInstance().getPose()))
+        .onTrue(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.GREEN)))
+        .onFalse(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.RED)));
 
     new Trigger(superstructure::isHasCoral)
-            .onTrue(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.GREEN)))
-            .onFalse(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.DARK_RED)));
+        .onTrue(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.GREEN)))
+        .onFalse(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.DARK_RED)));
 
     new Trigger(() -> drive.getPitch().getDegrees() > 10)
-            .onTrue(
-                    Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.STROBE_BLUE))
-                            .alongWith(controllerRumbleCommand()));
+        .onTrue(
+            Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.STROBE_BLUE))
+                .alongWith(controllerRumbleCommand()));
 
-    new Trigger(()-> elevator.isAtGoal() && (elevator.getPositionMeters() > 0.02) && (elevator.getSetpoint().position == 0)).onTrue(elevator.homingSequence());
+    new Trigger(
+            () ->
+                elevator.isAtGoal()
+                    && (elevator.getPositionMeters() > 0.02)
+                    && (elevator.getSetpoint().position == 0))
+        .onTrue(elevator.homingSequence());
   }
 
   private Command controllerRumbleCommand() {

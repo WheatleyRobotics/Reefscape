@@ -41,18 +41,18 @@ public class DriveToPose extends Command {
       new LoggedTunableNumber("DriveToPose/ApproachVelocityScale");
 
   static {
-    drivekP.initDefault(2.1); // Reduced from 2.05
-    drivekD.initDefault(0.2); // Increased from 0.15
-    thetakP.initDefault(3.0); // Reduced from 4.0
-    thetakD.initDefault(0.1); // Increased from 0.0
-    driveMaxVelocity.initDefault(2.0); // Reduced from 1.5
-    driveMaxAcceleration.initDefault(4.0); // Reduced from 3.0
-    thetaMaxVelocity.initDefault(Units.degreesToRadians(300.0)); // Reduced from 360.0
-    thetaMaxAcceleration.initDefault(Units.degreesToRadians(540.0)); // Reduced from 720.0
+    drivekP.initDefault(1.8);
+    drivekD.initDefault(0.2);
+    thetakP.initDefault(3.0);
+    thetakD.initDefault(0.1);
+    driveMaxVelocity.initDefault(1.0);
+    driveMaxAcceleration.initDefault(2.0);
+    thetaMaxVelocity.initDefault(Units.degreesToRadians(360));
+    thetaMaxAcceleration.initDefault(Units.degreesToRadians(720));
     driveTolerance.initDefault(0.02);
     thetaTolerance.initDefault(Units.degreesToRadians(1.0));
-    approachDistanceThreshold.initDefault(0.1); // Distance threshold for gentle approach
-    approachVelocityScale.initDefault(0.9); // Scale factor for velocity during approach
+    approachDistanceThreshold.initDefault(0.1);
+    approachVelocityScale.initDefault(0.9);
   }
 
   private final Drive drive;

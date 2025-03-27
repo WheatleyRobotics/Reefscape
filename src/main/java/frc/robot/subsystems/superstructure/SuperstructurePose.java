@@ -48,8 +48,8 @@ public record SuperstructurePose(DoubleSupplier elevatorHeight, Supplier<Rotatio
         algaeIntakeAngle),
     ALGAE_L2_INTAKE("AlgaeL2Intake", Units.inchesToMeters(8.1), 184),
     ALGAE_L3_INTAKE("AlgaeL3Intake", Units.inchesToMeters(11.65), 181),
-    THROW(() -> elevatorMaxTravel, () -> 80),
-    BARGE(() -> elevatorMaxTravel, () -> 140),
+    THROW("Throw", elevatorMaxTravel, 80),
+    BARGE("Barge", elevatorMaxTravel, 140),
     PROCESSING("Processing", 0.0, 180),
     ALGAE_STOW("AlgaeStow", 0.0, 140),
     ALGAE_STOW_FRONT("AlgaeStowFront", 0.1, pivotSafeAngle.getDegrees());

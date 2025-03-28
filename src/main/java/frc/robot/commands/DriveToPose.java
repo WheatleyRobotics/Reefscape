@@ -52,7 +52,7 @@ public class DriveToPose extends Command {
     driveTolerance.initDefault(0.02);
     thetaTolerance.initDefault(Units.degreesToRadians(1.0));
     approachDistanceThreshold.initDefault(0.1);
-    approachVelocityScale.initDefault(0.9);
+    approachVelocityScale.initDefault(1);
   }
 
   private final Drive drive;

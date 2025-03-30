@@ -18,6 +18,7 @@ import static frc.robot.subsystems.vision.VisionConstants.*;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -46,7 +47,9 @@ import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
 import frc.robot.subsystems.superstructure.slam.Slam;
 import frc.robot.subsystems.superstructure.slam.SlamIO;
 import frc.robot.subsystems.vision.*;
+import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.DynamicAuto;
+import frc.robot.util.FieldConstants;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -98,7 +101,7 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOLimelight("limelight", drive::getRotation),
+                // new VisionIOLimelight("limelight", drive::getRotation),
                 new VisionIOPhotonVision(
                     camera0Name,
                     robotToCamera0,
@@ -306,8 +309,39 @@ public class RobotContainer {
     driveController.back().whileTrue(Commands.runOnce(() -> climb.setServoPosition(1)));
 
     driveController
-        .povRight()
-        .whileTrue(new DriveToPose(drive, () -> new Pose2d(7.156, 2, Rotation2d.fromDegrees(180))));
+            .povRight()
+            .whileTrue(
+                    Commands.parallel(
+                            superstructure.runGoal(
+                                    () ->
+                                            RobotState.getInstance().getCurrentZone().getFace() % 2 == 0
+                                                    ? SuperstructureState.ALGAE_L3_INTAKE
+                                                    : SuperstructureState.ALGAE_L2_INTAKE),
+                            new DriveToPose(
+                                    drive,
+                                    () ->
+                                            FieldConstants.addOffset(
+                                                    AllianceFlipUtil.getCorrected(
+                                                            FieldConstants.Reef.centerFaces[
+                                                                    RobotState.getInstance().getCurrentZone().getFace()]),
+                                                    0.55))
+                                    .andThen(
+                                            Commands.run(() -> drive.runVelocity(new ChassisSpeeds(-0.15, 0.0, 0.0))))))
+            .onFalse(
+                    new DriveToPose(
+                            drive,
+                            () ->
+                                    FieldConstants.addOffset(
+                                            AllianceFlipUtil.getCorrected(
+                                                    FieldConstants.Reef.centerFaces[
+                                                            RobotState.getInstance().getCurrentZone().getFace()]),
+                                            0.75))
+                            .deadlineFor(
+                                    superstructure.runGoal(
+                                            () ->
+                                                    RobotState.getInstance().getCurrentZone().getFace() % 2 == 0
+                                                            ? SuperstructureState.ALGAE_L3_INTAKE
+                                                            : SuperstructureState.ALGAE_L2_INTAKE)));
 
     operatorController
         .x()
@@ -376,47 +410,39 @@ public class RobotContainer {
             () -> -driveController.getRightX()));
 
     driveController
-        .leftBumper()
-        .whileTrue(
-            DriveCommands.joystickDrive(
-                drive,
-                () -> -driveController.getLeftY() * 0.4,
-                () -> -driveController.getLeftX() * 0.4,
-                () -> -driveController.getRightX() * 0.3));
-
-    driveController
-        .b()
-        .onTrue(
-            Commands.runOnce(
-                    () -> {
-                      drive.setPose(new Pose2d(drive.getPose().getTranslation(), new Rotation2d()));
-                      drive.setYaw(new Rotation2d());
-                      RobotState.getInstance().resetPose(drive.getPose());
-                    },
-                    drive)
-                .ignoringDisable(true));
-
-    driveController
         .x()
         .whileTrue(
-            AutoScore.getAutoScoreCommand(
-                    () -> RobotState.getInstance().getDesiredState(), false, drive, superstructure)
-                .alongWith(
-                    Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.STROBE_WHITE))))
+            Commands.parallel(
+                superstructure.runGoal(
+                    () ->
+                        RobotState.getInstance().getCurrentZone().getFace() % 2 == 0
+                            ? SuperstructureState.ALGAE_L3_INTAKE
+                            : SuperstructureState.ALGAE_L2_INTAKE),
+                new DriveToPose(
+                        drive,
+                        () ->
+                            FieldConstants.addOffset(
+                                AllianceFlipUtil.getCorrected(
+                                    FieldConstants.Reef.centerFaces[
+                                        RobotState.getInstance().getCurrentZone().getFace()]),
+                                0.55))
+                    .andThen(
+                        Commands.run(() -> drive.runVelocity(new ChassisSpeeds(-0.15, 0.0, 0.0))))))
         .onFalse(
-            AutoScore.getClearReefCommand(drive)
-                .alongWith(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.RED))));
-
-    driveController
-        .y()
-        .whileTrue(
-            AutoScore.getAutoScoreCommand(
-                    () -> RobotState.getInstance().getDesiredState(), true, drive, superstructure)
-                .alongWith(
-                    Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.STROBE_WHITE))))
-        .onFalse(
-            AutoScore.getClearReefCommand(drive)
-                .alongWith(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.RED))));
+            new DriveToPose(
+                    drive,
+                    () ->
+                        FieldConstants.addOffset(
+                            AllianceFlipUtil.getCorrected(
+                                FieldConstants.Reef.centerFaces[
+                                    RobotState.getInstance().getCurrentZone().getFace()]),
+                            0.75))
+                .deadlineFor(
+                    superstructure.runGoal(
+                        () ->
+                            RobotState.getInstance().getCurrentZone().getFace() % 2 == 0
+                                ? SuperstructureState.ALGAE_L3_INTAKE
+                                : SuperstructureState.ALGAE_L2_INTAKE)));
 
     driveController
         .b()

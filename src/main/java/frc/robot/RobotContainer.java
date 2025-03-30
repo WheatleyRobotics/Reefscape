@@ -309,39 +309,39 @@ public class RobotContainer {
     driveController.back().whileTrue(Commands.runOnce(() -> climb.setServoPosition(1)));
 
     driveController
-            .povRight()
-            .whileTrue(
-                    Commands.parallel(
-                            superstructure.runGoal(
-                                    () ->
-                                            RobotState.getInstance().getCurrentZone().getFace() % 2 == 0
-                                                    ? SuperstructureState.ALGAE_L3_INTAKE
-                                                    : SuperstructureState.ALGAE_L2_INTAKE),
-                            new DriveToPose(
-                                    drive,
-                                    () ->
-                                            FieldConstants.addOffset(
-                                                    AllianceFlipUtil.getCorrected(
-                                                            FieldConstants.Reef.centerFaces[
-                                                                    RobotState.getInstance().getCurrentZone().getFace()]),
-                                                    0.55))
-                                    .andThen(
-                                            Commands.run(() -> drive.runVelocity(new ChassisSpeeds(-0.15, 0.0, 0.0))))))
-            .onFalse(
-                    new DriveToPose(
-                            drive,
-                            () ->
-                                    FieldConstants.addOffset(
-                                            AllianceFlipUtil.getCorrected(
-                                                    FieldConstants.Reef.centerFaces[
-                                                            RobotState.getInstance().getCurrentZone().getFace()]),
-                                            0.75))
-                            .deadlineFor(
-                                    superstructure.runGoal(
-                                            () ->
-                                                    RobotState.getInstance().getCurrentZone().getFace() % 2 == 0
-                                                            ? SuperstructureState.ALGAE_L3_INTAKE
-                                                            : SuperstructureState.ALGAE_L2_INTAKE)));
+        .povRight()
+        .whileTrue(
+            Commands.parallel(
+                superstructure.runGoal(
+                    () ->
+                        RobotState.getInstance().getCurrentZone().getFace() % 2 == 0
+                            ? SuperstructureState.ALGAE_L3_INTAKE
+                            : SuperstructureState.ALGAE_L2_INTAKE),
+                new DriveToPose(
+                        drive,
+                        () ->
+                            FieldConstants.addOffset(
+                                AllianceFlipUtil.getCorrected(
+                                    FieldConstants.Reef.centerFaces[
+                                        RobotState.getInstance().getCurrentZone().getFace()]),
+                                0.55))
+                    .andThen(
+                        Commands.run(() -> drive.runVelocity(new ChassisSpeeds(-0.15, 0.0, 0.0))))))
+        .onFalse(
+            new DriveToPose(
+                    drive,
+                    () ->
+                        FieldConstants.addOffset(
+                            AllianceFlipUtil.getCorrected(
+                                FieldConstants.Reef.centerFaces[
+                                    RobotState.getInstance().getCurrentZone().getFace()]),
+                            0.75))
+                .deadlineFor(
+                    superstructure.runGoal(
+                        () ->
+                            RobotState.getInstance().getCurrentZone().getFace() % 2 == 0
+                                ? SuperstructureState.ALGAE_L3_INTAKE
+                                : SuperstructureState.ALGAE_L2_INTAKE)));
 
     operatorController
         .x()
@@ -410,53 +410,18 @@ public class RobotContainer {
             () -> -driveController.getRightX()));
 
     driveController
-        .x()
+        .a()
         .whileTrue(
-            Commands.parallel(
-                superstructure.runGoal(
-                    () ->
-                        RobotState.getInstance().getCurrentZone().getFace() % 2 == 0
-                            ? SuperstructureState.ALGAE_L3_INTAKE
-                            : SuperstructureState.ALGAE_L2_INTAKE),
-                new DriveToPose(
-                        drive,
-                        () ->
-                            FieldConstants.addOffset(
-                                AllianceFlipUtil.getCorrected(
-                                    FieldConstants.Reef.centerFaces[
-                                        RobotState.getInstance().getCurrentZone().getFace()]),
-                                0.55))
-                    .andThen(
-                        Commands.run(() -> drive.runVelocity(new ChassisSpeeds(-0.15, 0.0, 0.0))))))
-        .onFalse(
-            new DriveToPose(
-                    drive,
-                    () ->
-                        FieldConstants.addOffset(
-                            AllianceFlipUtil.getCorrected(
-                                FieldConstants.Reef.centerFaces[
-                                    RobotState.getInstance().getCurrentZone().getFace()]),
-                            0.75))
-                .deadlineFor(
-                    superstructure.runGoal(
-                        () ->
-                            RobotState.getInstance().getCurrentZone().getFace() % 2 == 0
-                                ? SuperstructureState.ALGAE_L3_INTAKE
-                                : SuperstructureState.ALGAE_L2_INTAKE)));
-
-    driveController
-        .b()
-        .whileTrue(superstructure.runGoal(() -> superstructure.getState().getEject()));
+            AutoScore.getAutoScoreCommand(
+                    () -> RobotState.getInstance().getDesiredState(), false, drive, superstructure)
+                .alongWith(
+                    Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.STROBE_WHITE))));
 
     operatorController
         .x()
         .onTrue(
             Commands.runOnce(
                 () -> RobotState.getInstance().setDesiredState(SuperstructureState.L4_CORAL)));
-
-    operatorController.b().onTrue(superstructure.runGoal(SuperstructureState.ALGAE_L2_INTAKE));
-
-    operatorController.a().onTrue(superstructure.runGoal(SuperstructureState.BARGE));
 
     /*
        var random = new Random();

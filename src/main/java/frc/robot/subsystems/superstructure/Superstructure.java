@@ -618,6 +618,19 @@ public class Superstructure extends SubsystemBase {
     dispenser.setPositionPivot(degrees);
   }
 
+  @AutoLogOutput(key = "Superstructure/ElevatorPercentage")
+  public double elevatorPercentage() {
+    double measured = elevator.getPositionMeters();
+    double goal = elevator.getGoalMeters();
+    if (goal == 0 && measured == 0) {
+      return 1;
+    }
+    if (goal == 0 && measured > 0) {
+      return 1;
+    }
+    return measured / goal;
+  }
+
   /** All edge commands should finish and exit properly. */
   @Builder(toBuilder = true)
   @Getter

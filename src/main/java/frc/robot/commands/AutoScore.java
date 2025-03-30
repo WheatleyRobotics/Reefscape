@@ -27,15 +27,6 @@ public class AutoScore {
       Drive drive,
       Superstructure superstructure) {
     return Commands.sequence(
-        /*
-        superstructure
-            .runGoal(SuperstructureState.INTAKE)
-            .until(superstructure::isHasCoral)
-            .onlyIf(() -> !Robot.isSimulation())
-            .withTimeout(2),
-
-             */
-
         Commands.runOnce(() -> RobotState.getInstance().setSide(right ? 1 : 0)),
         superstructure
             .runGoal(
@@ -44,7 +35,10 @@ public class AutoScore {
                     return SuperstructureState.L1_CORAL;
                   else return state.get();
                 })
-            .until(superstructure::atGoal)
+            .until(
+                () ->
+                    superstructure.getGoal().equals(state.get())
+                        && superstructure.elevatorPercentage() > 0.75)
             .deadlineFor(
                 RobotState.getInstance().isClearedReef()
                     ? new DriveToPose(
@@ -61,8 +55,7 @@ public class AutoScore {
                             FieldConstants.addOffset(
                                 FieldConstants.getBranch(
                                     RobotState.getInstance().getCurrentZone(), right),
-                                -minClearReefDistance.get())))
-            .onlyIf(() -> !superstructure.getGoal().equals(state.get())),
+                                -minClearReefDistance.get()))),
         Commands.parallel(
                 new DriveToPose(
                     drive,

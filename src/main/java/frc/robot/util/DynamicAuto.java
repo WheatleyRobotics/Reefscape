@@ -169,7 +169,7 @@ public class DynamicAuto {
               AutoBuilder.followPath(startPath)
                   .deadlineFor(
                       new WaitCommand(pathTime.times(raiseTimePercentage.get()))
-                          .andThen(superstructure.runGoal(SuperstructureState.L4_CORAL))),
+                          .andThen(superstructure.runGoal(SuperstructureState.L2_CORAL))),
               AutoScore.getAutoScoreCommand(
                   () -> SuperstructureState.L4_CORAL, isRightSide, drive, superstructure),
               AutoBuilder.followPath(secondPath)
@@ -236,7 +236,7 @@ public class DynamicAuto {
               AutoBuilder.followPath(pathToCoral)
                   .deadlineFor(
                       new WaitCommand(pathTime.times(raiseTimePercentage.get()))
-                          .andThen(superstructure.runGoal(SuperstructureState.L4_CORAL))),
+                          .andThen(superstructure.runGoal(SuperstructureState.L2_CORAL))),
 
               // Score the coral
               AutoScore.getAutoScoreCommand(

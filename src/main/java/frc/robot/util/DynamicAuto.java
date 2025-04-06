@@ -3,6 +3,7 @@ package frc.robot.util;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Timer;
@@ -27,7 +28,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
 public class DynamicAuto {
   // Constants
   private static final LoggedTunableNumber raiseTimePercentage =
-      new LoggedTunableNumber("DynamicAuto/RaiseTimePercentage", 0.30);
+      new LoggedTunableNumber("DynamicAuto/RaiseTimePercentage", 0.45);
   private static final int MAX_CORAL_SECTIONS = 4;
   private static final int MAX_CORAL_ZONES = 12;
   private static final boolean IS_CHOREO = true;
@@ -172,12 +173,15 @@ public class DynamicAuto {
                           .andThen(superstructure.runGoal(SuperstructureState.L2_CORAL))),
               AutoScore.getAutoScoreCommand(
                   () -> SuperstructureState.L4_CORAL, isRightSide, drive, superstructure),
+              new WaitCommand(0.4),
               AutoBuilder.followPath(secondPath)
                   .deadlineFor(superstructure.runGoal(SuperstructureState.INTAKE)),
               superstructure
                   .runGoal(SuperstructureState.INTAKE)
                   .until(superstructure::isHasCoral)
-                  .withTimeout(2));
+                  .withTimeout(2)
+                  .deadlineFor(
+                      Commands.run(() -> drive.runVelocity(new ChassisSpeeds(-0.15, 0, 0)))));
     } catch (Exception e) {
       logError("Error in first section", e);
       return Commands.none();
@@ -240,7 +244,8 @@ public class DynamicAuto {
 
               // Score the coral
               AutoScore.getAutoScoreCommand(
-                  () -> SuperstructureState.L4_CORAL, isRightSide, drive, superstructure));
+                  () -> SuperstructureState.L4_CORAL, isRightSide, drive, superstructure),
+              new WaitCommand(0.4));
 
       if (!isLast) {
         String pathToSourceName = coralZone + "-" + sourcePosition.getPathName();
@@ -258,7 +263,9 @@ public class DynamicAuto {
               superstructure
                   .runGoal(SuperstructureState.INTAKE)
                   .until(superstructure::isHasCoral)
-                  .withTimeout(2);
+                  .withTimeout(2)
+                  .deadlineFor(
+                      Commands.run(() -> drive.runVelocity(new ChassisSpeeds(-0.15, 0, 0))));
 
           sectionCommand = Commands.sequence(sectionCommand, pathBackToSource, waitAtSource);
         }

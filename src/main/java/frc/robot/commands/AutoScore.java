@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 public class AutoScore {
 
   public static final LoggedTunableNumber minClearReefDistance =
-      new LoggedTunableNumber("AutoScore/MinClearReefDistance", 0.7);
+      new LoggedTunableNumber("AutoScore/MinClearReefDistance", 0.75);
   public static final LoggedTunableNumber l4Offset =
       new LoggedTunableNumber("AutoScore/L4Offset", 0.5125);
   public static final LoggedTunableNumber coralOffset =
@@ -35,10 +35,7 @@ public class AutoScore {
                     return SuperstructureState.L1_CORAL;
                   else return state.get();
                 })
-            .until(
-                () ->
-                    superstructure.getGoal().equals(state.get())
-                        && superstructure.elevatorPercentage() > 0.75)
+            .until(superstructure::atGoal)
             .deadlineFor(
                 RobotState.getInstance().isClearedReef()
                     ? new DriveToPose(

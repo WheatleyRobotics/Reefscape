@@ -249,12 +249,13 @@ public class Dispenser {
         } else if (!hasCoral) {
           tunnelIO.runVolts(-tunnelIntakeVolts.get() / 5.0);
         }
-      } else if (currentState.equals(SuperstructureState.L1_CORAL_EJECT)
-          || currentState.equals(SuperstructureState.L2_CORAL_EJECT)
+      } else if (currentState.equals(SuperstructureState.L2_CORAL_EJECT)
           || currentState.equals(SuperstructureState.L3_CORAL_EJECT)
           || currentState.equals(SuperstructureState.L4_CORAL_EJECT)) {
         RobotState.getInstance().setHadCoral(false);
         tunnelIO.runVolts(tunnelDispenseVolts.get());
+      } else if (currentState.equals(SuperstructureState.L1_CORAL_EJECT)) {
+        tunnelIO.runVolts(-3.0);
       } else {
         tunnelIO.stop();
       }

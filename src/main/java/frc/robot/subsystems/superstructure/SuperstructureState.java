@@ -41,8 +41,7 @@ public enum SuperstructureState {
           .pose(SuperstructurePose.Preset.L4.getPose())
           .height(Height.SECOND_STAGE)
           .build()),
-  L1_CORAL_EJECT(
-      L1_CORAL.getValue().toBuilder().tunnelVolts(Dispenser.tunnelDispenseVolts).build()),
+  L1_CORAL_EJECT(L1_CORAL.getValue().toBuilder().build()),
   L2_CORAL_EJECT(
       L2_CORAL.getValue().toBuilder().tunnelVolts(Dispenser.tunnelDispenseVolts).build()),
   L3_CORAL_EJECT(
@@ -129,7 +128,6 @@ public enum SuperstructureState {
     try {
       returnState =
           switch (this.name()) {
-            case "STOW" -> SuperstructureState.L1_CORAL_EJECT;
             case "ALGAE_L2" -> SuperstructureState.ALGAE_L2_INTAKE;
             case "ALGAE_L3" -> SuperstructureState.ALGAE_L3_INTAKE;
             case "PROCESSING" -> SuperstructureState.PROCESSING_EJECT;

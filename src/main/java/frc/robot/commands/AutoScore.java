@@ -28,7 +28,7 @@ public class AutoScore {
       Superstructure superstructure) {
     return Commands.sequence(
         Commands.runOnce(() -> RobotState.getInstance().setSide(right ? 1 : 0)),
-        superstructure.getState().equals(SuperstructureState.L4_CORAL)
+        RobotState.getInstance().isAuto()
             ? Commands.none()
             : superstructure
                 .runGoal(

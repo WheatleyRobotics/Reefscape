@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.commands.AutoScore;
 import frc.robot.subsystems.drive.Drive;
@@ -250,7 +251,7 @@ public class DynamicAuto {
         }
       }
 
-      return sectionCommand;
+      return sectionCommand.alongWith(new PrintCommand("Section " + branchID));
     } catch (Exception e) {
       logError("Error building section for target " + branchID, e);
       return Commands.none();

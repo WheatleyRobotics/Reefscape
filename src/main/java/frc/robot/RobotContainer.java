@@ -180,7 +180,7 @@ public class RobotContainer {
 
     // Set up auto routines
     dynamicAuto = new DynamicAuto(drive, superstructure);
-    NamedCommands.registerCommand("coral", superstructure.runGoal(SuperstructureState.L4_CORAL));
+    NamedCommands.registerCommand("L4", superstructure.runGoal(SuperstructureState.L4_CORAL));
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
     // Set up SysId routines

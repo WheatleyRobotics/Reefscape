@@ -25,7 +25,7 @@ import lombok.Getter;
 public final class Constants {
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : Mode.SIM;
   public static final double loopPeriodSecs = 0.02;
-  @Getter private static RobotType robotType = RobotType.SIMBOT;
+  @Getter private static RobotType robotType = RobotType.COMPBOT;
   public static final boolean tuningMode = true;
   public static final boolean autoIntake = false;
 

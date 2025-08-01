@@ -5,6 +5,7 @@
       "/AdvantageKit/RealOutputs/Mechanism2d/Goal": "Mechanism2d",
       "/AdvantageKit/RealOutputs/Mechanism2d/Measured": "Mechanism2d",
       "/AdvantageKit/RealOutputs/Mechanism2d/Setpoint": "Mechanism2d",
+      "/AdvantageKit/RealOutputs/PathPlanner": "Alerts",
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Alerts": "Alerts",
       "/SmartDashboard/Auto Choices": "String Chooser",
@@ -12,6 +13,7 @@
       "/SmartDashboard/Auto Coral #1": "String Chooser",
       "/SmartDashboard/Auto Coral #2": "String Chooser",
       "/SmartDashboard/Auto Coral #3": "String Chooser",
+      "/SmartDashboard/PathPlanner": "Alerts",
       "/SmartDashboard/Source Position": "String Chooser",
       "/SmartDashboard/Starting Position": "String Chooser",
       "/SmartDashboard/VisionSystemSim-main/Sim Field": "Field2d"

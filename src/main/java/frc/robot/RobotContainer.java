@@ -16,6 +16,7 @@ package frc.robot;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -179,6 +180,7 @@ public class RobotContainer {
 
     // Set up auto routines
     dynamicAuto = new DynamicAuto(drive, superstructure);
+    NamedCommands.registerCommand("L4", superstructure.runGoal(SuperstructureState.L4_CORAL));
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
     // Set up SysId routines
@@ -503,13 +505,15 @@ public class RobotContainer {
                 .withTimeout(0.9)
                 .beforeStarting(() -> blinkinLED.setPattern(BlinkinPattern.STROBE_WHITE))
                 .finallyDo(() -> blinkinLED.setPattern(BlinkinPattern.RED))); // Rumble three times
+    /*
+       new Trigger(
+               () ->
+                   DriverStation.isDisabled()
+                       && dynamicAuto.getStartPose().equals(RobotState.getInstance().getPose()))
+           .onTrue(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.GREEN)))
+           .onFalse(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.RED)));
 
-    new Trigger(
-            () ->
-                DriverStation.isDisabled()
-                    && dynamicAuto.getStartPose().equals(RobotState.getInstance().getPose()))
-        .onTrue(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.GREEN)))
-        .onFalse(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.RED)));
+    */
 
     new Trigger(superstructure::isHasCoral)
         .onTrue(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.GREEN)))

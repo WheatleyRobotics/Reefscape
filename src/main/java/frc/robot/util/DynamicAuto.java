@@ -2,36 +2,29 @@ package frc.robot.util;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.commands.AutoScore;
 import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.superstructure.Superstructure;
 import frc.robot.subsystems.superstructure.SuperstructureState;
 import java.util.ArrayList;
 import java.util.List;
-import org.littletonrobotics.junction.AutoLogOutput;
 
 /**
  * Manages dynamic autonomous path selection and execution based on dashboard settings. Allows for
  * multiple path sections with coral scoring positions.
  */
 public class DynamicAuto {
-  // Constants
-  private static final LoggedTunableNumber raiseTimePercentage =
-      new LoggedTunableNumber("DynamicAuto/RaiseTimePercentage", 0.45);
   private static final int MAX_CORAL_SECTIONS = 4;
   private static final int MAX_CORAL_ZONES = 12;
-  private static final boolean IS_CHOREO = true;
 
   // Dashboard options
   private final SendableChooser<StartingPosition> startingPositionChooser = new SendableChooser<>();
@@ -104,12 +97,12 @@ public class DynamicAuto {
     for (int i = 0; i < MAX_CORAL_SECTIONS; i++) {
       SendableChooser<Integer> sectionChooser = new SendableChooser<>();
       sectionChooser.addOption("None", -1);
-
-      for (int j = 0; j < MAX_CORAL_ZONES; j++) {
+      int j;
+      for (j = 0; j < MAX_CORAL_ZONES; j++) {
         sectionChooser.addOption("Branch " + j, j);
       }
-
-      sectionChooser.setDefaultOption("Branch 5", 5);
+      int branch = j + 7;
+      sectionChooser.setDefaultOption("Branch " + branch, branch);
       coralSectionChoosers.add(sectionChooser);
       SmartDashboard.putData("Auto Coral #" + i, sectionChooser);
     }
@@ -128,28 +121,10 @@ public class DynamicAuto {
     // Get first section (starting position to first coral)
     Command section1;
     try {
-      Integer target = coralSectionChoosers.get(0).getSelected();
-      if (target == null || target == -1) {
+      Integer branchID = coralSectionChoosers.get(0).getSelected();
+      if (branchID == null || branchID == -1) {
         return Commands.none();
       }
-
-      // Determine if coral is on the right side
-      boolean isRightSide = !(target % 2 == 0);
-      String coralZone = getCoralZoneName(target);
-      StartingPosition startPosition = startingPositionChooser.getSelected();
-
-      if (startPosition == null) {
-        errorAlert.set(true);
-        return Commands.none();
-      }
-
-      String startPathName = startPosition.getPathName() + "-" + coralZone;
-      PathPlannerPath startPath = loadPath(startPathName);
-
-      if (startPath == null) {
-        return Commands.none();
-      }
-      Time pathTime = startPath.getIdealTrajectory(DriveConstants.ppConfig).get().getTotalTime();
 
       SourcePosition sourcePosition = sourcePositionChooser.getSelected();
       if (sourcePosition == null) {
@@ -157,20 +132,33 @@ public class DynamicAuto {
         return Commands.none();
       }
 
-      String secondPathName = coralZone + "-" + sourcePosition.getPathName();
-      PathPlannerPath secondPath = loadPath(secondPathName);
-
-      if (secondPath == null) {
+      StartingPosition startPosition = startingPositionChooser.getSelected();
+      if (startPosition == null) {
+        errorAlert.set(true);
         return Commands.none();
       }
 
+      String startPathName = startPosition.getPathName() + "-" + branchID;
+      PathPlannerPath startToReefPath = loadPath(startPathName);
+
+      if (startToReefPath == null) {
+        return Commands.none();
+      }
+
+      String reefToSource = branchID + "-" + sourcePosition.getPathName();
+      PathPlannerPath secondPath = loadPath(reefToSource);
+
+      if (secondPath == null) {
+        System.out.println("Second path not found");
+        return Commands.none();
+      }
+
+      boolean isRightSide = !(branchID % 2 == 0);
+
       section1 =
           Commands.sequence(
-              AutoBuilder.resetOdom(startPath.getStartingHolonomicPose().get()),
-              AutoBuilder.followPath(startPath)
-                  .deadlineFor(
-                      new WaitCommand(pathTime.times(raiseTimePercentage.get()))
-                          .andThen(superstructure.runGoal(SuperstructureState.L2_CORAL))),
+              AutoBuilder.resetOdom(startToReefPath.getStartingHolonomicPose().get()),
+              AutoBuilder.followPath(startToReefPath),
               AutoScore.getAutoScoreCommand(
                   () -> SuperstructureState.L4_CORAL, isRightSide, drive, superstructure),
               new WaitCommand(0.4),
@@ -179,7 +167,7 @@ public class DynamicAuto {
               superstructure
                   .runGoal(SuperstructureState.INTAKE)
                   .until(superstructure::isHasCoral)
-                  .withTimeout(2)
+                  .withTimeout(3)
                   .deadlineFor(
                       Commands.run(() -> drive.runVelocity(new ChassisSpeeds(-0.15, 0, 0)))));
     } catch (Exception e) {
@@ -213,42 +201,34 @@ public class DynamicAuto {
    * @return The command sequence for this section
    */
   private Command buildSection(SendableChooser<Integer> chooser, boolean isLast) {
-    Integer target = chooser.getSelected();
+    Integer branchID = chooser.getSelected();
     SourcePosition sourcePosition = sourcePositionChooser.getSelected();
 
-    if (target == null
-        || target == -1
+    if (branchID == null
+        || branchID == -1
         || sourcePosition == null
         || sourcePosition == SourcePosition.NONE) {
       return Commands.none();
     }
 
     try {
-      String coralZone = getCoralZoneName(target);
-      boolean isRightSide = !(target % 2 == 0);
+      boolean isRightSide = !(branchID % 2 == 0);
 
-      String pathToCoralName = sourcePosition.getPathName() + "-" + coralZone;
-      PathPlannerPath pathToCoral = loadPath(pathToCoralName);
+      String sourceToReefName = sourcePosition.getPathName() + "-" + branchID;
+      PathPlannerPath sourceToReefPath = loadPath(sourceToReefName);
 
-      if (pathToCoral == null) {
+      if (sourceToReefPath == null) {
         return Commands.none();
       }
-      Time pathTime = pathToCoral.getIdealTrajectory(DriveConstants.ppConfig).get().getTotalTime();
 
       Command sectionCommand =
           Commands.sequence(
-              AutoBuilder.followPath(pathToCoral)
-                  .deadlineFor(
-                      new WaitCommand(pathTime.times(raiseTimePercentage.get()))
-                          .andThen(superstructure.runGoal(SuperstructureState.L2_CORAL))),
-
-              // Score the coral
+              AutoBuilder.followPath(sourceToReefPath),
               AutoScore.getAutoScoreCommand(
-                  () -> SuperstructureState.L4_CORAL, isRightSide, drive, superstructure),
-              new WaitCommand(0.4));
+                  () -> SuperstructureState.L4_CORAL, isRightSide, drive, superstructure));
 
       if (!isLast) {
-        String pathToSourceName = coralZone + "-" + sourcePosition.getPathName();
+        String pathToSourceName = branchID + "-" + sourcePosition.getPathName();
         PathPlannerPath pathToSource = loadPath(pathToSourceName);
 
         if (pathToSource != null) {
@@ -271,9 +251,9 @@ public class DynamicAuto {
         }
       }
 
-      return sectionCommand;
+      return sectionCommand.alongWith(new PrintCommand("Section " + branchID));
     } catch (Exception e) {
-      logError("Error building section for target " + target, e);
+      logError("Error building section for target " + branchID, e);
       return Commands.none();
     }
   }
@@ -286,9 +266,7 @@ public class DynamicAuto {
    */
   private PathPlannerPath loadPath(String pathName) {
     try {
-      return IS_CHOREO
-          ? PathPlannerPath.fromChoreoTrajectory(pathName)
-          : PathPlannerPath.fromPathFile(pathName);
+      return PathPlannerPath.fromChoreoTrajectory(pathName);
     } catch (Exception e) {
       logError("Failed to load path: " + pathName, e);
       return null;
@@ -304,45 +282,5 @@ public class DynamicAuto {
   private void logError(String message, Exception e) {
     System.out.println(message + ": " + e.toString());
     errorAlert.set(true);
-  }
-
-  /**
-   * Gets the starting pose for the autonomous routine.
-   *
-   * @return The starting pose
-   */
-  @AutoLogOutput(key = "DynamicAuto/StartingPose")
-  public Pose2d getStartPose() {
-    try {
-      StartingPosition startPosition = startingPositionChooser.getSelected();
-      if (startPosition == null) {
-        return new Pose2d();
-      }
-
-      // Use Z3 as default for getting start pose
-      PathPlannerPath startPath = loadPath(startPosition.getPathName() + "-Z3");
-      return startPath != null ? startPath.getStartingHolonomicPose().get() : new Pose2d();
-    } catch (Exception e) {
-      logError("Error getting start pose", e);
-      return new Pose2d();
-    }
-  }
-
-  /**
-   * Converts a coral zone ID to its zone name.
-   *
-   * @param id The coral zone ID
-   * @return The coral zone name
-   */
-  private String getCoralZoneName(int id) {
-    return switch (id) {
-      case 0, 11 -> "Z0";
-      case 1, 2 -> "Z1";
-      case 3, 4 -> "Z2";
-      case 5, 6 -> "Z3";
-      case 7, 8 -> "Z4";
-      case 9, 10 -> "Z5";
-      default -> "NONE";
-    };
   }
 }

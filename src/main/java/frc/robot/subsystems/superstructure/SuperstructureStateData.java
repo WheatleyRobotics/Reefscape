@@ -7,7 +7,6 @@
 
 package frc.robot.subsystems.superstructure;
 
-import frc.robot.subsystems.superstructure.slam.Slam;
 import java.util.function.DoubleSupplier;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -20,8 +19,6 @@ public class SuperstructureStateData {
   @Builder.Default private final SuperstructurePose pose = new SuperstructurePose();
   @Builder.Default private final DoubleSupplier tunnelVolts = () -> 0.0;
   @Builder.Default private final DoubleSupplier gripperCurrent = () -> 0.0;
-  @Builder.Default private final DoubleSupplier intakeVolts = () -> 0.0;
-  @Builder.Default private final Slam.Goal slamGoal = Slam.Goal.SLAM_UP;
   @Builder.Default private final Height height = Height.BOTTOM;
   @Builder.Default private final boolean reversed = false;
 

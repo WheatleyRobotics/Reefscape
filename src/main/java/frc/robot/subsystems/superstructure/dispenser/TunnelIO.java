@@ -31,8 +31,14 @@ public interface TunnelIO {
   /* Run rollers at volts */
   default void runVolts(double volts) {}
 
+  /* Run rollers at velocity using PIDF control */
+  default void runVelocity(double velocityRadsPerSec) {}
+
   /* Stop rollers */
   default void stop() {}
 
   default void setBrakeMode(boolean enabled) {}
+
+  /* Set PIDF gains for velocity control */
+  default void setPID(double kP, double kI, double kD, double kF) {}
 }

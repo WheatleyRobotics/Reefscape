@@ -14,7 +14,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import frc.robot.RobotState;
-import frc.robot.subsystems.superstructure.slam.Slam;
+
 import frc.robot.util.EqualsUtil;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
@@ -23,8 +23,7 @@ import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 
 public class SuperstructureVisualizer {
   private static final Translation3d intakeOrigin3d = new Translation3d(0.2850, 0.0, 0.1630);
-  private static final Rotation2d ambiguousIntakePosition =
-      Slam.minAngle.interpolate(Slam.maxAngle, 0.5);
+  private static final Rotation2d defaultIntakeAngle = Rotation2d.fromDegrees(65.0); // Average of old min/max
 
   private final String name;
   private final LoggedMechanism2d mechanism =
@@ -59,8 +58,6 @@ public class SuperstructureVisualizer {
   public void update(
       double elevatorHeightMeters,
       Rotation2d pivotFinalAngle,
-      boolean slammed,
-      boolean retracting,
       boolean hasAlgae) {
     elevatorMechanism.setLength(
         EqualsUtil.epsilonEquals(elevatorHeightMeters, 0.0)
@@ -114,10 +111,7 @@ public class SuperstructureVisualizer {
             new Rotation3d(
                 0.0,
                 Rotation2d.kPi
-                        .minus(
-                            (slammed
-                                ? (retracting ? Slam.maxAngle : Slam.minAngle)
-                                : ambiguousIntakePosition))
+                        .minus(defaultIntakeAngle)
                         .getRadians()
                     - Math.PI / 2.0,
                 0.0)));

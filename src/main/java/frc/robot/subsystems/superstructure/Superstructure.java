@@ -19,7 +19,7 @@ import frc.robot.Constants;
 import frc.robot.RobotState;
 import frc.robot.subsystems.superstructure.dispenser.Dispenser;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
-import frc.robot.subsystems.superstructure.slam.Slam;
+
 import frc.robot.util.FieldConstants;
 import java.util.*;
 import java.util.function.BooleanSupplier;
@@ -37,7 +37,6 @@ import org.littletonrobotics.junction.Logger;
 public class Superstructure extends SubsystemBase {
   private final Elevator elevator;
   private final Dispenser dispenser;
-  private final Slam slam;
 
   private final Graph<SuperstructureState, EdgeCommand> graph =
       new DefaultDirectedGraph<>(EdgeCommand.class);
@@ -65,10 +64,9 @@ public class Superstructure extends SubsystemBase {
       new SuperstructureVisualizer("Setpoint");
   private final SuperstructureVisualizer goalVisualizer = new SuperstructureVisualizer("Goal");
 
-  public Superstructure(Elevator elevator, Dispenser dispenser, Slam slam) {
+  public Superstructure(Elevator elevator, Dispenser dispenser) {
     this.elevator = elevator;
     this.dispenser = dispenser;
-    this.slam = slam;
 
     // Updating E Stop based on disabled override
     new Trigger(() -> disabledOverride.getAsBoolean())
@@ -91,7 +89,6 @@ public class Superstructure extends SubsystemBase {
                     .deadlineFor(
                         Commands.runOnce(
                             () -> {
-                              slam.setGoal(Slam.Goal.IDLE);
                               dispenser.setTunnelVolts(0.0);
                               dispenser.setGripperCurrent(0.0);
                             }))
@@ -334,7 +331,6 @@ public class Superstructure extends SubsystemBase {
     // Run periodic
     elevator.periodic();
     dispenser.periodic();
-    slam.periodic();
 
     if (DriverStation.isDisabled()) {
       next = null;
@@ -385,20 +381,14 @@ public class Superstructure extends SubsystemBase {
     measuredVisualizer.update(
         elevator.getPositionMeters(),
         dispenser.getPivotAngle(),
-        slam.isSlammed(),
-        slam.isRetracting(),
         dispenser.isHasAlgae());
     setpointVisualizer.update(
         elevator.getSetpoint().position,
         Rotation2d.fromRadians(dispenser.getSetpoint().position),
-        slam.isSlammed(),
-        slam.isRetracting(),
         dispenser.isHasAlgae());
     goalVisualizer.update(
         elevator.getGoalMeters(),
         Rotation2d.fromRadians(dispenser.getGoal()),
-        true,
-        slam.getGoal().isRetracted(),
         dispenser.isHasAlgae());
   }
 
@@ -520,22 +510,13 @@ public class Superstructure extends SubsystemBase {
     // Just run to next state if no restrictions
     return EdgeCommand.builder()
         .command(
-            addSlamAvoidance(
-                    runSuperstructurePose(to.getValue().getPose())
-                        .andThen(Commands.waitUntil(this::isAtGoal)),
-                    from,
-                    to)
+            runSuperstructurePose(to.getValue().getPose())
+                .andThen(Commands.waitUntil(this::isAtGoal))
                 .andThen(runSuperstructureExtras(to)))
         .build();
   }
 
-  private Command addSlamAvoidance(
-      Command command, SuperstructureState from, SuperstructureState to) {
-    return Commands.sequence(
-        willSlam(from, to) ? getSlamCommand(Slam.Goal.SLAM_DOWN) : Commands.none(),
-        command,
-        getSlamCommand(to.getValue().getSlamGoal()));
-  }
+
 
   private Command runElevator(DoubleSupplier elevatorHeight) {
     return Commands.runOnce(() -> elevator.setGoal(elevatorHeight));
@@ -550,19 +531,16 @@ public class Superstructure extends SubsystemBase {
     return runElevator(pose.elevatorHeight()).alongWith(runDispenserPivot(pose.pivotAngle()));
   }
 
-  /** Runs dispenser and slam based on {@link SuperstructureState} state. Ends immediately. */
+  /** Runs dispenser based on {@link SuperstructureState} state. Ends immediately. */
   private Command runSuperstructureExtras(SuperstructureState state) {
     return Commands.runOnce(
         () -> {
           dispenser.setTunnelVolts(state.getValue().getTunnelVolts().getAsDouble());
           dispenser.setGripperCurrent(state.getValue().getGripperCurrent().getAsDouble());
-          slam.setIntakeVolts(state.getValue().getIntakeVolts().getAsDouble());
         });
   }
 
-  private Command getSlamCommand(Slam.Goal goal) {
-    return Commands.runOnce(() -> slam.setGoal(goal));
-  }
+
 
   private boolean isEdgeAllowed(EdgeCommand edge, SuperstructureState goal) {
     return (!edge.isRestricted() || goal == graph.getEdgeTarget(edge))

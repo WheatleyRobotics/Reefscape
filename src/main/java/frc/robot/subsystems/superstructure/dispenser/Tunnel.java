@@ -30,4 +30,13 @@ public class Tunnel extends SubsystemBase {
   public Command runRoller(double inputVolts) {
     return startEnd(() -> io.runVolts(inputVolts), () -> io.stop());
   }
+  
+  @AutoLogOutput
+  public Command runRollerVelocity(double velocityRadsPerSec) {
+    return startEnd(() -> io.runVelocity(velocityRadsPerSec), () -> io.stop());
+  }
+  
+  public void setPIDGains(double kP, double kI, double kD, double kF) {
+    io.setPID(kP, kI, kD, kF);
+  }
 }

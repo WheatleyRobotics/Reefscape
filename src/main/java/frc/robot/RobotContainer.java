@@ -44,8 +44,7 @@ import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIO;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOFalcon;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
-import frc.robot.subsystems.superstructure.slam.Slam;
-import frc.robot.subsystems.superstructure.slam.SlamIO;
+
 import frc.robot.subsystems.vision.*;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.DynamicAuto;
@@ -67,7 +66,6 @@ public class RobotContainer {
   private Vision vision;
   Elevator elevator;
   Dispenser dispenser;
-  Slam slam;
   Climb climb;
   private final BlinkinLED blinkinLED = BlinkinLED.getInstance();
   private final Superstructure superstructure;
@@ -114,7 +112,6 @@ public class RobotContainer {
                     robotState.isShouldTrigSolve()));
         elevator = new Elevator(new ElevatorIOFalcon());
         dispenser = new Dispenser(new PivotIOFalconIntegrated(), new TunnelIOFalcon());
-        slam = new Slam(new SlamIO() {}, new TunnelIO() {});
 
         climb = new Climb(new WinchIOFalcon());
 
@@ -164,7 +161,6 @@ public class RobotContainer {
         vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         elevator = new Elevator(new ElevatorIO() {});
         dispenser = new Dispenser(new PivotIO() {}, new TunnelIO() {});
-        slam = new Slam(new SlamIO() {}, new TunnelIO() {});
         break;
     }
     if (elevator == null) {
@@ -173,10 +169,7 @@ public class RobotContainer {
     if (dispenser == null) {
       dispenser = new Dispenser(new PivotIO() {}, new TunnelIO() {});
     }
-    if (slam == null) {
-      slam = new Slam(new SlamIO() {}, new TunnelIO() {});
-    }
-    superstructure = new Superstructure(elevator, dispenser, slam);
+    superstructure = new Superstructure(elevator, dispenser);
 
     // Set up auto routines
     dynamicAuto = new DynamicAuto(drive, superstructure);

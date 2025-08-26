@@ -16,6 +16,8 @@ import com.ctre.phoenix6.configs.ProximityParamsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.ParentDevice;
@@ -45,6 +47,7 @@ public class TunnelIOFalcon implements TunnelIO {
   // Single shot for voltage mode, robot loop will call continuously
   private final TorqueCurrentFOC torqueCurrentFOC = new TorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
   private final VoltageOut voltageOut = new VoltageOut(0.0).withUpdateFreqHz(0);
+  private final VelocityVoltage velocityVoltage = new VelocityVoltage(0.0).withUpdateFreqHz(0);
   private final NeutralOut neutralOut = new NeutralOut();
 
   private final Debouncer connectedDebouncer = new Debouncer(0.5);
@@ -125,8 +128,23 @@ public class TunnelIOFalcon implements TunnelIO {
   }
 
   @Override
+  public void runVelocity(double velocityRadsPerSec) {
+    talon.setControl(velocityVoltage.withVelocity(Units.radiansToRotations(velocityRadsPerSec)));
+  }
+
+  @Override
   public void stop() {
     talon.setControl(neutralOut);
+  }
+
+  @Override
+  public void setPID(double kP, double kI, double kD, double kF) {
+    Slot0Configs slot0Configs = new Slot0Configs();
+    slot0Configs.kP = kP;
+    slot0Configs.kI = kI;
+    slot0Configs.kD = kD;
+    slot0Configs.kV = kF;
+    tryUntilOk(5, () -> talon.getConfigurator().apply(slot0Configs));
   }
 
   @Override

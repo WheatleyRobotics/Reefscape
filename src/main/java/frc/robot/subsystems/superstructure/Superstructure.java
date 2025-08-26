@@ -552,10 +552,7 @@ public class Superstructure extends SubsystemBase {
     return elevator.isAtGoal() && (dispenser.isAtGoal());
   }
 
-  public static boolean willSlam(SuperstructureState from, SuperstructureState to) {
-    return from.getValue().getHeight().lowerThan(SuperstructureStateData.Height.INTAKE)
-        != to.getValue().getHeight().lowerThan(SuperstructureStateData.Height.INTAKE);
-  }
+
 
   private boolean isWithinAngleBound(
       Pose2d robotPose, Pose2d stationPose, double minAngle, double maxAngle) {

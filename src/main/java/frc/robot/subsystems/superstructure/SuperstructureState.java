@@ -10,8 +10,6 @@ package frc.robot.subsystems.superstructure;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.subsystems.superstructure.SuperstructureStateData.Height;
 import frc.robot.subsystems.superstructure.dispenser.Dispenser;
-import frc.robot.subsystems.superstructure.slam.Slam;
-import frc.robot.subsystems.superstructure.slam.Slam.Goal;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -51,9 +49,7 @@ public enum SuperstructureState {
   ALGAE_FLOOR_INTAKE(
       SuperstructureStateData.builder()
           .pose(SuperstructurePose.Preset.ALGAE_FLOOR_INTAKE.getPose())
-          .slamGoal(Slam.Goal.SLAM_DOWN)
           .gripperCurrent(Dispenser.gripperIntakeCurrent)
-          .intakeVolts(Slam.floorIntakeVolts)
           .height(Height.BOTTOM)
           .build()),
   ALGAE_L2(
@@ -95,7 +91,6 @@ public enum SuperstructureState {
       SuperstructureStateData.builder()
           .pose(SuperstructurePose.Preset.ALGAE_STOW.getPose())
           .gripperCurrent(Dispenser.gripperIntakeCurrent)
-          .slamGoal(Slam.Goal.SLAM_DOWN)
           .height(Height.INTAKE)
           .build()),
   TOSS(
@@ -104,7 +99,6 @@ public enum SuperstructureState {
               new SuperstructurePose(
                   SuperstructurePose.Preset.ALGAE_STOW.getPose().elevatorHeight(),
                   () -> Rotation2d.fromDegrees(30.0)))
-          .slamGoal(Goal.SLAM_UP)
           .height(Height.INTAKE)
           .gripperCurrent(Dispenser.gripperDispenseCurrent)
           .build()),
@@ -112,14 +106,11 @@ public enum SuperstructureState {
       SuperstructureStateData.builder()
           .pose(SuperstructurePose.Preset.PROCESSING.getPose())
           .gripperCurrent(Dispenser.gripperIntakeCurrent)
-          .slamGoal(Goal.SLAM_UP)
           .build()),
   PROCESSING_EJECT(
       SuperstructureStateData.builder()
           .pose(SuperstructurePose.Preset.PROCESSING.getPose())
-          .slamGoal(Goal.SLAM_UP)
           .gripperCurrent(Dispenser.gripperDispenseCurrent)
-          .intakeVolts(Slam.occupiedVolts)
           .build());
   private final SuperstructureStateData value;
 

@@ -21,7 +21,7 @@ public class ElevatorIOSim implements ElevatorIO {
   public static final double carriageMassKg = Units.lbsToKilograms(6.0);
   public static final double stagesMassKg = Units.lbsToKilograms(12.0);
   public static final DCMotor gearbox =
-      DCMotor.getKrakenX60Foc(2).withReduction(ElevatorIOFalcon.reduction);
+      DCMotor.getKrakenX60Foc(2).withReduction(ElevatorIOKraken.reduction);
 
   public static final Matrix<N2, N2> A =
       MatBuilder.fill(

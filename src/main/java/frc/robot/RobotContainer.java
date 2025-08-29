@@ -42,7 +42,7 @@ import frc.robot.subsystems.superstructure.SuperstructureState;
 import frc.robot.subsystems.superstructure.dispenser.*;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIO;
-import frc.robot.subsystems.superstructure.elevator.ElevatorIOFalcon;
+import frc.robot.subsystems.superstructure.elevator.ElevatorIOKraken;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
 import frc.robot.subsystems.superstructure.slam.Slam;
 import frc.robot.subsystems.superstructure.slam.SlamIO;
@@ -112,7 +112,7 @@ public class RobotContainer {
                     robotToCamera1,
                     drive::getRotation,
                     robotState.isShouldTrigSolve()));
-        elevator = new Elevator(new ElevatorIOFalcon());
+        elevator = new Elevator(new ElevatorIOKraken());
         dispenser = new Dispenser(new PivotIOFalconIntegrated(), new TunnelIOFalcon());
         slam = new Slam(new SlamIO() {}, new TunnelIO() {});
 

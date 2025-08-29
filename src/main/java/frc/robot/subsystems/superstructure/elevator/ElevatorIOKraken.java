@@ -25,7 +25,7 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 
-public class ElevatorIOFalcon implements ElevatorIO {
+public class ElevatorIOKraken implements ElevatorIO {
   public static final double reduction = 3.50;
   // box not including the sproket
 
@@ -56,7 +56,7 @@ public class ElevatorIOFalcon implements ElevatorIO {
       new PositionTorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
   private final VoltageOut voltageRequest = new VoltageOut(0.0).withUpdateFreqHz(0.0);
 
-  public ElevatorIOFalcon() {
+  public ElevatorIOKraken() {
     talon = new TalonFX(11, "*");
     followerTalon = new TalonFX(12, "*");
     followerTalon.setControl(new Follower(talon.getDeviceID(), false));

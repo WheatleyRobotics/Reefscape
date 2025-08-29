@@ -39,10 +39,11 @@ public class Elevator {
   private static final LoggedTunableNumber kD = new LoggedTunableNumber("Elevator/kD");
   private static final LoggedTunableNumber kS = new LoggedTunableNumber("Elevator/kS");
   private static final LoggedTunableNumber kG = new LoggedTunableNumber("Elevator/kG");
+  private static final LoggedTunableNumber kA = new LoggedTunableNumber("Elevator/kA");
   private static final LoggedTunableNumber maxVelocityMetersPerSec =
-      new LoggedTunableNumber("Elevator/MaxVelocityMetersPerSec", 0.685);
+      new LoggedTunableNumber("Elevator/MaxVelocityMetersPerSec", 1.5);
   private static final LoggedTunableNumber maxAccelerationMetersPerSec2 =
-      new LoggedTunableNumber("Elevator/MaxAccelerationMetersPerSec2", 2);
+      new LoggedTunableNumber("Elevator/MaxAccelerationMetersPerSec2", 3);
   private static final LoggedTunableNumber homingVolts =
       new LoggedTunableNumber("Elevator/HomingVolts", -2.0);
   private static final LoggedTunableNumber homingTimeSecs =
@@ -50,18 +51,19 @@ public class Elevator {
   private static final LoggedTunableNumber homingVelocityThresh =
       new LoggedTunableNumber("Elevator/HomingVelocityThresh", 5.0);
   private static final LoggedTunableNumber staticCharacterizationVelocityThresh =
-      new LoggedTunableNumber("Elevator/StaticCharacterizationVelocityThresh", 0.1);
+      new LoggedTunableNumber("Elevator/StaticCharacterizationVelocityThresh", 0.2);
   private static final LoggedTunableNumber tolerance =
       new LoggedTunableNumber("Elevator/Tolerance", 1);
 
   static {
     switch (Constants.getRobotType()) {
       case COMPBOT, DEVBOT -> {
-        kP.initDefault(360);
+        kP.initDefault(800);
         kI.initDefault(0);
-        kD.initDefault(40);
-        kS.initDefault(1.9);
-        kG.initDefault(0.0);
+        kD.initDefault(34);
+        kS.initDefault(3);
+        kG.initDefault(40);
+        kA.initDefault(12);
       }
       case SIMBOT -> {
         kP.initDefault(3000);
@@ -69,6 +71,7 @@ public class Elevator {
         kD.initDefault(800);
         kS.initDefault(5);
         kG.initDefault(50);
+        kA.initDefault(0.0);
       }
     }
   }
@@ -85,6 +88,7 @@ public class Elevator {
 
   private TrapezoidProfile profile;
   @Getter private State setpoint = new State();
+  private double previousSetpointVelocityMetersPerSec = 0.0;
   private Supplier<State> goal = State::new;
   private boolean stopProfile = false;
   @Getter private boolean shouldEStop = false;
@@ -161,10 +165,15 @@ public class Elevator {
                 MathUtil.clamp(setpoint.position, 0.0, SuperstructureConstants.elevatorMaxTravel),
                 0.0);
       }
+      double accelerationMetersPerSec2 =
+          (setpoint.velocity - previousSetpointVelocityMetersPerSec) / Constants.loopPeriodSecs;
+      previousSetpointVelocityMetersPerSec = setpoint.velocity;
+
       io.runPosition(
           setpoint.position / sprocketRadius + homedPosition,
-          kS.get() * Math.signum(setpoint.velocity) // Magnitude irrelevant
-              + kG.get() * SuperstructureConstants.elevatorAngle.getSin());
+          kS.get() * Math.signum(setpoint.velocity)
+              + kG.get()
+              + (kA.get() * accelerationMetersPerSec2));
       // Check at goal
       atGoal =
           EqualsUtil.epsilonEquals(setpoint.position, goalState.position)
@@ -183,6 +192,7 @@ public class Elevator {
     } else {
       // Reset setpoint
       setpoint = new State(getPositionMeters(), 0.0);
+      previousSetpointVelocityMetersPerSec = 0.0;
 
       // Clear logs
       Logger.recordOutput("Elevator/Profile/SetpointPositionMeters", 0.0);
@@ -221,7 +231,7 @@ public class Elevator {
     io.setBrakeMode(brakeModeEnabled);
   }
 
-  public Command staticCharacterization(double outputRampRate) {
+  public Command staticCharacterization(double currentRampRateAmpsPerSec) {
     final StaticCharacterizationState state = new StaticCharacterizationState();
     Timer timer = new Timer();
     return Commands.startRun(
@@ -230,17 +240,19 @@ public class Elevator {
               timer.restart();
             },
             () -> {
-              state.characterizationOutput = outputRampRate * timer.get();
-              io.runOpenLoop(state.characterizationOutput);
+              state.characterizationCurrentAmps = currentRampRateAmpsPerSec * timer.get();
+              System.out.println("Current Ramp Rate: " + state.characterizationCurrentAmps);
+              io.runOpenLoop(state.characterizationCurrentAmps);
               Logger.recordOutput(
-                  "Elevator/StaticCharacterizationOutput", state.characterizationOutput);
+                  "Elevator/StaticCharacterizationCurrentAmps", state.characterizationCurrentAmps);
             })
         .until(() -> inputs.velocityRadPerSec >= staticCharacterizationVelocityThresh.get())
         .finallyDo(
             () -> {
               stopProfile = false;
               timer.stop();
-              Logger.recordOutput("Elevator/CharacterizationOutput", state.characterizationOutput);
+              Logger.recordOutput(
+                  "Elevator/CharacterizationCurrentAmps", state.characterizationCurrentAmps);
             });
   }
 
@@ -282,7 +294,7 @@ public class Elevator {
   }
 
   private static class StaticCharacterizationState {
-    public double characterizationOutput = 0.0;
+    public double characterizationCurrentAmps = 0.0;
   }
 
   public void runVolts(double volts) {

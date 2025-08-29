@@ -43,7 +43,7 @@ public class Elevator {
   private static final LoggedTunableNumber maxVelocityMetersPerSec =
       new LoggedTunableNumber("Elevator/MaxVelocityMetersPerSec", 1.5);
   private static final LoggedTunableNumber maxAccelerationMetersPerSec2 =
-      new LoggedTunableNumber("Elevator/MaxAccelerationMetersPerSec2", 3);
+      new LoggedTunableNumber("Elevator/MaxAccelerationMetersPerSec2", 2.6);
   private static final LoggedTunableNumber homingVolts =
       new LoggedTunableNumber("Elevator/HomingVolts", -2.0);
   private static final LoggedTunableNumber homingTimeSecs =
@@ -58,12 +58,12 @@ public class Elevator {
   static {
     switch (Constants.getRobotType()) {
       case COMPBOT, DEVBOT -> {
-        kP.initDefault(800);
+        kP.initDefault(700);
         kI.initDefault(0);
         kD.initDefault(34);
         kS.initDefault(3);
-        kG.initDefault(40);
-        kA.initDefault(12);
+        kG.initDefault(35);
+        kA.initDefault(4);
       }
       case SIMBOT -> {
         kP.initDefault(3000);

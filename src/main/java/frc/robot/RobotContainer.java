@@ -31,7 +31,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoScore;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.DriveToPose;
 import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.climb.WinchIOFalcon;
 import frc.robot.subsystems.drive.*;
@@ -47,9 +46,7 @@ import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
 import frc.robot.subsystems.superstructure.slam.Slam;
 import frc.robot.subsystems.superstructure.slam.SlamIO;
 import frc.robot.subsystems.vision.*;
-import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.DynamicAuto;
-import frc.robot.util.FieldConstants;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -424,37 +421,50 @@ public class RobotContainer {
     driveController
         .a()
         .whileTrue(
-            Commands.parallel(
-                    superstructure.runGoal(
-                        () ->
-                            RobotState.getInstance().getCurrentZone().getFace() % 2 == 0
-                                ? SuperstructureState.ALGAE_L3_INTAKE
-                                : SuperstructureState.ALGAE_L2_INTAKE),
-                    new DriveToPose(
-                        drive,
-                        () ->
-                            new Pose2d(
-                                FieldConstants.addOffset(
-                                        AllianceFlipUtil.getCorrected(
-                                            FieldConstants.Reef.centerFaces[
-                                                RobotState.getInstance()
-                                                    .getCurrentZone()
-                                                    .getFace()]),
-                                        0.5)
-                                    .getTranslation(),
-                                AllianceFlipUtil.getCorrected(
-                                        FieldConstants.Reef.centerFaces[
-                                            RobotState.getInstance().getCurrentZone().getFace()])
-                                    .getRotation()
-                                    .plus(Rotation2d.fromDegrees(180)))))
-                .andThen(
-                    AutoScore.getClearReefCommand(drive)
-                        .deadlineFor(
-                            superstructure.runGoal(
-                                () ->
-                                    RobotState.getInstance().getCurrentZone().getFace() % 2 == 0
-                                        ? SuperstructureState.ALGAE_L3_INTAKE
-                                        : SuperstructureState.ALGAE_L2_INTAKE))));
+            AutoScore.getAutoScoreCommand(
+                    () -> RobotState.getInstance().getDesiredState(), true, drive, superstructure)
+                .alongWith(
+                    Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.STROBE_WHITE))))
+        .onFalse(
+            AutoScore.getClearReefCommand(drive)
+                .alongWith(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.RED))));
+    /*
+       driveController
+           .b()
+           .whileTrue(
+               Commands.parallel(
+                       superstructure.runGoal(
+                           () ->
+                               RobotState.getInstance().getCurrentZone().getFace() % 2 == 0
+                                   ? SuperstructureState.ALGAE_L3_INTAKE
+                                   : SuperstructureState.ALGAE_L2_INTAKE),
+                       new DriveToPose(
+                           drive,
+                           () ->
+                               new Pose2d(
+                                   FieldConstants.addOffset(
+                                           AllianceFlipUtil.getCorrected(
+                                               FieldConstants.Reef.centerFaces[
+                                                   RobotState.getInstance()
+                                                       .getCurrentZone()
+                                                       .getFace()]),
+                                           0.5)
+                                       .getTranslation(),
+                                   AllianceFlipUtil.getCorrected(
+                                           FieldConstants.Reef.centerFaces[
+                                               RobotState.getInstance().getCurrentZone().getFace()])
+                                       .getRotation()
+                                       .plus(Rotation2d.fromDegrees(180)))))
+                   .andThen(
+                       AutoScore.getClearReefCommand(drive)
+                           .deadlineFor(
+                               superstructure.runGoal(
+                                   () ->
+                                       RobotState.getInstance().getCurrentZone().getFace() % 2 == 0
+                                           ? SuperstructureState.ALGAE_L3_INTAKE
+                                           : SuperstructureState.ALGAE_L2_INTAKE))));
+
+    */
 
     /*
        var random = new Random();

@@ -4,18 +4,18 @@
  "type":"Swerve",
  "variables":{
   "expressions":{
-   "EO":{
-    "dimension":"Number",
+   "GL":{
+    "dimension":"LinAcc",
     "var":{
-     "exp":"-1",
-     "val":-1.0
+     "exp":"2 m / s ^ 2",
+     "val":2.0
     }
    },
    "RO":{
     "dimension":"Number",
     "var":{
-     "exp":"-0.515",
-     "val":-0.515
+     "exp":"-0.55",
+     "val":-0.55
     }
    },
    "SO":{

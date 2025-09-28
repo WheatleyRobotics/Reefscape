@@ -10,11 +10,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.commands.AutoScore;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.superstructure.Superstructure;
 import frc.robot.subsystems.superstructure.SuperstructureState;
+import frc.robot.subsystems.superstructure.elevator.Elevator;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +26,7 @@ import java.util.List;
 public class DynamicAuto {
   private static final int MAX_CORAL_SECTIONS = 4;
   private static final int MAX_CORAL_ZONES = 12;
+  private static final double raiseTimeBuffer = 0.5;
 
   // Dashboard options
   private final SendableChooser<StartingPosition> startingPositionChooser = new SendableChooser<>();
@@ -146,23 +148,38 @@ public class DynamicAuto {
       }
 
       String reefToSource = branchID + "-" + sourcePosition.getPathName();
-      PathPlannerPath secondPath = loadPath(reefToSource);
+      PathPlannerPath reefToSourcePath = loadPath(reefToSource);
 
-      if (secondPath == null) {
+      if (reefToSourcePath == null) {
         System.out.println("Second path not found");
         return Commands.none();
       }
 
-      boolean isRightSide = !(branchID % 2 == 0);
+      double startToReefPathRaiseTime =
+          startToReefPath.getIdealTrajectory(DriveConstants.ppConfig).get().getTotalTimeSeconds()
+              - TrapezoidalUtil.calculateTimeToSetpoint(
+                  SuperstructureState.L4_CORAL.getValue().getPose().elevatorHeight().getAsDouble(),
+                  0,
+                  0,
+                  Elevator.maxVelocityMetersPerSec.getAsDouble(),
+                  Elevator.maxAccelerationMetersPerSec2.getAsDouble());
 
+      startToReefPathRaiseTime = startToReefPathRaiseTime > 0 ? startToReefPathRaiseTime : 0;
+      System.out.println(startToReefPathRaiseTime);
+      boolean isRightSide = !(branchID % 2 == 0);
       section1 =
           Commands.sequence(
               AutoBuilder.resetOdom(startToReefPath.getStartingHolonomicPose().get()),
-              AutoBuilder.followPath(startToReefPath),
+              Commands.parallel(
+                  Commands.waitSeconds(startToReefPathRaiseTime - raiseTimeBuffer)
+                      .andThen(
+                          superstructure
+                              .runGoal(SuperstructureState.L4_CORAL)
+                              .until(superstructure::atGoal)),
+                  AutoBuilder.followPath(startToReefPath)),
               AutoScore.getAutoScoreCommand(
                   () -> SuperstructureState.L4_CORAL, isRightSide, drive, superstructure),
-              new WaitCommand(0.4),
-              AutoBuilder.followPath(secondPath)
+              AutoBuilder.followPath(reefToSourcePath)
                   .deadlineFor(superstructure.runGoal(SuperstructureState.INTAKE)),
               superstructure
                   .runGoal(SuperstructureState.INTAKE)
@@ -221,9 +238,24 @@ public class DynamicAuto {
         return Commands.none();
       }
 
+      double sourceToReefPathRaiseTime =
+          sourceToReefPath.getIdealTrajectory(DriveConstants.ppConfig).get().getTotalTimeSeconds()
+              - TrapezoidalUtil.calculateTimeToSetpoint(
+                  SuperstructureState.L4_CORAL.getValue().getPose().elevatorHeight().getAsDouble(),
+                  0,
+                  0,
+                  Elevator.maxVelocityMetersPerSec.getAsDouble(),
+                  Elevator.maxAccelerationMetersPerSec2.getAsDouble());
+
       Command sectionCommand =
           Commands.sequence(
-              AutoBuilder.followPath(sourceToReefPath),
+              Commands.parallel(
+                  AutoBuilder.followPath(sourceToReefPath),
+                  Commands.waitSeconds(sourceToReefPathRaiseTime - raiseTimeBuffer)
+                      .andThen(
+                          superstructure
+                              .runGoal(SuperstructureState.L4_CORAL)
+                              .until(superstructure::atGoal))),
               AutoScore.getAutoScoreCommand(
                   () -> SuperstructureState.L4_CORAL, isRightSide, drive, superstructure));
 

@@ -26,7 +26,7 @@ import java.util.List;
 public class DynamicAuto {
   private static final int MAX_CORAL_SECTIONS = 4;
   private static final int MAX_CORAL_ZONES = 12;
-  private static final double raiseTimeBuffer = 0.5;
+  private static final double raiseTimeBuffer = 0.8;
 
   // Dashboard options
   private final SendableChooser<StartingPosition> startingPositionChooser = new SendableChooser<>();

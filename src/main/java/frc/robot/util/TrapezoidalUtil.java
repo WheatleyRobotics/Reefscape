@@ -1,5 +1,7 @@
 package frc.robot.util;
 
+import org.littletonrobotics.junction.Logger;
+
 public class TrapezoidalUtil {
   /**
    * Calculates the time to reach setpoint using a trapezoidal velocity profile
@@ -17,10 +19,10 @@ public class TrapezoidalUtil {
 
     // Validate inputs
     if (acceleration <= 0) {
-      throw new IllegalArgumentException("Acceleration and acceleration must be positive");
+      return -1;
     }
     if (distance < 0) {
-      throw new IllegalArgumentException("Distance cannot be negative");
+      return -1;
     }
     if (distance == 0) {
       return 0.0;
@@ -50,7 +52,7 @@ public class TrapezoidalUtil {
       double discriminant = B * B - 4 * A * C;
 
       if (discriminant < 0) {
-        throw new IllegalArgumentException("No valid solution exists for given parameters");
+        return -1;
       }
 
       double t1_tri = (-B + Math.sqrt(discriminant)) / (2 * A);
@@ -60,7 +62,7 @@ public class TrapezoidalUtil {
       }
 
       if (t1_tri < 0) {
-        throw new IllegalArgumentException("No positive solution exists");
+        return -1;
       }
 
       double peakVel = initialVel + acceleration * t1_tri;
@@ -73,6 +75,11 @@ public class TrapezoidalUtil {
     double t2 = remainingDistance / maxVel;
 
     // Total time is sum of all three phases
-    return t1 + t2 + t3;
+
+    double total = t1 + t2 + t3;
+
+    Logger.recordOutput("Superstructure/EstimatedTime", total);
+
+    return total;
   }
 }

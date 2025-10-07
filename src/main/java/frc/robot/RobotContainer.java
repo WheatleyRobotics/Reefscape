@@ -28,8 +28,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.AutoIntake;
 import frc.robot.commands.AutoScore;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.DriveToPose;
 import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.climb.WinchIOFalcon;
 import frc.robot.subsystems.drive.*;
@@ -45,6 +47,7 @@ import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
 import frc.robot.subsystems.superstructure.slam.Slam;
 import frc.robot.subsystems.superstructure.slam.SlamIO;
 import frc.robot.subsystems.vision.*;
+import frc.robot.util.AutoCycle;
 import frc.robot.util.DynamicAuto;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
@@ -58,6 +61,7 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 public class RobotContainer {
   RobotState robotState = RobotState.getInstance();
   DynamicAuto dynamicAuto;
+  AutoCycle autoCycle;
   // Subsystems
   private Drive drive;
   private Vision vision;
@@ -176,6 +180,9 @@ public class RobotContainer {
 
     // Set up auto routines
     dynamicAuto = new DynamicAuto(drive, superstructure);
+    autoCycle = new AutoCycle(drive, superstructure);
+    autoCycle.setUpWidget();
+
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
     // Set up SysId routines
@@ -303,6 +310,10 @@ public class RobotContainer {
     driveController.start().whileTrue(Commands.runOnce(() -> climb.setServoPosition(0.0)));
 
     driveController.back().whileTrue(Commands.runOnce(() -> climb.setServoPosition(1)));
+
+    driveController
+        .povDown()
+        .whileTrue(new DriveToPose(drive, () -> new Pose2d(7.2, 2, Rotation2d.kPi)));
     /*
        driveController
            .povRight()
@@ -416,16 +427,7 @@ public class RobotContainer {
             () -> -driveController.getLeftX(),
             () -> -driveController.getRightX()));
 
-    driveController
-        .a()
-        .whileTrue(
-            AutoScore.getAutoScoreCommand(
-                    () -> RobotState.getInstance().getDesiredState(), true, drive, superstructure)
-                .alongWith(
-                    Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.STROBE_WHITE))))
-        .onFalse(
-            AutoScore.getClearReefCommand(drive)
-                .alongWith(Commands.runOnce(() -> blinkinLED.setPattern(BlinkinPattern.RED))));
+    driveController.a().whileTrue(autoCycle.nextCycle(true));
     /*
        driveController
            .b()
@@ -572,6 +574,8 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
+    // return AutoIntake.getAutoIntakeCommand(drive, superstructure, true);
+    // return autoCycle.nextCycle(true);
     return dynamicAuto.getAutoCommand();
     // return autoChooser.get();
   }

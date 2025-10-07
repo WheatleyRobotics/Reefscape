@@ -2,7 +2,6 @@ package frc.robot.util;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -10,6 +9,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
+import frc.robot.commands.AutoIntake;
 import frc.robot.commands.AutoScore;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
@@ -181,12 +181,10 @@ public class DynamicAuto {
                   () -> SuperstructureState.L4_CORAL, isRightSide, drive, superstructure),
               AutoBuilder.followPath(reefToSourcePath)
                   .deadlineFor(superstructure.runGoal(SuperstructureState.INTAKE)),
-              superstructure
-                  .runGoal(SuperstructureState.INTAKE)
-                  .until(superstructure::isHasCoral)
-                  .withTimeout(3)
-                  .deadlineFor(
-                      Commands.run(() -> drive.runVelocity(new ChassisSpeeds(-0.15, 0, 0)))));
+              AutoIntake.getAutoIntakeCommand(
+                  drive,
+                  superstructure,
+                  sourcePositionChooser.getSelected().getPathName().equals("RIGHT")));
     } catch (Exception e) {
       logError("Error in first section", e);
       return Commands.none();
@@ -270,16 +268,14 @@ public class DynamicAuto {
                       superstructure
                           .runGoal(SuperstructureState.INTAKE)
                           .onlyIf(() -> !superstructure.isHasCoral()));
-
-          Command waitAtSource =
-              superstructure
-                  .runGoal(SuperstructureState.INTAKE)
-                  .until(superstructure::isHasCoral)
-                  .withTimeout(2)
-                  .deadlineFor(
-                      Commands.run(() -> drive.runVelocity(new ChassisSpeeds(-0.15, 0, 0))));
-
-          sectionCommand = Commands.sequence(sectionCommand, pathBackToSource, waitAtSource);
+          sectionCommand =
+              Commands.sequence(
+                  sectionCommand,
+                  pathBackToSource,
+                  AutoIntake.getAutoIntakeCommand(
+                      drive,
+                      superstructure,
+                      sourcePositionChooser.getSelected().getPathName().equals("RIGHT")));
         }
       }
 

@@ -11,6 +11,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.commands.AutoScore;
 import frc.robot.subsystems.superstructure.SuperstructureState;
 import frc.robot.util.AllianceFlipUtil;
@@ -70,6 +72,8 @@ public class RobotState {
     return ChassisSpeeds.fromRobotRelativeSpeeds(robotVelocity, pose.getRotation());
   }
 
+  @Getter private Field2d field = new Field2d();
+
   public void addDriveSpeeds(ChassisSpeeds speeds) {
     robotVelocity = speeds;
   }
@@ -93,6 +97,7 @@ public class RobotState {
     updateZone();
     updateIsClearedReef();
     updateShouldTrigSolve();
+    updateField();
   }
 
   public void resetPose(Pose2d pose) {
@@ -168,5 +173,10 @@ public class RobotState {
     boolean isFacingReef = headingDifference <= Math.toDegrees(Math.PI / 6.0);
 
     shouldTrigSolve = isCloseEnough && isFacingReef;
+  }
+
+  public void updateField() {
+    field.setRobotPose(pose);
+    SmartDashboard.putData("Field", field);
   }
 }

@@ -7,8 +7,8 @@
    "GL":{
     "dimension":"LinAcc",
     "var":{
-     "exp":"2 m / s ^ 2",
-     "val":2.0
+     "exp":"4 m / s ^ 2",
+     "val":4.0
     }
    },
    "RO":{
@@ -21,8 +21,15 @@
    "SO":{
     "dimension":"Number",
     "var":{
-     "exp":"-0.5",
-     "val":-0.5
+     "exp":"-0.55",
+     "val":-0.55
+    }
+   },
+   "ST":{
+    "dimension":"Number",
+    "var":{
+     "exp":"0.5",
+     "val":0.5
     }
    }
   },

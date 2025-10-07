@@ -184,15 +184,21 @@ public class FieldConstants {
   }
 
   /**
-   * Adjusts a pose by a given offset in inches.
+   * Translates a pose both in the direction of its rotation and perpendicular to it.
    *
-   * @param pose The pose to adjust.
-   * @param offsetMeters The offset in meters.
-   * @return The adjusted pose.
+   * @param pose The original pose
+   * @param forwardOffset The forward/backward offset in meters (SO) Positive moves forward,
+   *     negative moves backward
+   * @param lateralOffset The left/right offset in meters (ST) Positive moves left, negative moves
+   *     right
+   * @return A new Pose2d with both offsets applied
    */
-  public static Pose2d addOffset(Pose2d pose, double offsetMeters) {
-    double adjustedX = pose.getX() + offsetMeters * Math.cos(pose.getRotation().getRadians());
-    double adjustedY = pose.getY() + offsetMeters * Math.sin(pose.getRotation().getRadians());
+  public static Pose2d addOffset(Pose2d pose, double forwardOffset, double lateralOffset) {
+    double theta = pose.getRotation().getRadians();
+    double adjustedX =
+        pose.getX() + forwardOffset * Math.cos(theta) - lateralOffset * Math.sin(theta);
+    double adjustedY =
+        pose.getY() + forwardOffset * Math.sin(theta) + lateralOffset * Math.cos(theta);
     return new Pose2d(adjustedX, adjustedY, pose.getRotation());
   }
 

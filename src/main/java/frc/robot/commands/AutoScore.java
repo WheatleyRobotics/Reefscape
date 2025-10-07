@@ -46,7 +46,8 @@ public class AutoScore {
                                 FieldConstants.addOffset(
                                         FieldConstants.getBranch(
                                             RobotState.getInstance().getCurrentZone(), right),
-                                        -minClearReefDistance.get())
+                                        -minClearReefDistance.get(),
+                                        0)
                                     .interpolate(RobotState.getInstance().getPose(), 0.5))
                         : new DriveToPose(
                             drive,
@@ -54,7 +55,8 @@ public class AutoScore {
                                 FieldConstants.addOffset(
                                     FieldConstants.getBranch(
                                         RobotState.getInstance().getCurrentZone(), right),
-                                    -minClearReefDistance.get()))),
+                                    -minClearReefDistance.get(),
+                                    0))),
         Commands.parallel(
                 new DriveToPose(
                     drive,
@@ -64,7 +66,8 @@ public class AutoScore {
                                 RobotState.getInstance().getCurrentZone(), right),
                             state.get().equals(SuperstructureState.L4_CORAL)
                                 ? -l4Offset.get()
-                                : -coralOffset.get())),
+                                : -coralOffset.get(),
+                            0)),
                 superstructure
                     .runGoal(
                         () -> {
@@ -73,7 +76,7 @@ public class AutoScore {
                           else return state.get();
                         })
                     .until(superstructure::atGoal))
-            .withTimeout(2),
+            .withTimeout(4),
         new WaitCommand(0.1),
         superstructure
             .runGoal(() -> state.get().getEject())

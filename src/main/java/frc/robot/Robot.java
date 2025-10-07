@@ -13,11 +13,15 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.pathfinding.Pathfinding;
 import edu.wpi.first.hal.AllianceStationID;
+import edu.wpi.first.net.WebServer;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.util.AutoCycle;
+import frc.robot.util.LocalADStarAK;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -67,6 +71,7 @@ public class Robot extends LoggedRobot {
         Logger.recordMetadata("GitDirty", "Unknown");
         break;
     }
+    WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
 
     // Set up data receivers & replay source
     switch (Constants.currentMode) {
@@ -118,6 +123,7 @@ public class Robot extends LoggedRobot {
       DriverStationSim.notifyNewData();
     }
 
+    Pathfinding.setPathfinder(new LocalADStarAK());
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
     robotContainer = new RobotContainer();
@@ -128,13 +134,8 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically during all modes. */
   @Override
   public void robotPeriodic() {
-    var canStatus = RobotController.getCANStatus();
-    if (canStatus.transmitErrorCount > 0 || canStatus.receiveErrorCount > 0) {
-      canErrorTimer.restart();
-    }
-    canErrorAlert.set(
-        !canErrorTimer.hasElapsed(canErrorTimeThreshold)
-            && !canInitialErrorTimer.hasElapsed(canErrorTimeThreshold));
+
+    AutoCycle.periodic();
 
     CommandScheduler.getInstance().run();
 

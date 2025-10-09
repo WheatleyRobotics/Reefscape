@@ -23,8 +23,8 @@ import frc.robot.Constants;
 
 public class DriveConstants {
   public static final double odometryFrequency = 100; // Hz
-  public static final double trackWidth = Units.inchesToMeters(28);
-  public static final double wheelBase = Units.inchesToMeters(28);
+  public static final double trackWidth = Units.inchesToMeters(19.75);
+  public static final double wheelBase = Units.inchesToMeters(19.75);
   public static final double driveBaseRadius = Math.hypot(trackWidth / 2.0, wheelBase / 2.0);
   public static final double maxSpeedMetersPerSec = Units.feetToMeters(19.3);
   public static final double maxAngularSpeed = Units.feetToMeters(19.3) / driveBaseRadius;
@@ -110,10 +110,10 @@ public class DriveConstants {
   public static final double driveKd = 0.04;
   public static final double driveKs = 0.11;
   public static final double driveKv = 0.10;
-  public static final double driveSimP = 0.05;
+  public static final double driveSimP = 0.15;
   public static final double driveSimD = 0.0;
-  public static final double driveSimKs = 0.0;
-  public static final double driveSimKv = 0.0789;
+  public static final double driveSimKs = 0.01404;
+  public static final double driveSimKv = 0.10165;
 
   // Turn motor configuration
   public static final boolean turnInverted = false;
@@ -131,14 +131,14 @@ public class DriveConstants {
   // Turn PID configuration
   public static final double turnKp = 0.5;
   public static final double turnKd = 0.03;
-  public static final double turnSimP = 8.0;
+  public static final double turnSimP = 10;
   public static final double turnSimD = 0.0;
   public static final double turnPIDMinInput = 0; // Radians
   public static final double turnPIDMaxInput = 2 * Math.PI; // Radians
 
   // PathPlanner configuration
   public static final double robotMassKg = 63.19;
-  public static final double robotMOI = 3.85;
+  public static final double robotMOI = 4.5;
   public static final double wheelCOF = 1.5;
   public static final RobotConfig ppConfig =
       new RobotConfig(

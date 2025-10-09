@@ -45,25 +45,26 @@ public class AutoIntake {
                                         .getTranslation()))
                         > pathFindTolerance.getAsDouble()
                     ? AutoBuilder.pathfindToPose(
-                        AllianceFlipUtil.getCorrected(
-                            FieldConstants.addOffset(
-                                right
-                                    ? FieldConstants.CoralStation.rightCenterFace
-                                    : FieldConstants.CoralStation.leftCenterFace,
-                                stationPathFindOffset.getAsDouble(),
-                                stationTranslation.getAsDouble())),
-                        AutoCycle.pathConstraints)
+                            AllianceFlipUtil.getCorrected(
+                                FieldConstants.addOffset(
+                                    right
+                                        ? FieldConstants.CoralStation.rightCenterFace
+                                        : FieldConstants.CoralStation.leftCenterFace,
+                                    stationPathFindOffset.getAsDouble(),
+                                    stationTranslation.getAsDouble())),
+                            AutoCycle.pathConstraints)
+                        .andThen(
+                            new DriveToPose(
+                                drive,
+                                () ->
+                                    AllianceFlipUtil.getCorrected(
+                                        FieldConstants.addOffset(
+                                            right
+                                                ? FieldConstants.CoralStation.rightCenterFace
+                                                : FieldConstants.CoralStation.leftCenterFace,
+                                            stationDTPOffset.getAsDouble(),
+                                            stationTranslation.getAsDouble()))))
                     : Commands.none(),
-                new DriveToPose(
-                    drive,
-                    () ->
-                        AllianceFlipUtil.getCorrected(
-                            FieldConstants.addOffset(
-                                right
-                                    ? FieldConstants.CoralStation.rightCenterFace
-                                    : FieldConstants.CoralStation.leftCenterFace,
-                                stationDTPOffset.getAsDouble(),
-                                stationTranslation.getAsDouble()))),
                 Commands.run(() -> drive.runVelocity(new ChassisSpeeds(-0.2, 0, 0)))));
   }
 }

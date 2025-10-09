@@ -9,6 +9,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.RobotState;
 import frc.robot.commands.AutoIntake;
 import frc.robot.commands.AutoScore;
 import frc.robot.subsystems.drive.Drive;
@@ -177,8 +179,26 @@ public class DynamicAuto {
                               .runGoal(SuperstructureState.L4_CORAL)
                               .until(superstructure::atGoal)),
                   AutoBuilder.followPath(startToReefPath)),
-              AutoScore.getAutoScoreCommand(
-                  () -> SuperstructureState.L4_CORAL, isRightSide, drive, superstructure),
+              Commands.either(
+                  AutoScore.getAutoScoreCommand(
+                      () -> SuperstructureState.L4_CORAL, isRightSide, drive, superstructure),
+                  superstructure
+                      .runGoal(() -> SuperstructureState.L4_CORAL_EJECT)
+                      .until(() -> !superstructure.isHasCoral())
+                      .andThen(new WaitCommand(0.1)),
+                  () ->
+                      RobotState.getInstance()
+                              .getPose()
+                              .getTranslation()
+                              .getDistance(
+                                  FieldConstants.addOffset(
+                                          FieldConstants.getBranch(
+                                              RobotState.getInstance().getCurrentZone(),
+                                              isRightSide),
+                                          AutoScore.l4Offset.getAsDouble(),
+                                          0)
+                                      .getTranslation())
+                          >= 0.03),
               AutoBuilder.followPath(reefToSourcePath)
                   .deadlineFor(superstructure.runGoal(SuperstructureState.INTAKE)),
               AutoIntake.getAutoIntakeCommand(
@@ -254,8 +274,26 @@ public class DynamicAuto {
                           superstructure
                               .runGoal(SuperstructureState.L4_CORAL)
                               .until(superstructure::atGoal))),
-              AutoScore.getAutoScoreCommand(
-                  () -> SuperstructureState.L4_CORAL, isRightSide, drive, superstructure));
+              Commands.either(
+                  AutoScore.getAutoScoreCommand(
+                      () -> SuperstructureState.L4_CORAL, isRightSide, drive, superstructure),
+                  superstructure
+                      .runGoal(() -> SuperstructureState.L4_CORAL_EJECT)
+                      .until(() -> !superstructure.isHasCoral())
+                      .andThen(new WaitCommand(0.1)),
+                  () ->
+                      RobotState.getInstance()
+                              .getPose()
+                              .getTranslation()
+                              .getDistance(
+                                  FieldConstants.addOffset(
+                                          FieldConstants.getBranch(
+                                              RobotState.getInstance().getCurrentZone(),
+                                              isRightSide),
+                                          AutoScore.l4Offset.getAsDouble(),
+                                          0)
+                                      .getTranslation())
+                          >= 0.03));
 
       if (!isLast) {
         String pathToSourceName = branchID + "-" + sourcePosition.getPathName();

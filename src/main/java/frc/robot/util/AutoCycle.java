@@ -68,7 +68,7 @@ public class AutoCycle {
           }
 
           return Commands.sequence(
-              superstructure.isHasCoral()
+              !superstructure.isHasCoral()
                   ? AutoIntake.getAutoIntakeCommand(drive, superstructure, right)
                   : Commands.none(),
               AutoBuilder.pathfindToPose(cycle.getFirst().getPose(), pathConstraints),

@@ -30,7 +30,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoScore;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.DriveToPose;
 import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.climb.WinchIOFalcon;
 import frc.robot.subsystems.drive.*;
@@ -310,9 +309,7 @@ public class RobotContainer {
 
     driveController.back().whileTrue(Commands.runOnce(() -> climb.setServoPosition(1)));
 
-    driveController
-        .povDown()
-        .whileTrue(new DriveToPose(drive, () -> new Pose2d(7.2, 2, Rotation2d.kPi)));
+    driveController.povDown().whileTrue(autoCycle.nextCycle(true));
     /*
        driveController
            .povRight()

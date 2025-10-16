@@ -28,7 +28,7 @@ import java.util.List;
 public class DynamicAuto {
   private static final int MAX_CORAL_SECTIONS = 4;
   private static final int MAX_CORAL_ZONES = 12;
-  private static final double raiseTimeBuffer = 0.8;
+  private static final double raiseTimeBuffer = 1.2;
 
   // Dashboard options
   private final SendableChooser<StartingPosition> startingPositionChooser = new SendableChooser<>();
@@ -198,13 +198,14 @@ public class DynamicAuto {
                                           AutoScore.l4Offset.getAsDouble(),
                                           0)
                                       .getTranslation())
-                          >= 0.03),
+                          >= 0.05),
               AutoBuilder.followPath(reefToSourcePath)
                   .deadlineFor(superstructure.runGoal(SuperstructureState.INTAKE)),
               AutoIntake.getAutoIntakeCommand(
                   drive,
                   superstructure,
-                  sourcePositionChooser.getSelected().getPathName().equals("RIGHT")));
+                  // sourcePositionChooser.getSelected().getPathName().equals("RIGHT")
+                  true));
     } catch (Exception e) {
       logError("Error in first section", e);
       return Commands.none();
@@ -311,9 +312,9 @@ public class DynamicAuto {
                   sectionCommand,
                   pathBackToSource,
                   AutoIntake.getAutoIntakeCommand(
-                      drive,
-                      superstructure,
-                      sourcePositionChooser.getSelected().getPathName().equals("RIGHT")));
+                      drive, superstructure, true
+                      // sourcePositionChooser.getSelected().getPathName().equals("RIGHT")
+                      ));
         }
       }
 

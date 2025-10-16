@@ -23,10 +23,10 @@ import frc.robot.Constants;
 
 public class DriveConstants {
   public static final double odometryFrequency = 100; // Hz
-  public static final double trackWidth = Units.inchesToMeters(19.75);
-  public static final double wheelBase = Units.inchesToMeters(19.75);
+  public static final double trackWidth = Units.inchesToMeters(22.75);
+  public static final double wheelBase = Units.inchesToMeters(22.75);
   public static final double driveBaseRadius = Math.hypot(trackWidth / 2.0, wheelBase / 2.0);
-  public static final double maxSpeedMetersPerSec = Units.feetToMeters(19.3);
+  public static final double maxSpeedMetersPerSec = 5.0;
   public static final double maxAngularSpeed = Units.feetToMeters(19.3) / driveBaseRadius;
   public static final Translation2d[] moduleTranslations =
       new Translation2d[] {
@@ -40,13 +40,13 @@ public class DriveConstants {
   public static final Rotation2d frontLeftZeroRotation =
       switch (Constants.getRobotType()) {
         case SIMBOT -> new Rotation2d();
-        case COMPBOT -> Rotation2d.fromRotations(0.302734); // 0.31
+        case COMPBOT -> Rotation2d.fromRotations(0.020020); // 0.31
         case DEVBOT -> Rotation2d.fromRotations(0.290527); // 0.290527
       };
   public static final Rotation2d frontRightZeroRotation =
       switch (Constants.getRobotType()) {
         case SIMBOT -> new Rotation2d();
-        case COMPBOT -> Rotation2d.fromRotations(0.197021); // 0.22
+        case COMPBOT -> Rotation2d.fromRotations(0.200195); // 0.22
         case DEVBOT -> Rotation2d.fromRotations(0.095215)
             .plus(Rotation2d.fromRadians(0.17))
             .minus(Rotation2d.fromRadians(0.151)); // 0.095215
@@ -54,7 +54,7 @@ public class DriveConstants {
   public static final Rotation2d backLeftZeroRotation =
       switch (Constants.getRobotType()) {
         case SIMBOT -> new Rotation2d();
-        case COMPBOT -> Rotation2d.fromRotations(-0.106201); // -0.094
+        case COMPBOT -> Rotation2d.fromRotations(-0.105469); // -0.094
         case DEVBOT -> Rotation2d.fromRotations(0.360352 + 0.25)
             .plus(Rotation2d.fromRadians(0.16)); // 0.360352
       };
@@ -62,7 +62,7 @@ public class DriveConstants {
   public static final Rotation2d backRightZeroRotation =
       switch (Constants.getRobotType()) {
         case SIMBOT -> new Rotation2d();
-        case COMPBOT -> Rotation2d.fromRotations(-0.098145); // 0.096
+        case COMPBOT -> Rotation2d.fromRotations(-0.0969240); // 0.096
         case DEVBOT -> Rotation2d.fromRotations(-0.5 + 0.41254)
             .minus(Rotation2d.fromRadians(0.14))
             .plus(Rotation2d.fromRadians(0.076))
@@ -94,7 +94,7 @@ public class DriveConstants {
 
   // Drive motor configuration
   public static final int driveMotorCurrentLimit = 80;
-  public static final double wheelRadiusMeters = Units.inchesToMeters(1.935);
+  public static final double wheelRadiusMeters = Units.inchesToMeters(1.911);
 
   public static final double driveMotorReduction = 6.12; // MK4i L3
   public static final DCMotor driveGearbox = DCMotor.getNeoVortex(1);
@@ -106,9 +106,9 @@ public class DriveConstants {
       (2 * Math.PI) / 60.0 / driveMotorReduction; // Rotor RPM -> Wheel Rad/Sec
 
   // Drive PID configuration
-  public static final double driveKp = 0.015;
-  public static final double driveKd = 0.04;
-  public static final double driveKs = 0.11;
+  public static final double driveKp = 0.0125;
+  public static final double driveKd = 0.1;
+  public static final double driveKs = 0.13502;
   public static final double driveKv = 0.10;
   public static final double driveSimP = 0.15;
   public static final double driveSimD = 0.0;
@@ -129,8 +129,8 @@ public class DriveConstants {
       (2 * Math.PI) / 60.0 / turnMotorReduction; // Rotor RPM -> Wheel Rad/Sec
 
   // Turn PID configuration
-  public static final double turnKp = 0.5;
-  public static final double turnKd = 0.03;
+  public static final double turnKp = 0.4;
+  public static final double turnKd = 0.2;
   public static final double turnSimP = 10;
   public static final double turnSimD = 0.0;
   public static final double turnPIDMinInput = 0; // Radians

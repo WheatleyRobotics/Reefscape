@@ -39,7 +39,7 @@ public record SuperstructurePose(DoubleSupplier elevatorHeight, Supplier<Rotatio
     L1("L1", Units.inchesToMeters(8.5), 180.0),
     L2("L2", Units.inchesToMeters(5.75), L2Angle + 10),
     L3("L3", Units.inchesToMeters(13.75), L3Angle + 8),
-    L4("L4", Units.inchesToMeters(28), L4Angle),
+    L4("L4", Units.inchesToMeters(29.5), L4Angle),
     ALGAE_FLOOR_INTAKE(
         "AlgaeFloorIntake",
         Units.inchesToMeters(0.0)

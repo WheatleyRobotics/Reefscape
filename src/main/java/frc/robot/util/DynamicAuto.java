@@ -2,7 +2,6 @@ package frc.robot.util;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -11,10 +10,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.RobotState;
+import frc.robot.commands.AutoIntake;
 import frc.robot.commands.AutoScore;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.superstructure.Superstructure;
 import frc.robot.subsystems.superstructure.SuperstructureState;
+import frc.robot.subsystems.superstructure.elevator.Elevator;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +28,7 @@ import java.util.List;
 public class DynamicAuto {
   private static final int MAX_CORAL_SECTIONS = 4;
   private static final int MAX_CORAL_ZONES = 12;
+  private static final double raiseTimeBuffer = 1.2;
 
   // Dashboard options
   private final SendableChooser<StartingPosition> startingPositionChooser = new SendableChooser<>();
@@ -146,30 +150,62 @@ public class DynamicAuto {
       }
 
       String reefToSource = branchID + "-" + sourcePosition.getPathName();
-      PathPlannerPath secondPath = loadPath(reefToSource);
+      PathPlannerPath reefToSourcePath = loadPath(reefToSource);
 
-      if (secondPath == null) {
+      if (reefToSourcePath == null) {
         System.out.println("Second path not found");
         return Commands.none();
       }
 
-      boolean isRightSide = !(branchID % 2 == 0);
+      double startToReefPathRaiseTime =
+          startToReefPath.getIdealTrajectory(DriveConstants.ppConfig).get().getTotalTimeSeconds()
+              - TrapezoidalUtil.calculateTimeToSetpoint(
+                  SuperstructureState.L4_CORAL.getValue().getPose().elevatorHeight().getAsDouble(),
+                  0,
+                  0,
+                  Elevator.maxVelocityMetersPerSec.getAsDouble(),
+                  Elevator.maxAccelerationMetersPerSec2.getAsDouble());
 
+      startToReefPathRaiseTime = startToReefPathRaiseTime > 0 ? startToReefPathRaiseTime : 0;
+      System.out.println(startToReefPathRaiseTime);
+      boolean isRightSide = !(branchID % 2 == 0);
       section1 =
           Commands.sequence(
               AutoBuilder.resetOdom(startToReefPath.getStartingHolonomicPose().get()),
-              AutoBuilder.followPath(startToReefPath),
-              AutoScore.getAutoScoreCommand(
-                  () -> SuperstructureState.L4_CORAL, isRightSide, drive, superstructure),
-              new WaitCommand(0.4),
-              AutoBuilder.followPath(secondPath)
+              Commands.parallel(
+                  Commands.waitSeconds(startToReefPathRaiseTime - raiseTimeBuffer)
+                      .andThen(
+                          superstructure
+                              .runGoal(SuperstructureState.L4_CORAL)
+                              .until(superstructure::atGoal)),
+                  AutoBuilder.followPath(startToReefPath)),
+              Commands.either(
+                  AutoScore.getAutoScoreCommand(
+                      () -> SuperstructureState.L4_CORAL, isRightSide, drive, superstructure),
+                  superstructure
+                      .runGoal(() -> SuperstructureState.L4_CORAL_EJECT)
+                      .until(() -> !superstructure.isHasCoral())
+                      .andThen(new WaitCommand(0.1)),
+                  () ->
+                      RobotState.getInstance()
+                              .getPose()
+                              .getTranslation()
+                              .getDistance(
+                                  FieldConstants.addOffset(
+                                          FieldConstants.getBranch(
+                                              RobotState.getInstance().getCurrentZone(),
+                                              isRightSide),
+                                          AutoScore.l4Offset.getAsDouble(),
+                                          0)
+                                      .getTranslation())
+                          >= 0.05),
+              AutoBuilder.followPath(reefToSourcePath)
                   .deadlineFor(superstructure.runGoal(SuperstructureState.INTAKE)),
-              superstructure
-                  .runGoal(SuperstructureState.INTAKE)
-                  .until(superstructure::isHasCoral)
-                  .withTimeout(3)
-                  .deadlineFor(
-                      Commands.run(() -> drive.runVelocity(new ChassisSpeeds(-0.15, 0, 0)))));
+              AutoIntake.getAutoIntakeCommand(
+                  drive,
+                  superstructure,
+                  // sourcePositionChooser.getSelected().getPathName().equals("RIGHT")
+                  true));
     } catch (Exception e) {
       logError("Error in first section", e);
       return Commands.none();
@@ -221,11 +257,44 @@ public class DynamicAuto {
         return Commands.none();
       }
 
+      double sourceToReefPathRaiseTime =
+          sourceToReefPath.getIdealTrajectory(DriveConstants.ppConfig).get().getTotalTimeSeconds()
+              - TrapezoidalUtil.calculateTimeToSetpoint(
+                  SuperstructureState.L4_CORAL.getValue().getPose().elevatorHeight().getAsDouble(),
+                  0,
+                  0,
+                  Elevator.maxVelocityMetersPerSec.getAsDouble(),
+                  Elevator.maxAccelerationMetersPerSec2.getAsDouble());
+
       Command sectionCommand =
           Commands.sequence(
-              AutoBuilder.followPath(sourceToReefPath),
-              AutoScore.getAutoScoreCommand(
-                  () -> SuperstructureState.L4_CORAL, isRightSide, drive, superstructure));
+              Commands.parallel(
+                  AutoBuilder.followPath(sourceToReefPath),
+                  Commands.waitSeconds(sourceToReefPathRaiseTime - raiseTimeBuffer)
+                      .andThen(
+                          superstructure
+                              .runGoal(SuperstructureState.L4_CORAL)
+                              .until(superstructure::atGoal))),
+              Commands.either(
+                  AutoScore.getAutoScoreCommand(
+                      () -> SuperstructureState.L4_CORAL, isRightSide, drive, superstructure),
+                  superstructure
+                      .runGoal(() -> SuperstructureState.L4_CORAL_EJECT)
+                      .until(() -> !superstructure.isHasCoral())
+                      .andThen(new WaitCommand(0.1)),
+                  () ->
+                      RobotState.getInstance()
+                              .getPose()
+                              .getTranslation()
+                              .getDistance(
+                                  FieldConstants.addOffset(
+                                          FieldConstants.getBranch(
+                                              RobotState.getInstance().getCurrentZone(),
+                                              isRightSide),
+                                          AutoScore.l4Offset.getAsDouble(),
+                                          0)
+                                      .getTranslation())
+                          >= 0.03));
 
       if (!isLast) {
         String pathToSourceName = branchID + "-" + sourcePosition.getPathName();
@@ -238,16 +307,14 @@ public class DynamicAuto {
                       superstructure
                           .runGoal(SuperstructureState.INTAKE)
                           .onlyIf(() -> !superstructure.isHasCoral()));
-
-          Command waitAtSource =
-              superstructure
-                  .runGoal(SuperstructureState.INTAKE)
-                  .until(superstructure::isHasCoral)
-                  .withTimeout(2)
-                  .deadlineFor(
-                      Commands.run(() -> drive.runVelocity(new ChassisSpeeds(-0.15, 0, 0))));
-
-          sectionCommand = Commands.sequence(sectionCommand, pathBackToSource, waitAtSource);
+          sectionCommand =
+              Commands.sequence(
+                  sectionCommand,
+                  pathBackToSource,
+                  AutoIntake.getAutoIntakeCommand(
+                      drive, superstructure, true
+                      // sourcePositionChooser.getSelected().getPathName().equals("RIGHT")
+                      ));
         }
       }
 

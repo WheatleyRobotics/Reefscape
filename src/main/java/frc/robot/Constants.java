@@ -23,6 +23,7 @@ import lombok.Getter;
  * (log replay from a file).
  */
 public final class Constants {
+  // RSOURCE = (0.85, 0.66)
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : Mode.SIM;
   public static final double loopPeriodSecs = 0.02;
   @Getter private static RobotType robotType = RobotType.COMPBOT;

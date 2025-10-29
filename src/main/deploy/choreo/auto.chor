@@ -4,25 +4,32 @@
  "type":"Swerve",
  "variables":{
   "expressions":{
-   "EO":{
-    "dimension":"Number",
+   "GL":{
+    "dimension":"LinAcc",
     "var":{
-     "exp":"-1",
-     "val":-1.0
+     "exp":"3 m / s ^ 2",
+     "val":3.0
     }
    },
    "RO":{
     "dimension":"Number",
     "var":{
-     "exp":"-0.515",
-     "val":-0.515
+     "exp":"-0.5125",
+     "val":-0.5125
     }
    },
    "SO":{
     "dimension":"Number",
     "var":{
-     "exp":"-0.5",
-     "val":-0.5
+     "exp":"-0.55",
+     "val":-0.55
+    }
+   },
+   "ST":{
+    "dimension":"Number",
+    "var":{
+     "exp":"0.5",
+     "val":0.5
     }
    }
   },
@@ -253,8 +260,8 @@
    },
    "RSOURCE":{
     "x":{
-     "exp":"0.85 m",
-     "val":0.85
+     "exp":"0.75 m",
+     "val":0.75
     },
     "y":{
      "exp":"0.66 m",

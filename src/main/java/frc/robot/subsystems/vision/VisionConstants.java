@@ -53,14 +53,6 @@ public class VisionConstants {
   public static double maxAmbiguity = 0.3;
   public static double maxZError = 0.1;
 
-  // Standard deviation multipliers for each camera
-  // (Adjust to trust some cameras more than others)
-  public static double[] cameraStdDevFactors =
-      new double[] {
-        1.5, // Left Camera
-        1.5 // Right Camera
-      };
-
   // Multipliers to apply for MegaTag 2 observations
   public static double linearStdDevMegatagFactor = 4; // More stable than full 3D solve
   public static double linearStdDevPhotonMultiTag = 0.8;

@@ -204,8 +204,7 @@ public class DynamicAuto {
               AutoIntake.getAutoIntakeCommand(
                   drive,
                   superstructure,
-                  // sourcePositionChooser.getSelected().getPathName().equals("RIGHT")
-                  true));
+                  sourcePositionChooser.getSelected().getPathName().equals("RIGHT")));
     } catch (Exception e) {
       logError("Error in first section", e);
       return Commands.none();
@@ -312,9 +311,10 @@ public class DynamicAuto {
                   sectionCommand,
                   pathBackToSource,
                   AutoIntake.getAutoIntakeCommand(
-                      drive, superstructure, true
-                      // sourcePositionChooser.getSelected().getPathName().equals("RIGHT")
-                      ));
+                      drive,
+                      superstructure,
+                      // sourcePositionChooser.getSelected().getPathName().equals("RIGHT"),
+                      true));
         }
       }
 

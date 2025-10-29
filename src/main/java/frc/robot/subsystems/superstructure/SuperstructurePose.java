@@ -46,8 +46,8 @@ public record SuperstructurePose(DoubleSupplier elevatorHeight, Supplier<Rotatio
             - groundToCarriageZero
             - (pivotToGripper / 2.0 * Rotation2d.fromDegrees(algaeIntakeAngle).getSin()),
         algaeIntakeAngle),
-    ALGAE_L2_INTAKE("AlgaeL2Intake", Units.inchesToMeters(10), 184),
-    ALGAE_L3_INTAKE("AlgaeL3Intake", Units.inchesToMeters(17.0), 181),
+    ALGAE_L2_INTAKE("AlgaeL2Intake", Units.inchesToMeters(12), 184),
+    ALGAE_L3_INTAKE("AlgaeL3Intake", Units.inchesToMeters(19.0), 181),
     THROW("Throw", elevatorMaxTravel, 80),
     BARGE("Barge", elevatorMaxTravel, 140),
     PROCESSING("Processing", 0.0, 180),
